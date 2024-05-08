@@ -6,7 +6,7 @@
 </h1>
 
 <div align="center">
-  Computer-Aided Molecular Design and Screening for Extractive distillation Entrainers using Infinitely Sharp Split (ISS) method
+  Computer-Aided Molecular Design and Screening for Extractive Distillation Entrainers using Infinitely Sharp Split (ISS) Method
   <br />
   <a href="#about"><strong>Explore the screenshots »</strong></a>
   <br />
