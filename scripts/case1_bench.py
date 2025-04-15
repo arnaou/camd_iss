@@ -38,7 +38,7 @@ prop_lim['hv'] = [-np.inf, 67]
 Load the data
 """
 # load interaction parameters
-df_gc, df_a = load_gc('../data/unifac.xlsx', 'dataframe')
+df_gc, df_a = load_gc('../trash/unifac.xlsx', 'dataframe')
 # load the entrainers to be screened
 dict_entrainer = {'H2O': [1, 0, 0, 0, 0],
                   'DMSO': [0, 1, 0, 0, 0],

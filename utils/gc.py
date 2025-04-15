@@ -17,7 +17,7 @@ import pickle
 from collections import defaultdict
 from matplotlib import pyplot as plt
 
-def inspect_contribs(df):
+def inspect_contribs(df, verbose=True):
     " function to expect contribution of selected groups and properties"
     # find zero entries
     zero_entries = df == 0
@@ -33,17 +33,22 @@ def inspect_contribs(df):
     for idx, col in zero_tuples:
         grouped_by_column[col].append(idx)
         # Step 5: Raise a warning if column is not "noc" or "ccsub"
-        if col not in ["noc", "ccsub"]:
+        if col not in ["noc", "ccsub"] and verbose:
             warnings.warn(f"Warning: some groups have a 0 contribution for the property: Column '{col}' ")
 
     # Step 5: Convert defaultdict to regular dict for easy viewing (optional)
     grouped_by_column = dict(grouped_by_column)
+    if bool(grouped_by_column):
+        print('some properties and groups have missing interactions')
+    else:
+        print('all contribution for each group and property are present')
+
 
     return grouped_by_column
 
 
 
-def inspect_interractions(df):
+def inspect_interractions(df, verbose=True):
     """
     Inspects the interaction parameters in the given DataFrame. these are identified as the zero elements of groups not being from the same main group.
     A warning is raised in this case the the list of missing interraction is returned
@@ -65,8 +70,12 @@ def inspect_interractions(df):
 
     # Load group mapping from a pickle file
     # unifac_dict will map each group to its main group for further comparisons
-    with open('../data/unifac_groups.pkl', 'rb') as f:
-        unifac_dict = pickle.load(f)
+    try:
+        with open('../data/unifac_groups.pkl', 'rb') as f:
+            unifac_dict = pickle.load(f)
+    except FileNotFoundError:
+        with open('data/unifac_groups.pkl', 'rb') as f:
+            unifac_dict = pickle.load(f)
 
     # Get the shape of the DataFrame (number of rows and columns)
     rows, cols = df.shape
@@ -92,7 +101,7 @@ def inspect_interractions(df):
     int_tot = rows * (cols - 1) // 2
 
     # If there are missing interaction parameters (zeros found above the diagonal)
-    if len(zero_locations) != 0:
+    if len(zero_locations) != 0 and verbose:
         # Raise a warning indicating how many interaction parameters are missing
         warnings.warn(f"\nWarning, A total of {len(zero_locations)} out of {int_tot} interaction parameters are missing", UserWarning)
         # Raise a warning specifying which main groups have missing interaction parameters
@@ -201,9 +210,6 @@ def construct_mixture(tag, groups):
     df_mix.set_index('compound', inplace=True)
     return df_mix
 
-
-
-    return
 
 def prop_calc(mol, prop_list, contrib):
     """ Function that calculates various thermophysical properties using the Contantinou-Gani model
@@ -644,7 +650,7 @@ def pyo_unifac_bubbleT(x, T0, P, antoine_params, mixture, verbose: bool):
     n_comp = x.shape[1]
     n_data = x.shape[0]
     # load the unifac parameters
-    file_path = '../data/unifac.xlsx'
+    file_path = '../trash/unifac.xlsx'
     df_gc, df_a = load_gc(file_path, output_format='dataframe')
     # define sets
     model.k = pyo.Set(initialize=mixture.columns, name='Groups present')
@@ -867,7 +873,7 @@ def iss_method(x0, T0, P, antoine_params, mixture, verbose):
               ('min', 1): 0.6,
               ('min', 2): 0.7}
     # load the unifac parameters
-    file_path = '../data/unifac.xlsx'
+    file_path = '../trash/unifac.xlsx'
     df_gc, df_a = load_gc(file_path, output_format='dataframe')
     # define sets
     model.k = pyo.Set(initialize=mixture.columns, name='Groups present')
@@ -1192,7 +1198,7 @@ def iss_method_new(x0, T0, P, antoine_params, mixture, verbose):
             (1, 1): 0.0,
             (1, 2): 0.5}
     # load the unifac parameters
-    file_path = '../data/unifac.xlsx'
+    file_path = '../trash/unifac.xlsx'
     df_gc, df_a = load_gc(file_path, output_format='dataframe')
     # define sets
     model.k = pyo.Set(initialize=mixture.columns, name='Groups present')

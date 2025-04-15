@@ -28,7 +28,7 @@ T = 308.15
 x = np.array([[0.4, 0.6]])
 
 # load the unifac parameters
-file_path = '../data/unifac.xlsx'
+file_path = '../trash/unifac.xlsx'
 df_gc, df_a = load_gc(file_path, output_format='dataframe')
 
 # define no of components and data points

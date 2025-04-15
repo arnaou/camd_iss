@@ -14,7 +14,7 @@ import numpy as np
 from utils.gc import load_gc
 
 # define data path
-file_path = '../data/unifac.xlsx'
+file_path = 'unifac.xlsx'
 # load the data
 df_gc, df_unifac = load_gc(file_path, output_format='dataframe')
 

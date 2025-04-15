@@ -10,7 +10,7 @@ from utils.gc import load_gc, construct_mixture, prop_calc, pyo_solve_antoine, p
 Load the data
 """
 # load group contributions
-df_gc, df_a = load_gc('../data/unifac.xlsx', 'dataframe')
+df_gc, df_a = load_gc('../trash/unifac.xlsx', 'dataframe')
 
 """
 Define the system

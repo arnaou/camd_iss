@@ -39,7 +39,7 @@ prop_lim['hv'] = [-np.inf, 67]
 Load the data
 """
 # load interaction parameters
-df_gc, df_a = load_gc('../data/unifac.xlsx', 'dataframe')
+df_gc, df_a = load_gc('../trash/unifac.xlsx', 'dataframe')
 # load the entrainers to be screened
 # load green solvent data
 df0 = pd.read_excel('../data/GreenSolvBank.xlsx')
