@@ -55,7 +55,7 @@
 
 > Extractive distillation allows the separation of mixtures beyond their azeotropic composition.
 > This is done by introducing a third component called entrainer that alters the relative volatility in the system.
-> Most emtrainer selection criteria are based on evaluating the selectivity and capacity at infinite dilution.
+> Most entrainer selection criteria are based on evaluating the selectivity and capacity at infinite dilution.
 > Furtheremore, they only focus on the dynamics in the extractive column, while neglecting the recovery column.
 > This work introduces a **computer-aided molecular design (CAMD) framework** for entrainer selection using a set of new
 > criteria including the infinitely sharp split concept (ISS), which provides insight into the column performance
@@ -88,7 +88,14 @@
 ### Built With
 
 > **[1]**
-> Please provide the technologies that are used in the project.
+> Pandas
+
+> **[2]**
+> Numpy
+
+> **[3]**
+> Pyomo
+
 
 ## Getting Started
 
