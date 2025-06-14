@@ -268,7 +268,8 @@ class Compound:
         if total_octet != 2 * self.m:
             raise ValueError(
                 f"Octet rule check failed for compound '{self.name}'. "
-                f"Calculated total: {total_octet}, Expected: {2 * self.m}"
+                f"Calculated total: {total_octet}, Expected: {2 * self.m}. "
+                f"Defined groups and occurrences: {self.groups}"
             )
 
         # Connectivity inequality check
@@ -462,22 +463,23 @@ def main():
     # Access the collection as a DataFrame
     print("Compound Collection as DataFrame:")
     print(collection.as_dataframe())
+    Compound(name="Invalid", groups={"CH3": 1, "H2O": 1}, m=1)
 
     # Measure execution time for property calculations
-    start_time = time.time()
-    pred = pure_comp.calculate_properties(
-        df_comps,
-        ['mw', 'tm', 'tb', 'tc', 'pc', 'vc', 'gf', 'hf', 'hv', 'vm', 'ac', 'zc', 'vm_tb', 'tfc', 'tfo', 'sol_par', 'lc50'],
-        round_digits=2
-    )
-    end_time = time.time()
+    # start_time = time.time()
+    # pred = pure_comp.calculate_properties(
+    #     df_comps,
+    #     ['mw', 'tm', 'tb', 'tc', 'pc', 'vc', 'gf', 'hf', 'hv', 'vm', 'ac', 'zc', 'vm_tb', 'tfc', 'tfo', 'sol_par', 'lc50'],
+    #     round_digits=2
+    # )
+    # end_time = time.time()
 
-    # Print the execution time
-    print(f"Execution time: {end_time - start_time:.4f} seconds")
+    # # Print the execution time
+    # print(f"Execution time: {end_time - start_time:.4f} seconds")
 
-    # Print the calculated properties
-    print("Calculated Properties:")
-    print(pred)
+    # # Print the calculated properties
+    # print("Calculated Properties:")
+    # print(pred)
 
 # Entry point for the script
 if __name__ == "__main__":
