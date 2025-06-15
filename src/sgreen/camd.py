@@ -154,6 +154,26 @@ class CompoundCollection:
             )
 
         self.compounds[compound.name] = compound
+        
+    def get_group_occurrences(self):
+        """
+        Retrieves the group occurrences for all compounds in the collection.
+
+        :return: A dictionary where keys are group names and values are their occurrences.
+        """
+        group_occurrences = {}
+        for compound in self.compounds.values():
+            for group, count in compound.groups.items():
+                group_occurrences[group] = group_occurrences.get(group, 0) + count
+        return group_occurrences
+
+    def get_compound_names(self):
+        """
+        Retrieves the names of all compounds in the collection.
+
+        :return: A list of compound names.
+        """
+        return list(self.compounds.keys())
 
     def remove_compound(self, name):
         """
