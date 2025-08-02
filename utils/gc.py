@@ -43,7 +43,6 @@ def inspect_contribs(df, verbose=True):
     else:
         print('all contribution for each group and property are present')
 
-
     return grouped_by_column
 
 

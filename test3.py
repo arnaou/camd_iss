@@ -103,13 +103,15 @@ class Calculator:
         # Find zero entries
         zero_entries = contrib_filtered == 0
 
+        # Set missing contributions to 0
+        contrib_filtered[zero_entries] = 0
+
         # Stack the DataFrame to convert it into a Series with multi-index
         zero_entries_stacked = zero_entries.stack()
 
         # Filter where values are True (i.e., where the original values are 0)
         zero_tuples = zero_entries_stacked[zero_entries_stacked].index.tolist()
 
-        # Group by column
         # Group by column
         grouped_by_column = defaultdict(list)
         for idx, col in zero_tuples:
@@ -118,7 +120,7 @@ class Calculator:
                 warnings.warn(f"Warning: some groups have a 0 contribution for the property: Column '{col}'")
         grouped_by_column = dict(grouped_by_column)
         if bool(grouped_by_column):
-            print('Some properties and groups have missing interactions.')
+            print('Some properties and groups have missing contributions.')
         else:
             print('All contributions for each group and property are present.')
 
@@ -137,7 +139,6 @@ class Calculator:
         missing_contribs = self.inspect_contribs(compound_collection, prop_list, verbose=False)
         if missing_contribs:
             print(f"Warning: Missing contributions detected for the following properties: {missing_contribs}")
-            prop_list = [prop for prop in prop_list if prop not in missing_contribs]
 
         results = {}
 
@@ -160,7 +161,7 @@ class Calculator:
 
         return results_df
     
-    
+
     def info(self):
         """
         Prints an overview of the implemented properties and their descriptions.
@@ -194,73 +195,72 @@ class Calculator:
         """Calculates the critical volume"""
         return -4.35 + 1000 * sum(self.contrib['Vc'][group] * count for group, count in group_occurrences.items())
 
-    def _calculate_gf(self, mol, idx):
+    def _calculate_gf(self, group_occurrences):
         """Calculates the Gibbs free energy of formation"""
-        return -14.828 + sum(self.contrib['Gf'][i] * mol[i] for i in idx)
+        return -14.828 + sum(self.contrib['Gf'][group] * count for group, count in group_occurrences.items())
 
-    def _calculate_hf(self, mol, idx):
+    def _calculate_hf(self, group_occurrences):
         """Calculates the enthalpy of formation"""
-        return 10.835 + sum(self.contrib['Hf'][i] * mol[i] for i in idx)
+        return 10.835 + sum(self.contrib['Hf'][group] * count for group, count in group_occurrences.items())
 
-    def _calculate_hv(self, mol, idx):
+    def _calculate_hv(self, group_occurrences):
         """Calculates the enthalpy of vaporization"""
-        return 6.829 + sum(self.contrib['Hv'][i] * mol[i] for i in idx)
+        return 6.829 + sum(self.contrib['Hv'][group] * count for group, count in group_occurrences.items())
 
-    def _calculate_vm(self, mol, idx):
+    def _calculate_vm(self, group_occurrences):
         """Calculates the molar volume"""
-        return 12.11 + sum(1000 * self.contrib['Vm'][i] * mol[i] for i in idx)
+        return 12.11 + sum(1000 * self.contrib['Vm'][group] * count for group, count in group_occurrences.items())
 
-    def _calculate_ac(self, mol, idx):
+    def _calculate_ac(self, group_occurrences):
         """Calculates the acentric factor"""
-        return 0.4085 * np.log(sum(self.contrib['Ac'][i] * mol[i] for i in idx) + 1.1507) ** 1.9802
+        return 0.4085 * np.log(sum(self.contrib['Ac'][group] * count for group, count in group_occurrences.items()) + 1.1507) ** 1.9802
 
-    def _calculate_zc(self, mol, idx):
+    def _calculate_zc(self, group_occurrences):
         """Calculates the critical compressibility factor"""
-        pc = self._calculate_pc(mol, idx)
-        vc = self._calculate_vc(mol, idx)
-        tc = self._calculate_tc(mol, idx)
+        pc = self._calculate_pc(group_occurrences)
+        vc = self._calculate_vc(group_occurrences)
+        tc = self._calculate_tc(group_occurrences)
         return pc * vc / (83.14 * tc)
 
-    def _calculate_vm_tb(self, mol, idx):
+    def _calculate_vm_tb(self, group_occurrences):
         """Calculates the molar volume at boiling point"""
-        vc = self._calculate_vc(mol, idx)
+        vc = self._calculate_vc(group_occurrences)
         return 0.285 * vc ** 1.048
 
-    def _calculate_tfc(self, mol, idx):
+    def _calculate_tfc(self, group_occurrences):
         """Calculates the closed cup flash point"""
-        tb = self._calculate_tb(mol, idx)
-        return -2.03 * sum(self.contrib['tfc'][i] * mol[i] for i in idx) + 0.659 * tb + 20.00
-    
-    def _calculate_tfo(self, mol, idx):
+        tb = self._calculate_tb(group_occurrences)
+        return -2.03 * sum(self.contrib['tfc'][group] * count for group, count in group_occurrences.items()) + 0.659 * tb + 20.00
+
+    def _calculate_tfo(self, group_occurrences):
         """Calculates the open cup flash point"""
-        tb = self._calculate_tb(mol, idx)
-        return  3.63 * sum(self.contrib['tfo'][i] * mol[i] for i in idx) + 0.409 * tb + 88.43
+        tb = self._calculate_tb(group_occurrences)
+        return 3.63 * sum(self.contrib['tfo'][group] * count for group, count in group_occurrences.items()) + 0.409 * tb + 88.43
 
-    def _calculate_hds(self, mol, idx):
+    def _calculate_hds(self, group_occurrences):
         """Calculates the Hansen dispersion solubility parameter"""
-        vm = self._calculate_vm(mol, idx)
-        return (sum(self.contrib['FDX'][i] * mol[i] for i in idx))/ vm
+        vm = self._calculate_vm(group_occurrences)
+        return sum(self.contrib['FDX'][group] * count for group, count in group_occurrences.items()) / vm
 
-    def _calculate_hps(self, mol, idx):
+    def _calculate_hps(self, group_occurrences):
         """Calculates the Hansen polar solubility parameter"""
-        vm = self._calculate_vm(mol, idx)
-        return (sum(self.contrib['FPX'][i] * self.contrib['FPX'][i] * mol[i] for i in idx)) ** 0.5 / vm
+        vm = self._calculate_vm(group_occurrences)
+        return (sum(self.contrib['FPX'][group] ** 2 * count for group, count in group_occurrences.items())) ** 0.5 / vm
 
-    def _calculate_hhs(self, mol, idx):
+    def _calculate_hhs(self, group_occurrences):
         """Calculates the Hansen hydrogen bonding solubility parameter"""
-        vm = self._calculate_vm(mol, idx)
-        return (sum(self.contrib['FHX'][i] * mol[i] for i in idx) / vm) ** 0.5
-    
-    def _calculate_sol_par(self, mol, idx):
+        vm = self._calculate_vm(group_occurrences)
+        return (sum(self.contrib['FHX'][group] * count for group, count in group_occurrences.items()) / vm) ** 0.5
+
+    def _calculate_sol_par(self, group_occurrences):
         """Calculates the Hildebrand (total) solubility parameter"""
-        hv = self._calculate_hv(mol, idx)
-        vm = self._calculate_vm(mol, idx)
+        hv = self._calculate_hv(group_occurrences)
+        vm = self._calculate_vm(group_occurrences)
         return ((1000 * hv - 8.314 * 298.15) / vm) ** 0.5
 
-    def _calculate_lc50(self, mol, idx):
+    def _calculate_lc50(self, group_occurrences):
         """Calculates the median lethal concentration (LC50)"""
-        return sum(self.contrib['LC50'][i] * mol[i] for i in idx)
-    
+        return sum(self.contrib['LC50'][group] * count for group, count in group_occurrences.items())
 
 
 from sgreen.dataset import Dataset
@@ -283,13 +283,9 @@ def main():
     compound_collection.add_compound(Compound(name="H2O", groups={"H2O": 1}))
     compound_collection.add_compound(Compound(name="CH3OH", groups={"CH3": 1, "OH": 1}))
 
-    # Inspect contributions
-    # missing_contribs = calculator.inspect_contribs(compound_collection, ['mw', 'tm', 'tb', 'vc'])
-    # print("Missing Contributions:")
-    # print(missing_contribs)
-
     # Calculate properties
     properties = calculator.calculate_properties(compound_collection, ['mw', 'tm', 'tb', 'vc'], round_digits=2)
+    print("Properties:")
     print(properties)
 
 if __name__ == "__main__":
