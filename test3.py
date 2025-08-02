@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import warnings
 from collections import defaultdict
-from sgreen.dataset import Dataset
+from sgreen.data import Dataset
 
 class Calculator:
     def __init__(self, dataset):
@@ -63,7 +63,7 @@ class Calculator:
         """
         Checks for missing contributions in the group contribution data for present groups and selected properties.
 
-        :param compound_collection: A CompoundCollection object containing compounds.
+        :param compound_collection: A Compounds object containing compounds.
         :param prop_list: A list of properties to inspect.
         :param verbose: If True, warnings are printed for missing contributions.
         :return: Dictionary of properties with missing contributions and the corresponding groups.
@@ -93,7 +93,7 @@ class Calculator:
         }
         mapped_props = [prop_mapping[prop] for prop in prop_list if prop in prop_mapping]
 
-        # Get group occurrences from the CompoundCollection
+        # Get group occurrences from the Compounds
         group_occurrences = compound_collection.get_group_occurrences()
         present_groups = [group for group, count in group_occurrences.items() if count > 0]
 
@@ -130,7 +130,7 @@ class Calculator:
         """
         Calculates various thermochemical properties using group contribution methods.
 
-        :param compound_collection: A CompoundCollection object containing compounds.
+        :param compound_collection: A Compounds object containing compounds.
         :param prop_list: A list of properties to calculate.
         :param round_digits: Number of decimal places to round the results to (Optional).
         :return: A pandas DataFrame with the calculated properties for each compound.
@@ -263,8 +263,8 @@ class Calculator:
         return sum(self.contrib['LC50'][group] * count for group, count in group_occurrences.items())
 
 
-from sgreen.dataset import Dataset
-from sgreen.camd import CompoundCollection, Compound
+from sgreen.data import Dataset
+from sgreen.core import Compounds, Compound
 
 
 def main():
@@ -278,8 +278,8 @@ def main():
     # Initialize the Calculator
     calculator = Calculator(dataset)
 
-    # Create a CompoundCollection
-    compound_collection = CompoundCollection()
+    # Create a Compounds
+    compound_collection = Compounds()
     compound_collection.add_compound(Compound(name="H2O", groups={"H2O": 1}))
     compound_collection.add_compound(Compound(name="CH3OH", groups={"CH3": 1, "OH": 1}))
 

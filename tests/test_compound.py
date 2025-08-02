@@ -1,7 +1,7 @@
 import unittest
 import pandas as pd
 
-from sgreen.camd import Compound
+from sgreen.core import Compound
 
 class TestCompound(unittest.TestCase):
     @classmethod
