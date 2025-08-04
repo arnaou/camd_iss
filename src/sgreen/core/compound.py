@@ -33,8 +33,8 @@ class Compound:
         
     Examples:
         >>> # Load group data first
-        >>> Compound.load_groups("data/unifac_groups.xlsx")
-        >>> Compound.load_valency("data/unifac_valency.xlsx")
+        >>> Compound.load_groups("data/unifac_groups.json")
+        >>> Compound.load_valency("data/unifac_valency.json")
         >>> Compound.load_smarts("data/unifac_smarts.json")
         >>> 
         >>> # Create compounds
@@ -55,31 +55,110 @@ class Compound:
     GROUP_SMARTS: Optional[Dict[str, str]] = None
 
     @classmethod
-    def load_groups(cls, file_path, sheet_name="Groups"):
+    def load_groups(cls, file_path: str) -> None:
         """
-        Loads the allowed groups from an Excel file.
+        Loads the allowed groups from a JSON file.
 
-        :param file_path: Path to the Excel file containing the allowed groups.
-        :param sheet_name: Name of the sheet in the Excel file (default is 'Groups').
+        Args:
+            file_path: Path to the JSON file containing allowed groups
+            
+        Raises:
+            GroupDataError: If loading fails due to file or format issues
+            
+        Examples:
+            >>> Compound.load_groups("data/unifac_groups.json")
+            
+        Note:
+            Expected JSON format: {"groups": ["CH3", "CH2", "OH", ...], "metadata": {...}}
         """
+        if not isinstance(file_path, str):
+            raise GroupDataError("file_path must be a string")
+            
         try:
-            cls.ALLOWED_GROUPS = pd.read_excel(file_path, sheet_name=sheet_name).iloc[:, 0].tolist()
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            if not isinstance(data, dict):
+                raise GroupDataError("JSON file must contain a dictionary")
+            
+            # Handle both formats: {"groups": [...]} or direct list
+            if "groups" in data:
+                groups = data["groups"]
+            elif isinstance(data, dict) and all(isinstance(k, str) for k in data.keys()):
+                # Handle direct dictionary format
+                groups = list(data.keys())
+            else:
+                raise GroupDataError("Invalid JSON format. Expected 'groups' key or direct group dictionary")
+            
+            if not isinstance(groups, list) or not groups:
+                raise GroupDataError("Groups must be a non-empty list")
+                
+            # Validate all groups are strings
+            for group in groups:
+                if not isinstance(group, str):
+                    raise GroupDataError(f"Group name must be string, got {type(group)}")
+                    
+            cls.ALLOWED_GROUPS = groups
+            
+        except FileNotFoundError:
+            raise GroupDataError(f"File not found: {file_path}")
+        except json.JSONDecodeError as e:
+            raise GroupDataError(f"Invalid JSON format in {file_path}: {e}")
         except Exception as e:
-            raise ValueError(f"Failed to load allowed groups from {file_path}: {e}")
+            raise GroupDataError(f"Failed to load allowed groups from {file_path}: {e}")
 
     @classmethod
-    def load_valency(cls, file_path, sheet_name="noc"):
+    def load_valency(cls, file_path: str) -> None:
         """
-        Loads the group valency (number of connections) from an Excel file.
+        Loads the group valency (number of connections) from a JSON file.
 
-        :param file_path: Path to the Excel file containing the group valency.
-        :param sheet_name: Name of the sheet in the Excel file (default is 'noc').
+        Args:
+            file_path: Path to the JSON file containing group valency data
+            
+        Raises:
+            GroupDataError: If loading fails due to file or format issues
+            
+        Examples:
+            >>> Compound.load_valency("data/unifac_valency.json")
+            
+        Note:
+            Expected JSON format: {"valency": {"CH3": 1, "CH2": 2, "OH": 1, ...}, "metadata": {...}}
+            Or direct format: {"CH3": 1, "CH2": 2, "OH": 1, ...}
         """
+        if not isinstance(file_path, str):
+            raise GroupDataError("file_path must be a string")
+            
         try:
-            valency_df = pd.read_excel(file_path, sheet_name=sheet_name)
-            cls.GROUP_VALENCY = valency_df.set_index("grp")["noc"].to_dict()
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            if not isinstance(data, dict):
+                raise GroupDataError("JSON file must contain a dictionary")
+            
+            # Handle both formats: {"valency": {...}} or direct dictionary
+            if "valency" in data:
+                valency_dict = data["valency"]
+            else:
+                valency_dict = data
+            
+            if not isinstance(valency_dict, dict) or not valency_dict:
+                raise GroupDataError("Valency data must be a non-empty dictionary")
+                
+            # Validate format
+            for group, valency in valency_dict.items():
+                if not isinstance(group, str):
+                    raise GroupDataError(f"Group name must be string, got {type(group)}")
+                if not isinstance(valency, (int, float)):
+                    raise GroupDataError(f"Valency for '{group}' must be numeric, got {type(valency)}")
+                    
+            cls.GROUP_VALENCY = {k: int(v) for k, v in valency_dict.items()}
+            
+        except FileNotFoundError:
+            raise GroupDataError(f"File not found: {file_path}")
+        except json.JSONDecodeError as e:
+            raise GroupDataError(f"Invalid JSON format in {file_path}: {e}")
         except Exception as e:
-            raise ValueError(f"Failed to load group valency from {file_path}: {e}")
+            raise GroupDataError(f"Failed to load group valency from {file_path}: {e}")
 
     @classmethod
     def load_smarts(cls, file_path: str) -> None:
