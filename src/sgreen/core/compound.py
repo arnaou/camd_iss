@@ -25,7 +25,7 @@ class Compound:
     Attributes:
         name (str): Name or identifier of the compound
         groups (Dict[str, int]): Dictionary mapping group names to their occurrences
-        m (int): Number of molecules for octet rule validation (default: 1)
+        m (int): 1: acyclic, 0: monocyclic, -1: bicyclic (default: 1)
         
     Class Attributes:
         ALLOWED_GROUPS (Optional[List[str]]): List of valid functional groups
