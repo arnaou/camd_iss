@@ -56,9 +56,10 @@ def test_ipopt():
 
     assert SolverFactory('ipopt').available() == True
     opt = SolverFactory('ipopt')
-    opt.options["linear_solver"] = "MA27"
+    opt.options["linear_solver"] = "MA57"
     opt.options["hsllib"] = "libcoinhsl.so"
 
-
+test_pyomo()
+test_ipopt()
 
 
