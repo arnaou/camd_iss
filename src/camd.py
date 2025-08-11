@@ -47,6 +47,8 @@ class CAMD:
         self.pure_properties = {}
         self.mixture_properties = {}
         self.generated_compounds = []
+        self.property_constraints = {}
+        self.calculated_properties = {}  # Store calculated properties for each candidate
         self.results = None
         
         self._create_output_directory()
@@ -238,6 +240,60 @@ class CAMD:
         print(f"  Group repetitions: {min_number_of_repetitions}-{max_number_of_repetitions}")
         print(f"  Functional groups: {min_func_groups}-{max_func_groups}")
         print(f"  Molecular type: {molecular_type} ({molecular_type_names[molecular_type]})")
+    
+    def add_constraint_properties(self, property_constraints: Dict[str, List[float]]):
+        """
+        Add pure component property constraints for candidate screening.
+        
+        Args:
+            property_constraints: Dict where keys are property names and values are
+                                [lower_bound, upper_bound] lists.
+                                Available properties: 'tb', 'tc', 'pc', 'ac', 'hv'
+                                Units: tb/tc [K], pc [Pa], ac [-], hv [J/mol]
+                                
+        Example:
+            constraints = {
+                'tb': [300, 450],    # Boiling point 300-450 K
+                'tc': [400, 600],    # Critical temperature 400-600 K  
+                'pc': [1e5, 5e6],    # Critical pressure 1-50 bar
+                'ac': [0.1, 0.8],    # Acentric factor 0.1-0.8
+                'hv': [20000, 60000] # Heat of vaporization 20-60 kJ/mol
+            }
+        """
+        if not isinstance(property_constraints, dict):
+            raise TypeError("property_constraints must be a dictionary")
+        
+        # Validate available properties
+        valid_properties = {'tm', 'tb', 'tc', 'pc', 'ac', 'hv'}
+        invalid_props = set(property_constraints.keys()) - valid_properties
+        if invalid_props:
+            raise ValueError(f"Invalid property names: {invalid_props}. "
+                           f"Valid properties: {valid_properties}")
+        
+        # Validate constraint format
+        for prop_name, bounds in property_constraints.items():
+            if not isinstance(bounds, list) or len(bounds) != 2:
+                raise ValueError(f"Bounds for '{prop_name}' must be a list of [lower_bound, upper_bound]")
+            
+            lower, upper = bounds
+            if not isinstance(lower, (int, float)) or not isinstance(upper, (int, float)):
+                raise ValueError(f"Bounds for '{prop_name}' must be numeric")
+            
+            if lower >= upper:
+                raise ValueError(f"Lower bound must be < upper bound for '{prop_name}': {bounds}")
+            
+            if lower < 0 and prop_name in ['tb', 'tc', 'pc', 'hv']:
+                raise ValueError(f"'{prop_name}' cannot have negative values: {bounds}")
+            
+            # Tm can be negative (below 0°C), so no restriction for tm
+        
+        self.property_constraints = property_constraints.copy()
+        
+        print(f"Set property constraints:")
+        for prop_name, bounds in property_constraints.items():
+            units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+            unit = units.get(prop_name, '')
+            print(f"  {prop_name.upper()}: {bounds[0]}-{bounds[1]} {unit}")
     
     def generate_candidates(self, 
                           max_solutions: int = 10000,
@@ -479,6 +535,278 @@ class CAMD:
                 return True
         return False
     
+    def calculate_pure_properties(self):
+        """
+        Calculate pure component properties for ALL candidates using Constantinou-Gani method.
+        
+        Stores results in self.calculated_properties where keys are candidate indices
+        and values are dicts with properties: {'tb': value, 'tc': value, 'pc': value, 'ac': value, 'hv': value}
+        
+        Returns:
+            int: Number of candidates with properties calculated successfully
+        """
+        if not self.generated_compounds:
+            print("No candidates to calculate properties for")
+            return 0
+            
+        if self.pure_method != "Constantinou-Gani":
+            raise NotImplementedError(f"Property calculation not implemented for {self.pure_method}")
+        
+        print(f"Calculating pure component properties for {len(self.generated_compounds)} candidates...")
+        
+        self.calculated_properties = {}  # Reset stored properties
+        successful_calculations = 0
+        
+        for i, compound in enumerate(self.generated_compounds):
+            try:
+                properties = self._calculate_compound_properties(compound)
+                self.calculated_properties[i] = properties
+                successful_calculations += 1
+            except Exception as e:
+                print(f"Warning: Could not calculate properties for candidate {i}: {e}")
+                self.calculated_properties[i] = {
+                    'tb': None, 'tc': None, 'pc': None, 'ac': None, 'hv': None
+                }
+        
+        print(f"Property calculation complete: {successful_calculations}/{len(self.generated_compounds)} successful")
+        return successful_calculations
+    
+    def _calculate_compound_properties(self, compound: Dict[str, int]) -> Dict[str, float]:
+        """
+        Calculate properties for a single compound.
+        
+        Args:
+            compound: Compound groups and counts
+            
+        Returns:
+            Dict with calculated properties
+        """
+        properties = {}
+        
+        # Calculate each pure component property
+        if 'tm' in self.pure_properties:
+            properties['tm'] = self._calculate_tm(compound)
+        else:
+            properties['tm'] = None
+            
+        if 'tb' in self.pure_properties:
+            properties['tb'] = self._calculate_tb(compound)
+        else:
+            properties['tb'] = None
+            
+        if 'tc' in self.pure_properties and 'scalars' in self.pure_properties:
+            properties['tc'] = self._calculate_tc(compound)
+        else:
+            properties['tc'] = None
+            
+        if 'pc' in self.pure_properties and 'scalars' in self.pure_properties:
+            properties['pc'] = self._calculate_pc(compound)
+        else:
+            properties['pc'] = None
+            
+        if 'ac' in self.pure_properties:
+            properties['ac'] = self._calculate_ac(compound)
+        else:
+            properties['ac'] = None
+            
+        if 'hv' in self.pure_properties and 'scalars' in self.pure_properties:
+            properties['hv'] = self._calculate_hv(compound)
+        else:
+            properties['hv'] = None
+        
+        return properties
+    
+    def _calculate_tm(self, compound: Dict[str, int]) -> float:
+        """Calculate melting point using Constantinou-Gani method: Tm0 * ln(sum(contrib.Tm[i] * mol[i]))"""
+        tm_data = self.pure_properties['tm']
+        scalars = self.pure_properties['scalars']
+        
+        tm_sum = 0.0
+        missing_groups = []
+        
+        for group, count in compound.items():
+            if group in tm_data:
+                tm_sum += count * tm_data[group]
+            else:
+                missing_groups.append(group)
+        
+        if missing_groups:
+            print(f"Warning: Missing Tm data for groups: {missing_groups}")
+        
+        if tm_sum <= 0:
+            return None
+            
+        # Get scalar for Tm calculation (should be 102.425)
+        tm_scalar = scalars.get('Tm0', 102.425)  # Default scalar if not found
+        return tm_scalar * np.log(tm_sum)
+    
+    def set_pure_property(self, candidate_index: int, property_name: str, value: float):
+        """
+        Manually set or override a pure component property for a specific candidate.
+        
+        Args:
+            candidate_index: Index of the candidate in the generated_compounds list
+            property_name: Property name ('tb', 'tc', 'pc', 'ac', 'hv')
+            value: Property value to set
+        """
+        if candidate_index < 0 or candidate_index >= len(self.generated_compounds):
+            raise ValueError(f"Invalid candidate index {candidate_index}. Must be 0 to {len(self.generated_compounds)-1}")
+        
+        valid_properties = {'tm', 'tb', 'tc', 'pc', 'ac', 'hv'}
+        if property_name not in valid_properties:
+            raise ValueError(f"Invalid property name '{property_name}'. Valid properties: {valid_properties}")
+        
+        if not isinstance(value, (int, float)):
+            raise TypeError(f"Property value must be numeric, got {type(value)}")
+        
+        # Initialize properties dict for this candidate if it doesn't exist
+        if candidate_index not in self.calculated_properties:
+            self.calculated_properties[candidate_index] = {
+                'tm': None, 'tb': None, 'tc': None, 'pc': None, 'ac': None, 'hv': None
+            }
+        
+        # Set the property
+        old_value = self.calculated_properties[candidate_index].get(property_name)
+        self.calculated_properties[candidate_index][property_name] = value
+        
+        compound = self.generated_compounds[candidate_index]
+        units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+        unit = units.get(property_name, '')
+        
+        if old_value is not None:
+            print(f"Updated {property_name.upper()} for candidate {candidate_index} ({compound}): {old_value} → {value} {unit}")
+        else:
+            print(f"Set {property_name.upper()} for candidate {candidate_index} ({compound}): {value} {unit}")
+    
+    def _calculate_tb(self, compound: Dict[str, int]) -> float:
+        """Calculate boiling point using Constantinou-Gani method: 204.359 * ln(sum(contrib.Tb[i] * mol[i]))"""
+        tb_data = self.pure_properties['tb']
+        scalars = self.pure_properties['scalars']
+        
+        tb_sum = 0.0
+        missing_groups = []
+        
+        for group, count in compound.items():
+            if group in tb_data:
+                tb_sum += count * tb_data[group]
+            else:
+                missing_groups.append(group)
+        
+        if missing_groups:
+            print(f"Warning: Missing Tb data for groups: {missing_groups}")
+        
+        if tb_sum <= 0:
+            return None
+            
+        tb_data = self.pure_properties['tb']
+        scalars = self.pure_properties['scalars']
+        
+        # Get scalar for Tb calculation (should be 204.359)
+        tb_scalar = scalars.get('Tb0', 204.359)  # Default scalar if not found
+        return tb_scalar * np.log(tb_sum)
+    
+    def _calculate_tc(self, compound: Dict[str, int]) -> float:
+        """Calculate critical temperature using Constantinou-Gani method: Tc0 * ln(sum(contrib.Tc[i] * mol[i]))"""
+        tc_data = self.pure_properties['tc']
+        scalars = self.pure_properties['scalars']
+        
+        tc_sum = 0.0
+        missing_groups = []
+        
+        for group, count in compound.items():
+            if group in tc_data:
+                tc_sum += count * tc_data[group]
+            else:
+                missing_groups.append(group)
+        
+        if missing_groups:
+            print(f"Warning: Missing Tc data for groups: {missing_groups}")
+        
+        if tc_sum <= 0:
+            return None
+            
+        # Get scalar for Tc calculation (should be 181.128)
+        tc_scalar = scalars.get('Tc0', 181.128)  # Default scalar if not found
+        return tc_scalar * np.log(tc_sum)
+    
+    def _calculate_pc(self, compound: Dict[str, int]) -> float:
+        """Calculate critical pressure using Constantinou-Gani method."""
+        pc_data = self.pure_properties['pc']
+        scalars = self.pure_properties['scalars']
+        
+        pc_sum = 0.0
+        missing_groups = []
+        
+        for group, count in compound.items():
+            if group in pc_data:
+                pc_sum += count * pc_data[group]
+            else:
+                missing_groups.append(group)
+        
+        if missing_groups:
+            print(f"Warning: Missing Pc data for groups: {missing_groups}")
+        
+        # Get scalars for Pc calculation (should be 0.100220 and 1.3705)
+        pc01 = scalars.get('Pc01', 0.100220)  # Default scalar if not found
+        pc02 = scalars.get('Pc02', 1.3705)    # Default scalar if not found
+        
+        # Pc = 1 / (sum(contrib.Pc[i] * mol[i]) + 0.100220)^2 + 1.3705
+        denominator = pc_sum + pc01
+        if denominator > 0:
+            return 1 / (denominator ** 2) + pc02
+        else:
+            return pc02  # Return just the constant if calculation fails
+    
+    def _calculate_ac(self, compound: Dict[str, int]) -> float:
+        """Calculate acentric factor using Constantinou-Gani method: w01 * ln(sum(contrib.Ac[i] * mol[i]) + w02)^w03"""
+        ac_data = self.pure_properties['ac']
+        scalars = self.pure_properties['scalars']
+        
+        ac_sum = 0.0
+        missing_groups = []
+        
+        for group, count in compound.items():
+            if group in ac_data:
+                ac_sum += count * ac_data[group]
+            else:
+                missing_groups.append(group)
+        
+        if missing_groups:
+            print(f"Warning: Missing Ac data for groups: {missing_groups}")
+        
+        # Get scalars for Ac calculation (should be 0.4085, 1.1507, 1.9802)
+        w01 = scalars.get('w01', 0.4085)   # Default scalar if not found
+        w02 = scalars.get('w02', 1.1507)   # Default scalar if not found  
+        w03 = scalars.get('w03', 1.9802)   # Default scalar if not found
+        
+        # acc = 0.4085 * ln(sum(contrib.Ac[i] * mol[i]) + 1.1507)^1.9802
+        argument = ac_sum + w02
+        if argument > 0:
+            return w01 * (np.log(argument) ** w03)
+        else:
+            return 0.0  # Return 0 if calculation fails
+    
+    def _calculate_hv(self, compound: Dict[str, int]) -> float:
+        """Calculate heat of vaporization using Constantinou-Gani method: Hv0 + sum(contrib.Hv[i] * mol[i])"""
+        hv_data = self.pure_properties['hv']
+        scalars = self.pure_properties['scalars']
+        
+        hv_sum = 0.0
+        missing_groups = []
+        
+        for group, count in compound.items():
+            if group in hv_data:
+                hv_sum += count * hv_data[group]
+            else:
+                missing_groups.append(group)
+        
+        if missing_groups:
+            print(f"Warning: Missing Hv data for groups: {missing_groups}")
+        
+        # Get scalar for Hv calculation (should be 6.829)
+        hv_scalar = scalars.get('Hv0', 6.829)  # Default scalar if not found
+        return hv_scalar + hv_sum
+    
     def add_compounds(self, compounds: Dict[str, List[int]]):
         """
         Add compounds defined by group occurrences.
@@ -689,6 +1017,91 @@ class CAMD:
         
         print("System validation passed")
         return True
+    
+    def filter_pure_properties(self):
+        """
+        Filter candidates based on pure component property constraints using stored properties.
+        
+        Uses properties calculated by calculate_pure_properties() or set manually with set_pure_property().
+        
+        Returns:
+            int: Number of candidates remaining after filtering
+        """
+        if not self.property_constraints:
+            print("No property constraints defined - skipping property filtering")
+            return len(self.generated_compounds)
+            
+        if not self.generated_compounds:
+            print("No candidates to filter")
+            return 0
+            
+        if not self.calculated_properties:
+            print("No calculated properties available. Run calculate_pure_properties() first.")
+            return len(self.generated_compounds)
+            
+        original_count = len(self.generated_compounds)
+        filtered_candidates = []
+        filtered_properties = {}
+        excluded_by_property = {}
+        
+        print(f"Filtering {original_count} candidates by pure component properties...")
+        
+        for i, candidate in enumerate(self.generated_compounds):
+            # Get stored properties for this candidate
+            if i not in self.calculated_properties:
+                print(f"Warning: No properties available for candidate {i}")
+                excluded_by_property['no_properties'] = excluded_by_property.get('no_properties', 0) + 1
+                continue
+                
+            properties = self.calculated_properties[i]
+            
+            # Check each property constraint
+            passes_constraints = True
+            for prop_name, bounds in self.property_constraints.items():
+                prop_value = properties.get(prop_name)
+                
+                if prop_value is None:
+                    passes_constraints = False
+                    excluded_by_property[f'{prop_name}_missing'] = excluded_by_property.get(f'{prop_name}_missing', 0) + 1
+                    break
+                
+                lower_bound, upper_bound = bounds
+                if not (lower_bound <= prop_value <= upper_bound):
+                    passes_constraints = False
+                    excluded_by_property[prop_name] = excluded_by_property.get(prop_name, 0) + 1
+                    break
+            
+            if passes_constraints:
+                filtered_candidates.append(candidate)
+                # Keep properties for filtered candidates with updated indices
+                filtered_properties[len(filtered_candidates) - 1] = properties
+        
+        # Update both candidates and their properties
+        self.generated_compounds = filtered_candidates
+        self.calculated_properties = filtered_properties
+        
+        # Report filtering results
+        excluded_total = original_count - len(filtered_candidates)
+        print(f"Property filtering results:")
+        print(f"  Original candidates: {original_count}")
+        print(f"  Excluded candidates: {excluded_total}")
+        print(f"  Remaining candidates: {len(filtered_candidates)}")
+        
+        if excluded_by_property:
+            print("  Exclusion breakdown:")
+            for reason, count in excluded_by_property.items():
+                if reason.endswith('_missing'):
+                    prop_name = reason.replace('_missing', '')
+                    print(f"    {prop_name.upper()} data missing: {count}")
+                elif reason == 'no_properties':
+                    print(f"    No calculated properties: {count}")
+                else:
+                    units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+                    unit = units.get(reason, '')
+                    bounds = self.property_constraints[reason]
+                    print(f"    {reason.upper()} outside {bounds[0]}-{bounds[1]} {unit}: {count}")
+        
+        return len(filtered_candidates)
     
     def _is_compound_excluded(self, compound: Dict[str, int]) -> bool:
         """

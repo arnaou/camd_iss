@@ -101,40 +101,127 @@ def main():
     else:
         print("   No predefined solvents defined - add to predefined_solvents list")
     
-    # Step 7: Validate and run screening calculations
-    print("\n6. Running screening calculations...")
+    # Step 6: Set pure component property constraints
+    print("\n6. Setting pure component property constraints...")
+    property_constraints = {
+        'tb': [300, 450],      # Boiling point 300-450 K
+        'tc': [400, 650],      # Critical temperature 400-650 K  
+        'pc': [1e5, 5e6],      # Critical pressure 1-50 bar (1e5-5e6 Pa)
+        'ac': [0.1, 0.8],      # Acentric factor 0.1-0.8
+        # 'hv': [20000, 60000]   # Heat of vaporization 20-60 kJ/mol (optional)
+    }
+    
+    if property_constraints:
+        try:
+            camd.add_constraint_properties(property_constraints)
+            print("   Property constraints set successfully")
+        except Exception as e:
+            print(f"   Error setting property constraints: {e}")
+    else:
+        print("   No property constraints defined")
+    
+    # Step 7: Calculate pure component properties for all candidates
+    print("\n7. Calculating pure component properties...")
+    try:
+        if camd.generated_compounds:
+            successful_calcs = camd.calculate_pure_properties()
+            print(f"   Properties calculated for {successful_calcs} candidates")
+        else:
+            print("   No candidates available for property calculation")
+    except Exception as e:
+        print(f"   Error calculating properties: {e}")
+    
+    # Step 8: Manual property adjustments (Optional)
+    print("\n8. Manual property adjustments (Optional)...")
+    # Example: Override a specific property value
+    # if len(camd.generated_compounds) > 0:
+    #     try:
+    #         camd.set_pure_property(candidate_index=0, property_name='tb', value=373.15)
+    #         print("   Example: Set boiling point for candidate 0 to 373.15 K")
+    #     except Exception as e:
+    #         print(f"   Error setting manual property: {e}")
+    print("   No manual adjustments defined - uncomment example above to test")
+    
+    # Step 9: Filter candidates based on pure component properties
+    print("\n9. Filtering candidates by pure component properties...")
+    try:
+        if camd.property_constraints and camd.calculated_properties:
+            remaining_candidates = camd.filter_pure_properties()
+            print(f"   Filtering complete: {remaining_candidates} candidates remain")
+        else:
+            print("   Skipping property filtering - no constraints or calculated properties")
+    except Exception as e:
+        print(f"   Error in property filtering: {e}")
+    
+    # Step 10: Validate system
+    print("\n10. Validating system...")
     try:
         if compound_A and compound_B:
             camd.validate_system()
-            camd.run()
-            
-            # Get and save results
-            results = camd.get_results()
-            camd.save_results()
-            print("   Screening calculations completed successfully")
+            print("   System validation successful")
         else:
-            print("   Skipping calculations - no binary system defined")
+            print("   Skipping validation - no binary system defined")
     except Exception as e:
-        print(f"   Error in calculations: {e}")
+        print(f"   Error in system validation: {e}")
     
-    # Step 8: Summary
+    # Step 11: Run screening calculations
+    print("\n11. Running screening calculations...")
+    # Commented out until VLE calculations are implemented
+    # try:
+    #     if compound_A and compound_B and camd.generated_compounds:
+    #         camd.run()
+    #         
+    #         # Get and save results
+    #         results = camd.get_results()
+    #         camd.save_results()
+    #         print("   Screening calculations completed successfully")
+    #     else:
+    #         print("   Skipping calculations - no complete system defined")
+    # except Exception as e:
+    #     print(f"   Error in calculations: {e}")
+    print("   Screening calculations not implemented yet")
+    
+    # Step 12: Summary
     print("\n=== Summary ===")
     print(f"Title: {camd.title}")
     print(f"Binary system: A={compound_A}, B={compound_B}")
     print(f"Available groups: {len(camd.available_groups)}")
     print(f"Design groups: {len(camd.design_groups)}")
-    print(f"Solvent candidates: {len(camd.generated_compounds)}")
+    print(f"Generated candidates: {len(camd.generated_compounds)}")
+    print(f"Property constraints: {len(camd.property_constraints)} properties")
+    print(f"Calculated properties: {len(camd.calculated_properties)} candidates")
     print(f"Output directory: {camd.output_dir}")
     
-    print("\n=== Next Steps ===")
-    print("1. Fill in the compounds to be separated:")
-    print("   - compound_A: e.g., {'CH3': 2, 'OH': 1} for ethanol")
-    print("   - compound_B: e.g., {'CH3': 6} for hexane")
-    print("2. Define solvent design space:")
-    print("   - design_groups: Add UNIFAC groups like ['CH3', 'CH2', 'OH', 'COOH']")
-    print("3. Optional: Add predefined solvent candidates")
-    print("4. Adjust constraint parameters for desired solvent properties")
-    print("5. Run the script to test the implementation")
+    if camd.calculated_properties:
+        print("\n=== Property Calculation Results ===")
+        for i, properties in camd.calculated_properties.items():
+            if i < 3:  # Show first 3 candidates
+                compound = camd.generated_compounds[i]
+                print(f"Candidate {i} ({compound}):")
+                for prop, value in properties.items():
+                    if value is not None:
+                        units = {'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+                        unit = units.get(prop, '')
+                        print(f"  {prop.upper()}: {value:.2f} {unit}")
+        if len(camd.calculated_properties) > 3:
+            print(f"  ... and {len(camd.calculated_properties) - 3} more candidates")
+    
+    print("\n=== Workflow Completed ===")
+    print("1. ✓ Binary system defined (compounds A and B)")
+    print("2. ✓ Design groups set for solvent generation")
+    print("3. ✓ Structural constraints applied")
+    print("4. ✓ Candidates generated/set")
+    print("5. ✓ Property constraints defined")
+    print("6. ✓ Pure component properties calculated")
+    print("7. ✓ Property-based filtering applied")
+    print("8. ✓ System validated")
+    print("9. ⏳ VLE screening calculations (to be implemented)")
+    
+    print("\n=== Next Development Steps ===")
+    print("1. Implement VLE calculations using UNIFAC-LY method")
+    print("2. Add mixture property calculations")
+    print("3. Implement solvent selection criteria")
+    print("4. Add results export and visualization")
 
 if __name__ == "__main__":
     main()
