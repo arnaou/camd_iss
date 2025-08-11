@@ -393,7 +393,11 @@ class CAMD:
     
     def set_candidates(self, candidates: List[Dict[str, int]]):
         """
-        Set predefined candidate compounds for screening.
+        Add predefined candidate compounds to the candidate pool.
+        
+        - If no candidates were previously generated, this becomes the candidate pool
+        - If candidates were already generated, predefined ones are added at the top
+        - Validates structural rules and removes duplicates (including A, B)
         
         Args:
             candidates: List of candidate compounds, where each compound is a dict
@@ -406,26 +410,74 @@ class CAMD:
         if not candidates:
             raise ValueError("candidates list cannot be empty")
         
+        valid_candidates = []
+        
         for i, candidate in enumerate(candidates):
             if not isinstance(candidate, dict):
                 raise TypeError(f"Candidate {i} must be a dictionary")
             
+            if not candidate:  # Skip empty candidates
+                continue
+                
             # Validate groups exist in available groups
             invalid_groups = []
             if self.available_groups:
                 invalid_groups = [g for g in candidate.keys() if g not in self.available_groups]
             
             if invalid_groups:
-                raise ValueError(f"Invalid groups in candidate {i}: {invalid_groups}")
+                print(f"Warning: Skipping candidate {i} with invalid groups: {invalid_groups}")
+                continue
             
-            # Validate single compound structure
-            if candidate:  # Only validate non-empty candidates
+            # Validate structural rules (octet and connectivity)
+            try:
                 self._validate_single_compound(candidate, i)
+            except ValueError as e:
+                print(f"Warning: Skipping candidate {i} due to structural violation: {e}")
+                continue
+            
+            # Check if candidate is identical to A or B
+            if self._is_compound_excluded(candidate):
+                print(f"Warning: Skipping candidate {i} - identical to system component A or B")
+                continue
+            
+            # Check if candidate already exists in generated compounds
+            if self._is_duplicate_candidate(candidate):
+                print(f"Warning: Skipping candidate {i} - already exists in candidate pool")
+                continue
+            
+            valid_candidates.append(candidate)
         
-        self.generated_compounds = candidates
-        print(f"Set {len(candidates)} candidate compounds")
+        # Add valid predefined candidates
+        if valid_candidates:
+            if self.generated_compounds:
+                # Add to existing generated candidates (at the top)
+                self.generated_compounds = valid_candidates + self.generated_compounds
+                print(f"Added {len(valid_candidates)} predefined candidates to existing pool")
+            else:
+                # No generated candidates, use predefined as the pool
+                self.generated_compounds = valid_candidates
+                print(f"Set {len(valid_candidates)} predefined candidates as candidate pool")
+                
+            print(f"Total candidates: {len(self.generated_compounds)}")
+        else:
+            print("No valid predefined candidates to add")
         
-        return candidates
+        return valid_candidates
+    
+    def _is_duplicate_candidate(self, candidate: Dict[str, int]) -> bool:
+        """
+        Check if a candidate already exists in the generated compounds list.
+        
+        Args:
+            candidate: Candidate to check
+            
+        Returns:
+            True if candidate is a duplicate, False otherwise
+        """
+        for existing_candidate in self.generated_compounds:
+            if self._compounds_equal(candidate, existing_candidate):
+                return True
+        return False
     
     def add_compounds(self, compounds: Dict[str, List[int]]):
         """
@@ -614,16 +666,80 @@ class CAMD:
     
     def validate_system(self):
         """Check system consistency and thermodynamic validity."""
-        if not self.groups:
-            raise ValueError("No groups defined. Use add_groups() first.")
-        
-        if not self.compounds:
-            raise ValueError("No compounds defined. Use add_compounds() first.")
-        
         if not self.system:
-            raise ValueError("No system defined. Use add_system() first.")
+            raise ValueError("No system defined. Use add_binary_system() first.")
+        
+        # Filter out candidates identical to compounds A or B
+        if self.generated_compounds:
+            original_count = len(self.generated_compounds)
+            filtered_candidates = []
+            excluded_count = 0
+            
+            for candidate in self.generated_compounds:
+                if self._is_compound_excluded(candidate):
+                    excluded_count += 1
+                else:
+                    filtered_candidates.append(candidate)
+            
+            self.generated_compounds = filtered_candidates
+            
+            if excluded_count > 0:
+                print(f"Excluded {excluded_count} candidates identical to system components A or B")
+                print(f"Remaining candidates: {len(self.generated_compounds)}")
         
         print("System validation passed")
+        return True
+    
+    def _is_compound_excluded(self, compound: Dict[str, int]) -> bool:
+        """
+        Check if a compound is identical to any system component (A or B).
+        
+        Args:
+            compound: Compound to check
+            
+        Returns:
+            True if compound should be excluded, False otherwise
+        """
+        if not self.system:
+            return False
+            
+        # Check against compound A
+        if 'A' in self.system:
+            if self._compounds_equal(compound, self.system['A']):
+                return True
+                
+        # Check against compound B  
+        if 'B' in self.system:
+            if self._compounds_equal(compound, self.system['B']):
+                return True
+                
+        return False
+    
+    def _compounds_equal(self, comp1: Dict[str, int], comp2: Dict[str, int]) -> bool:
+        """
+        Check if two compounds are identical (same groups with same counts).
+        
+        Args:
+            comp1: First compound
+            comp2: Second compound
+            
+        Returns:
+            True if compounds are identical, False otherwise
+        """
+        # Handle empty compounds
+        if not comp1 and not comp2:
+            return True
+        if not comp1 or not comp2:
+            return False
+            
+        # Check if all groups and counts match
+        all_groups = set(comp1.keys()) | set(comp2.keys())
+        for group in all_groups:
+            count1 = comp1.get(group, 0)
+            count2 = comp2.get(group, 0)
+            if count1 != count2:
+                return False
+                
         return True
     
     def run(self):
