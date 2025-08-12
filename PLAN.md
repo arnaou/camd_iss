@@ -172,3 +172,17 @@ camd.add_binary_system(
 ```
 
 ## Notes
+
+
+  1. Validate Property Calculations
+
+  - Test property calculations against known compounds
+  - Compare results with literature values or original implementation
+  - Ensure formulas are correctly implemented
+
+  2. Pre-calculation Group Validation
+
+  - Check that all groups in candidates have corresponding property contributions
+  - Implement early validation before expensive property calculations
+  - Handle missing group data gracefully
+  - Provide clear warnings for incomplete data

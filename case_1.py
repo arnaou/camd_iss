@@ -101,14 +101,26 @@ def main():
     else:
         print("   No predefined solvents defined - add to predefined_solvents list")
     
-    # Step 6: Set pure component property constraints
-    print("\n6. Setting pure component property constraints...")
+    # Step 6: Validate system (after all candidates are set)
+    print("\n6. Validating system...")
+    try:
+        if compound_A and compound_B:
+            camd.validate_system()
+            print("   System validation successful")
+        else:
+            print("   Skipping validation - no binary system defined")
+    except Exception as e:
+        print(f"   Error in system validation: {e}")
+    
+    # Step 7: Set pure component property constraints
+    print("\n7. Setting pure component property constraints...")
     property_constraints = {
-        'tb': [300, 450],      # Boiling point 300-450 K
-        'tc': [400, 650],      # Critical temperature 400-650 K  
-        'pc': [1e5, 5e6],      # Critical pressure 1-50 bar (1e5-5e6 Pa)
-        'ac': [0.1, 0.8],      # Acentric factor 0.1-0.8
-        # 'hv': [20000, 60000]   # Heat of vaporization 20-60 kJ/mol (optional)
+        'tb': [368.0, 500.0],      # Boiling point 368-500 K
+        'tm': [298.0, 40000.0],    # Melting point 298K+ (no upper limit)
+        #'tc': [400.0, 650.0],     # Critical temperature 400-650 K  
+        #'pc': [1e5, 5e6],         # Critical pressure 1-50 bar (1e5-5e6 Pa)
+        #'ac': [0.1, 0.8],         # Acentric factor 0.1-0.8
+        #'hv': [-9999.0, 67.0]      # Heat of vaporization range
     }
     
     if property_constraints:
@@ -120,8 +132,8 @@ def main():
     else:
         print("   No property constraints defined")
     
-    # Step 7: Calculate pure component properties for all candidates
-    print("\n7. Calculating pure component properties...")
+    # Step 8: Calculate pure component properties for all candidates
+    print("\n8. Calculating pure component properties...")
     try:
         if camd.generated_compounds:
             successful_calcs = camd.calculate_pure_properties()
@@ -131,8 +143,8 @@ def main():
     except Exception as e:
         print(f"   Error calculating properties: {e}")
     
-    # Step 8: Manual property adjustments (Optional)
-    print("\n8. Manual property adjustments (Optional)...")
+    # Step 9: Manual property adjustments (Optional)
+    print("\n9. Manual property adjustments (Optional)...")
     # Example: Override a specific property value
     # if len(camd.generated_compounds) > 0:
     #     try:
@@ -142,27 +154,53 @@ def main():
     #         print(f"   Error setting manual property: {e}")
     print("   No manual adjustments defined - uncomment example above to test")
     
-    # Step 9: Filter candidates based on pure component properties
-    print("\n9. Filtering candidates by pure component properties...")
+    # Step 10: Filter candidates based on pure component properties
+    print("\n10. Filtering candidates by pure component properties...")
     try:
-        if camd.property_constraints and camd.calculated_properties:
-            remaining_candidates = camd.filter_pure_properties()
-            print(f"   Filtering complete: {remaining_candidates} candidates remain")
+        filtering_stats = camd.filter_pure_properties()
+        
+        if filtering_stats['skipped']:
+            print(f"   Skipping property filtering: {filtering_stats['skip_reason']}")
         else:
-            print("   Skipping property filtering - no constraints or calculated properties")
+            # Display comprehensive filtering diagnostics
+            print(f"\n=== Property Filtering Diagnostics ===")
+            print(f"Candidate Source Breakdown:")
+            print(f"  Generated candidates (MILP): {filtering_stats['generated']}")
+            print(f"  Predefined candidates: {filtering_stats['predefined']}")
+            print(f"  Total candidates: {filtering_stats['total']}")
+            
+            print(f"\nProperty Constraints (in evaluation order):")
+            units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+            for i, prop_name in enumerate(filtering_stats['constraints'], 1):
+                bounds = filtering_stats['constraint_details'][prop_name]
+                unit = units.get(prop_name, '')
+                print(f"  {i}. {prop_name.upper()}: {bounds[0]} - {bounds[1]} {unit}")
+            
+            print(f"\n=== Filtering Results ===")
+            total = filtering_stats['total']
+            passed = filtering_stats['passed']
+            failed = filtering_stats['failed']
+            
+            print(f"✅ PASSED all constraints: {passed}/{total} ({passed/total*100:.1f}%)")
+            print(f"❌ FAILED constraints: {failed}/{total} ({failed/total*100:.1f}%)")
+            
+            if failed > 0:
+                print(f"\nFailure Analysis (by FIRST constraint that failed):")
+                for i, prop_name in enumerate(filtering_stats['constraints'], 1):
+                    count = filtering_stats['first_failure_stats'].get(prop_name, 0)
+                    if count > 0:
+                        percentage = count/total*100
+                        print(f"  {i}. {prop_name.upper()}: {count} candidates ({percentage:.1f}%) failed here first")
+                
+                missing_props = filtering_stats['first_failure_stats'].get('missing_properties', 0)
+                if missing_props > 0:
+                    percentage = missing_props/total*100
+                    print(f"  Missing properties: {missing_props} candidates ({percentage:.1f}%) had no calculated data")
+            
+            print(f"\nFinal Result: {passed} candidates available for screening")
+        
     except Exception as e:
         print(f"   Error in property filtering: {e}")
-    
-    # Step 10: Validate system
-    print("\n10. Validating system...")
-    try:
-        if compound_A and compound_B:
-            camd.validate_system()
-            print("   System validation successful")
-        else:
-            print("   Skipping validation - no binary system defined")
-    except Exception as e:
-        print(f"   Error in system validation: {e}")
     
     # Step 11: Run screening calculations
     print("\n11. Running screening calculations...")
