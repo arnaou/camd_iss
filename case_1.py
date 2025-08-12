@@ -89,7 +89,7 @@ def main():
         {'H2O': 1},    # water
         {'DMSO': 1},   # DMSO
         {'DOH': 1},    # Ethylene glycol
-        {'HCOOH': 1},    # Ethylene glycol
+        {'HCOOH': 1},    # Formic acid
     ]
     
     if predefined_solvents:
