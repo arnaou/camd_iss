@@ -116,11 +116,11 @@ def main():
     print("\n7. Setting pure component property constraints...")
     property_constraints = {
         'tb': [368.0, 500.0],      # Boiling point 368-500 K
-        'tm': [298.0, 40000.0],    # Melting point 298K+ (no upper limit)
+        'tm': [0.0, 298.0],    # Melting point 298K+ (no upper limit)
         #'tc': [400.0, 650.0],     # Critical temperature 400-650 K  
         #'pc': [1e5, 5e6],         # Critical pressure 1-50 bar (1e5-5e6 Pa)
         #'ac': [0.1, 0.8],         # Acentric factor 0.1-0.8
-        #'hv': [-9999.0, 67.0]      # Heat of vaporization range
+        'hv': [-9999.0, 67.0]      # Heat of vaporization range
     }
     
     if property_constraints:
@@ -143,16 +143,36 @@ def main():
     except Exception as e:
         print(f"   Error calculating properties: {e}")
     
-    # Step 9: Manual property adjustments (Optional)
-    print("\n9. Manual property adjustments (Optional)...")
-    # Example: Override a specific property value
-    # if len(camd.generated_compounds) > 0:
-    #     try:
-    #         camd.set_pure_property(candidate_index=0, property_name='tb', value=373.15)
-    #         print("   Example: Set boiling point for candidate 0 to 373.15 K")
-    #     except Exception as e:
-    #         print(f"   Error setting manual property: {e}")
-    print("   No manual adjustments defined - uncomment example above to test")
+    # Step 9: Manual property adjustments for compounds A and B (Optional)
+    print("\n9. Manual property adjustments for compounds A and B (Optional)...")
+    
+    # Show calculated properties first
+    if compound_A and compound_B:
+        try:
+            camd.show_binary_system_properties()
+        except Exception as e:
+            print(f"   Error displaying properties: {e}")
+    
+    # Example manual adjustments for compounds A and B
+    # Uncomment the examples below to override specific property values
+    # 
+    # # Acetone: Set experimental data for acetone (compound A)
+    try:
+        camd.set_binary_system_property('A', 'tb', 329.25)  # Experimental Tb for acetone
+        camd.set_binary_system_property('A', 'tc', 508.15)  # Experimental Tc for acetone
+        print("   Set experimental property values for compound A")
+    except Exception as e:
+        print(f"   Error setting property for compound A: {e}")
+    # 
+    # # Example 2: Set experimental critical pressure for methanol (compound B)  
+    # try:
+    #     camd.set_binary_system_property('B', 'pc', 80.84)  # Experimental Pc for methanol in bar
+    #     print("   Set experimental critical pressure for compound B (methanol)")
+    # except Exception as e:
+    #     print(f"   Error setting property for compound B: {e}")
+
+    
+    #print("   No manual adjustments active - uncomment examples above to override calculated values")
     
     # Step 10: Filter candidates based on pure component properties
     print("\n10. Filtering candidates by pure component properties...")
@@ -170,7 +190,7 @@ def main():
             print(f"  Total candidates: {filtering_stats['total']}")
             
             print(f"\nProperty Constraints (in evaluation order):")
-            units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+            units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'kJ/mol'}
             for i, prop_name in enumerate(filtering_stats['constraints'], 1):
                 bounds = filtering_stats['constraint_details'][prop_name]
                 unit = units.get(prop_name, '')
@@ -238,7 +258,7 @@ def main():
                 print(f"Candidate {i} ({compound}):")
                 for prop, value in properties.items():
                     if value is not None:
-                        units = {'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
+                        units = {'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'kJ/mol'}
                         unit = units.get(prop, '')
                         print(f"  {prop.upper()}: {value:.2f} {unit}")
         if len(camd.calculated_properties) > 3:

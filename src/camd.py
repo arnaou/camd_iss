@@ -617,6 +617,112 @@ class CAMD:
         else:
             print(f"Set {property_name.upper()} for candidate {candidate_index} ({compound}): {value} {unit}")
     
+    def set_binary_system_property(self, compound: str, property_name: str, value: float):
+        """
+        Manually set or override a pure component property for compound A or B in the binary system.
+        
+        Args:
+            compound: 'A' or 'B' to specify which compound in the binary system
+            property_name: Property name ('tm', 'tb', 'tc', 'pc', 'ac', 'hv')
+            value: Property value to set
+        """
+        if not self.system:
+            raise ValueError("No binary system defined. Use add_binary_system() first.")
+        
+        if compound not in ['A', 'B']:
+            raise ValueError("Compound must be 'A' or 'B'")
+        
+        if compound not in self.system:
+            raise ValueError(f"Compound {compound} not found in binary system")
+        
+        valid_properties = {'tm', 'tb', 'tc', 'pc', 'ac', 'hv'}
+        if property_name not in valid_properties:
+            raise ValueError(f"Invalid property name '{property_name}'. Valid properties: {valid_properties}")
+        
+        if not isinstance(value, (int, float)):
+            raise TypeError(f"Property value must be numeric, got {type(value)}")
+        
+        # Initialize binary system properties if not exists
+        if not hasattr(self, 'binary_system_properties'):
+            self.binary_system_properties = {'A': {}, 'B': {}}
+        
+        # Set the property
+        old_value = self.binary_system_properties[compound].get(property_name)
+        self.binary_system_properties[compound][property_name] = value
+        
+        compound_formula = self.system[compound]
+        units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'bar', 'ac': '-', 'hv': 'kJ/mol'}
+        unit = units.get(property_name, '')
+        
+        if old_value is not None:
+            print(f"Updated {property_name.upper()} for compound {compound} ({compound_formula}): {old_value} → {value} {unit}")
+        else:
+            print(f"Set {property_name.upper()} for compound {compound} ({compound_formula}): {value} {unit}")
+    
+    def get_binary_system_property(self, compound: str, property_name: str):
+        """
+        Get a property value for compound A or B, either manually set or calculated.
+        
+        Args:
+            compound: 'A' or 'B' to specify which compound in the binary system
+            property_name: Property name ('tm', 'tb', 'tc', 'pc', 'ac', 'hv')
+            
+        Returns:
+            Property value if available, None otherwise
+        """
+        if not self.system or compound not in self.system:
+            return None
+        
+        # Check for manually set properties first
+        if hasattr(self, 'binary_system_properties') and compound in self.binary_system_properties:
+            manual_value = self.binary_system_properties[compound].get(property_name)
+            if manual_value is not None:
+                return manual_value
+        
+        # Calculate property using property calculator
+        compound_composition = self.system[compound]
+        all_properties = self.property_calculator.calculate_all_properties(compound_composition)
+        return all_properties.get(property_name)
+    
+    def show_binary_system_properties(self):
+        """Display calculated and manually set properties for compounds A and B."""
+        if not self.system:
+            print("No binary system defined.")
+            return
+        
+        print("\n=== Binary System Properties ===")
+        
+        for compound in ['A', 'B']:
+            if compound in self.system:
+                composition = self.system[compound]
+                print(f"\nCompound {compound}: {composition}")
+                
+                # Get all properties
+                properties = ['tm', 'tb', 'tc', 'pc', 'ac', 'hv']
+                units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'bar', 'ac': '-', 'hv': 'kJ/mol'}
+                
+                for prop in properties:
+                    value = self.get_binary_system_property(compound, prop)
+                    if value is not None:
+                        unit = units.get(prop, '')
+                        
+                        # Check if this is a manually set value
+                        is_manual = (hasattr(self, 'binary_system_properties') and 
+                                   compound in self.binary_system_properties and 
+                                   self.binary_system_properties[compound].get(prop) is not None)
+                        
+                        manual_indicator = " (manual)" if is_manual else ""
+                        
+                        # Format value appropriately
+                        if prop == 'hv' and value is not None:
+                            display_value = value / 1000  # Convert J/mol to kJ/mol
+                        else:
+                            display_value = value
+                            
+                        print(f"  {prop.upper()}: {display_value:.2f} {unit}{manual_indicator}")
+                    else:
+                        print(f"  {prop.upper()}: Not available")
+    
     def add_compounds(self, compounds: Dict[str, List[int]]):
         """
         Add compounds defined by group occurrences.

@@ -278,7 +278,8 @@ class PropertyCalculator:
         
         # Get scalar for Hv calculation (should be 6.829)
         hv_scalar = scalars.get('Hv0', 6.829)
-        return hv_scalar + hv_sum
+        # Return in kJ/mol (no conversion needed)
+        return (hv_scalar + hv_sum)
     
     def get_available_properties(self) -> list:
         """Get list of properties that can be calculated based on loaded data."""

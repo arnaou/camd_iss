@@ -158,7 +158,7 @@ class PureComponentEvaluator:
                 'Tc (K)': f"{result['tc']:.2f}" if result['tc'] is not None else "N/A",
                 'Pc (bar)': f"{result['pc']:.2f}" if result['pc'] is not None else "N/A",
                 'Ac (-)': f"{result['ac']:.2f}" if result['ac'] is not None else "N/A",
-                'Hv (kJ/mol)': f"{result['hv']/1000:.2f}" if result['hv'] is not None else "N/A",
+                'Hv (kJ/mol)': f"{result['hv']:.2f}" if result['hv'] is not None else "N/A",
                 'Formula': result['formula'],
             }
             df_data.append(row)
@@ -303,7 +303,7 @@ class PureComponentEvaluator:
                 'Tc (K)': f"{result['tc']:.2f}" if result['tc'] is not None else "N/A",
                 'Pc (bar)': f"{result['pc']:.2f}" if result['pc'] is not None else "N/A",
                 'Ac (-)': f"{result['ac']:.2f}" if result['ac'] is not None else "N/A",
-                'Hv (kJ/mol)': f"{result['hv']/1000:.2f}" if result['hv'] is not None else "N/A",
+                'Hv (kJ/mol)': f"{result['hv']:.2f}" if result['hv'] is not None else "N/A",
             }
             comparison_data.append(row)
         
