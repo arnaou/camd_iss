@@ -26,7 +26,8 @@ def main():
         type="VLE",
         output_dir="./results/case_1",
         pure_method="Constantinou-Gani",
-        mixture_method="UNIFAC-LY"
+        mixture_method="UNIFAC-LY",
+        missing_group_action="remove_compounds"  # Options: "remove_compounds" or "set_zero"
     )
     
     # Step 2: Define binary system (compounds A and B to be separated)

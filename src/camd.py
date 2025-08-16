@@ -18,7 +18,8 @@ class CAMD:
     """
     
     def __init__(self, title: str = "", type: str = "VLE", output_dir: str = "./results", 
-                 pure_method: str = "Constantinou-Gani", mixture_method: str = "UNIFAC-LY"):
+                 pure_method: str = "Constantinou-Gani", mixture_method: str = "UNIFAC-LY",
+                 missing_group_action: str = "remove_compounds"):
         """
         Initialize CAMD instance.
         
@@ -28,6 +29,7 @@ class CAMD:
             output_dir: Directory for results output
             pure_method: Method for pure component properties (default: "Constantinou-Gani")
             mixture_method: Method for mixture properties (default: "UNIFAC-LY")
+            missing_group_action: Action for missing groups: "remove_compounds" (default) or "set_zero"
         """
         if type not in ["VLE", "LLE", "SLE"]:
             raise ValueError(f"Type must be one of ['VLE', 'LLE', 'SLE'], got {type}")
@@ -40,6 +42,7 @@ class CAMD:
         self.output_dir = Path(output_dir)
         self.pure_method = pure_method
         self.mixture_method = mixture_method
+        self.missing_group_action = missing_group_action
         
         self.groups = []
         self.compounds = {}
@@ -57,7 +60,8 @@ class CAMD:
         
         # Initialize property calculator and validator
         data_path = Path(__file__).parent.parent / "data" / "json"
-        self.property_calculator = PropertyCalculator(data_path=data_path, pure_method=pure_method)
+        self.property_calculator = PropertyCalculator(data_path=data_path, pure_method=pure_method, 
+                                                   missing_group_action=missing_group_action)
         self.compound_validator = CompoundValidator(data_path=data_path, molecular_type=1)  # Default to acyclic
         
         self._create_output_directory()
@@ -564,17 +568,51 @@ class CAMD:
         
         self.calculated_properties = {}  # Reset stored properties
         successful_calculations = 0
+        compounds_to_remove = []  # Track compounds that should be removed
         
         for i, compound in enumerate(self.generated_compounds):
             try:
                 properties = self.property_calculator.calculate_all_properties(compound)
-                self.calculated_properties[i] = properties
-                successful_calculations += 1
+                if properties is None:  # Compound marked for removal due to missing groups
+                    compounds_to_remove.append(i)
+                else:
+                    self.calculated_properties[i] = properties
+                    successful_calculations += 1
             except Exception as e:
                 print(f"Warning: Could not calculate properties for candidate {i}: {e}")
                 self.calculated_properties[i] = {
                     'tm': None, 'tb': None, 'tc': None, 'pc': None, 'ac': None, 'hv': None
                 }
+        
+        # Remove compounds with missing groups if action is "remove_compounds"
+        if compounds_to_remove and self.missing_group_action == "remove_compounds":
+            print(f"\nRemoving {len(compounds_to_remove)} compounds due to missing group contributions...")
+            # Remove in reverse order to maintain indices
+            for i in reversed(compounds_to_remove):
+                del self.generated_compounds[i]
+                # Update _generated_count if removing generated compounds
+                if i < self._generated_count:
+                    self._generated_count -= 1
+            
+            # Recalculate properties with new indices
+            print(f"Recalculating properties for remaining {len(self.generated_compounds)} candidates...")
+            self.calculated_properties = {}
+            successful_calculations = 0
+            
+            for i, compound in enumerate(self.generated_compounds):
+                try:
+                    properties = self.property_calculator.calculate_all_properties(compound)
+                    if properties is not None:
+                        self.calculated_properties[i] = properties
+                        successful_calculations += 1
+                except Exception as e:
+                    print(f"Warning: Could not calculate properties for candidate {i}: {e}")
+                    self.calculated_properties[i] = {
+                        'tm': None, 'tb': None, 'tc': None, 'pc': None, 'ac': None, 'hv': None
+                    }
+        
+        # Print missing groups summary
+        self.property_calculator.print_missing_groups_summary()
         
         print(f"Property calculation complete: {successful_calculations}/{len(self.generated_compounds)} successful")
         return successful_calculations

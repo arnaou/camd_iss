@@ -36,16 +36,23 @@ class PropertyCalculator:
     - Hv: Heat of vaporization [J/mol]
     """
     
-    def __init__(self, data_path: Union[str, Path] = None, pure_method: str = "Constantinou-Gani"):
+    def __init__(self, data_path: Union[str, Path] = None, pure_method: str = "Constantinou-Gani", 
+                 missing_group_action: str = "remove_compounds"):
         """
         Initialize the property calculator.
         
         Args:
             data_path: Path to directory containing property data JSON files
             pure_method: Method for pure component properties (currently only "Constantinou-Gani")
+            missing_group_action: Action for missing groups: "remove_compounds" (default) or "set_zero"
         """
         self.pure_method = pure_method
         self.pure_properties = {}
+        self.missing_group_action = missing_group_action
+        self.missing_groups_summary = {}  # Track missing groups across all calculations
+        
+        if missing_group_action not in ["remove_compounds", "set_zero"]:
+            raise ValueError(f"missing_group_action must be 'remove_compounds' or 'set_zero', got '{missing_group_action}'")
         
         if data_path is None:
             # Default to data directory relative to this file
@@ -89,7 +96,50 @@ class PropertyCalculator:
                 print(f"  Warning: {filename} not found")
                 self.pure_properties[prop_name] = {}
     
-    def calculate_all_properties(self, compound: Dict[str, int]) -> Dict[str, Optional[float]]:
+    def _handle_missing_groups(self, compound: Dict[str, int], missing_groups: list, property_name: str) -> bool:
+        """
+        Handle missing groups according to the configured action.
+        
+        Args:
+            compound: The compound being calculated
+            missing_groups: List of groups without property data
+            property_name: Name of the property being calculated
+            
+        Returns:
+            bool: True if calculation should continue, False if compound should be removed
+        """
+        if not missing_groups:
+            return True
+            
+        # Track missing groups for summary
+        if property_name not in self.missing_groups_summary:
+            self.missing_groups_summary[property_name] = set()
+        self.missing_groups_summary[property_name].update(missing_groups)
+        
+        if self.missing_group_action == "remove_compounds":
+            print(f"Warning: Compound {compound} has missing {property_name.upper()} data for groups: {missing_groups}")
+            print(f"         Action: Removing compound (missing_group_action='remove_compounds')")
+            return False
+        elif self.missing_group_action == "set_zero":
+            print(f"Warning: Compound {compound} has missing {property_name.upper()} data for groups: {missing_groups}")
+            print(f"         Action: Setting missing contributions to 0 (missing_group_action='set_zero')")
+            return True
+        
+        return True
+    
+    def print_missing_groups_summary(self):
+        """Print a summary of all missing groups encountered during calculations."""
+        if not self.missing_groups_summary:
+            print("No missing group contributions found.")
+            return
+            
+        print("\n=== Missing Group Contributions Summary ===")
+        for property_name, missing_groups in self.missing_groups_summary.items():
+            print(f"{property_name.upper()}: {sorted(missing_groups)}")
+        print(f"Action taken: {self.missing_group_action}")
+        print("=" * 45)
+    
+    def calculate_all_properties(self, compound: Dict[str, int]) -> Optional[Dict[str, Optional[float]]]:
         """
         Calculate all available pure component properties for a compound.
         
@@ -98,17 +148,40 @@ class PropertyCalculator:
                      Example: {'CH3': 2, 'OH': 1} for ethanol
             
         Returns:
-            Dict with property names as keys and calculated values as values
+            Dict with property names as keys and calculated values as values, or None if compound should be removed
         """
         properties = {}
         
-        # Calculate each property
-        properties['tm'] = self.calculate_tm(compound)
-        properties['tb'] = self.calculate_tb(compound)
-        properties['tc'] = self.calculate_tc(compound)
-        properties['pc'] = self.calculate_pc(compound)
-        properties['ac'] = self.calculate_ac(compound)
-        properties['hv'] = self.calculate_hv(compound)
+        # Calculate each property and check for missing groups
+        tm_result = self.calculate_tm(compound)
+        if tm_result is None and self.missing_group_action == "remove_compounds":
+            return None
+        properties['tm'] = tm_result
+        
+        tb_result = self.calculate_tb(compound)
+        if tb_result is None and self.missing_group_action == "remove_compounds":
+            return None
+        properties['tb'] = tb_result
+        
+        tc_result = self.calculate_tc(compound)
+        if tc_result is None and self.missing_group_action == "remove_compounds":
+            return None
+        properties['tc'] = tc_result
+        
+        pc_result = self.calculate_pc(compound)
+        if pc_result is None and self.missing_group_action == "remove_compounds":
+            return None
+        properties['pc'] = pc_result
+        
+        ac_result = self.calculate_ac(compound)
+        if ac_result is None and self.missing_group_action == "remove_compounds":
+            return None
+        properties['ac'] = ac_result
+        
+        hv_result = self.calculate_hv(compound)
+        if hv_result is None and self.missing_group_action == "remove_compounds":
+            return None
+        properties['hv'] = hv_result
         
         return properties
     
@@ -129,8 +202,9 @@ class PropertyCalculator:
             else:
                 missing_groups.append(group)
         
-        if missing_groups:
-            print(f"Warning: Missing Tm data for groups: {missing_groups}")
+        # Handle missing groups according to configured action
+        if not self._handle_missing_groups(compound, missing_groups, 'tm'):
+            return None
         
         if tm_sum <= 0:
             return None
@@ -156,8 +230,9 @@ class PropertyCalculator:
             else:
                 missing_groups.append(group)
         
-        if missing_groups:
-            print(f"Warning: Missing Tb data for groups: {missing_groups}")
+        # Handle missing groups according to configured action
+        if not self._handle_missing_groups(compound, missing_groups, 'tb'):
+            return None
         
         if tb_sum <= 0:
             return None
@@ -183,8 +258,9 @@ class PropertyCalculator:
             else:
                 missing_groups.append(group)
         
-        if missing_groups:
-            print(f"Warning: Missing Tc data for groups: {missing_groups}")
+        # Handle missing groups according to configured action
+        if not self._handle_missing_groups(compound, missing_groups, 'tc'):
+            return None
         
         if tc_sum <= 0:
             return None
@@ -210,8 +286,9 @@ class PropertyCalculator:
             else:
                 missing_groups.append(group)
         
-        if missing_groups:
-            print(f"Warning: Missing Pc data for groups: {missing_groups}")
+        # Handle missing groups according to configured action
+        if not self._handle_missing_groups(compound, missing_groups, 'pc'):
+            return None
         
         # Get scalars for Pc calculation
         pc01 = scalars.get('Pc01', 1.3705)
@@ -241,8 +318,9 @@ class PropertyCalculator:
             else:
                 missing_groups.append(group)
         
-        if missing_groups:
-            print(f"Warning: Missing Ac data for groups: {missing_groups}")
+        # Handle missing groups according to configured action
+        if not self._handle_missing_groups(compound, missing_groups, 'ac'):
+            return None
         
         # Get scalars for Ac calculation
         w01 = scalars.get('w01', 0.4085)
@@ -273,8 +351,9 @@ class PropertyCalculator:
             else:
                 missing_groups.append(group)
         
-        if missing_groups:
-            print(f"Warning: Missing Hv data for groups: {missing_groups}")
+        # Handle missing groups according to configured action
+        if not self._handle_missing_groups(compound, missing_groups, 'hv'):
+            return None
         
         # Get scalar for Hv calculation (should be 6.829)
         hv_scalar = scalars.get('Hv0', 6.829)
@@ -300,7 +379,7 @@ class PropertyCalculator:
 
 
 # Convenience function for quick calculations
-def calculate_properties(compound: Dict[str, int], data_path: Union[str, Path] = None) -> Dict[str, Optional[float]]:
+def calculate_properties(compound: Dict[str, int], data_path: Union[str, Path] = None) -> Optional[Dict[str, Optional[float]]]:
     """
     Convenience function to calculate all properties for a compound.
     
@@ -309,12 +388,13 @@ def calculate_properties(compound: Dict[str, int], data_path: Union[str, Path] =
         data_path: Optional path to property data directory
         
     Returns:
-        Dict with calculated properties
+        Dict with calculated properties, or None if compound should be removed
         
     Example:
         >>> compound = {'CH3': 2, 'OH': 1}  # Ethanol
         >>> props = calculate_properties(compound)
-        >>> print(f"Tb: {props['tb']:.1f} K")
+        >>> if props:
+        >>>     print(f"Tb: {props['tb']:.1f} K")
     """
     calculator = PropertyCalculator(data_path=data_path)
     return calculator.calculate_all_properties(compound)
@@ -337,6 +417,10 @@ if __name__ == "__main__":
         print(f"\n{name.upper()}: {compound}")
         properties = calculator.calculate_all_properties(compound)
         
+        if properties is None:
+            print("  Compound removed due to missing group contributions")
+            continue
+            
         units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
         
         for prop_name, value in properties.items():
