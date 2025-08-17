@@ -20,6 +20,7 @@ Example Usage:
 
 import numpy as np
 import pyomo.environ as pyo
+import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Dict, Optional, Union
 import sys
@@ -309,6 +310,77 @@ class AntoineCalculator:
             'error_at_critical_temp': abs(p_at_tc - pc),  # Should equal pc
             'relative_error_critical': abs(p_at_tc - pc) / pc * 100  # Percentage error
         }
+    
+    def plot_psat(self, A: float, B: float, C: float, 
+                  tb: float, tc: float, pc: float, ac: float,
+                  compound: Dict[str, int] = None, compound_name: str = "Compound") -> None:
+        """
+        Plot saturation pressure vs temperature showing Antoine equation validation.
+        
+        Args:
+            A, B, C: Antoine parameters
+            tb: Boiling point [K]
+            tc: Critical temperature [K]
+            pc: Critical pressure [MPa]
+            ac: Acentric factor [-]
+            compound: Dict with group names and counts (optional)
+            compound_name: Name for plot title (used if compound not provided)
+        """
+        try:
+            # Temperature range from Tb to Tc
+            T_range = np.linspace(tb, tc, 100)
+            
+            # Calculate Psat using Antoine equation
+            P_antoine = np.array([self.antoine_correlation(A, B, C, T) for T in T_range])
+            
+            # Key points
+            T_ac = 0.7 * tc  # Temperature where acentric factor is defined (Tr = 0.7)
+            P_tb = 0.101325  # Atmospheric pressure at boiling point
+            P_ac = np.power(10, -(ac + 1)) * pc  # Pressure at Tr = 0.7
+            
+            # Calculate Antoine values at key points
+            P_antoine_tb = self.antoine_correlation(A, B, C, tb)
+            P_antoine_ac = self.antoine_correlation(A, B, C, T_ac)
+            P_antoine_tc = self.antoine_correlation(A, B, C, tc)
+            
+            # Create the plot
+            plt.figure(figsize=(10, 6))
+            plt.plot(T_range, P_antoine, 'b-', linewidth=2, label='Antoine equation')
+            plt.plot(tb, P_antoine_tb, 'ro', markersize=8, label=f'Boiling point (Tb={tb:.1f}K)')
+            plt.plot(T_ac, P_antoine_ac, 'go', markersize=8, label=f'Tr=0.7 (T={T_ac:.1f}K, ω={ac:.3f})')
+            plt.plot(tc, P_antoine_tc, 'mo', markersize=8, label=f'Critical point (Tc={tc:.1f}K)')
+            
+            # Add horizontal lines for reference pressures
+            plt.axhline(y=P_tb, color='r', linestyle='--', alpha=0.5)
+            plt.axhline(y=P_ac, color='g', linestyle='--', alpha=0.5)
+            plt.axhline(y=pc, color='m', linestyle='--', alpha=0.5)
+            
+            plt.xlabel('Temperature [K]')
+            plt.ylabel('Saturation Pressure [MPa]')
+            plt.title(f'Psat vs T (Antoine Parameters: A={A:.3f}, B={B:.3f}, C={C:.3f})')
+            plt.grid(True, alpha=0.3)
+            plt.legend()
+            
+            # Add compound composition box
+            if compound:
+                # Create compound composition text
+                comp_text = "Compound Make Up:\n"
+                comp_text += " + ".join([f"{count} {group}" for group, count in compound.items()])
+            else:
+                comp_text = f"Compound: {compound_name}"
+            
+            # Add text box with compound composition
+            props = dict(boxstyle='round', facecolor='lightblue', alpha=0.8)
+            plt.text(0.02, 0.98, comp_text, transform=plt.gca().transAxes, fontsize=10,
+                    verticalalignment='top', bbox=props)
+            
+            plt.tight_layout()
+            plt.show()
+            
+        except ImportError:
+            print("Warning: matplotlib not available. Skipping Psat plot.")
+        except Exception as e:
+            print(f"Error creating Psat plot: {e}")
 
 
 # Convenience function for quick calculations  
@@ -341,15 +413,27 @@ if __name__ == "__main__":
     # Example usage
     print("=== Antoine Calculator Example ===")
     
-    # Test compounds with known critical properties
+    # Test compounds with both calculated and manually adjusted critical properties
     test_cases = {
-        'ethanol': {
+        'ethanol_calculated': {
             'compound': {'CH3': 1, 'CH2': 1, 'OH': 1},
-            'properties': {'tc': 513.9, 'pc': 6.137e6, 'ac': 0.645, 'tb': 351.4}
+            'properties': {'tc': 513.9, 'pc': 6.137e6, 'ac': 0.645, 'tb': 351.4},
+            'source': 'Calculated (PropertyCalculator)'
         },
-        'acetone': {
+        'ethanol_experimental': {
+            'compound': {'CH3': 1, 'CH2': 1, 'OH': 1},
+            'properties': {'tc': 514.0, 'pc': 6.148e6, 'ac': 0.644, 'tb': 351.44},
+            'source': 'Experimental data'
+        },
+        'acetone_calculated': {
             'compound': {'CH3': 2, 'CH3CO': 1}, 
-            'properties': {'tc': 508.2, 'pc': 4.7e6, 'ac': 0.307, 'tb': 329.4}
+            'properties': {'tc': 508.2, 'pc': 4.7e6, 'ac': 0.307, 'tb': 329.4},
+            'source': 'Calculated (PropertyCalculator)'
+        },
+        'acetone_experimental': {
+            'compound': {'CH3': 2, 'CH3CO': 1}, 
+            'properties': {'tc': 508.15, 'pc': 4.7e6, 'ac': 0.307, 'tb': 329.25},
+            'source': 'Experimental data'
         }
     }
     
@@ -357,6 +441,7 @@ if __name__ == "__main__":
     
     for name, data in test_cases.items():
         print(f"\n{name.upper()}: {data['compound']}")
+        print(f"Source: {data['source']}")
         print(f"Critical properties: Tc={data['properties']['tc']:.1f}K, "
               f"Pc={data['properties']['pc']/1e6:.2f}MPa, "
               f"w={data['properties']['ac']:.3f}, Tb={data['properties']['tb']:.1f}K")
@@ -386,6 +471,20 @@ if __name__ == "__main__":
         print(f"    P at critical temp: {validation['pressure_at_critical_temp']:.3f} MPa "
               f"(target: {data['properties']['pc']/1e6:.3f})")
         print(f"    Relative error at Tc: {validation['relative_error_critical']:.2f}%")
+        
+        # Create diagnostic plot
+        print(f"  Creating Psat diagnostic plot...")
+        calculator.plot_psat(
+            A=antoine_params['A'],
+            B=antoine_params['B'], 
+            C=antoine_params['C'],
+            tb=data['properties']['tb'],
+            tc=data['properties']['tc'], 
+            pc=data['properties']['pc']/1e6,  # Convert Pa to MPa
+            ac=data['properties']['ac'],
+            compound=data['compound'],
+            compound_name=name
+        )
     
     # Print summary
     calculator.print_missing_properties_summary()
