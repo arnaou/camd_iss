@@ -8,6 +8,7 @@ import json
 
 from .property_calculator import PropertyCalculator
 from .compound_validator import CompoundValidator
+from .antoine_calculator import AntoineCalculator
 
 
 class CAMD:
@@ -55,13 +56,15 @@ class CAMD:
         self.generated_compounds = []
         self.property_constraints = {}
         self.calculated_properties = {}  # Store calculated properties for each candidate
+        self.calculated_antoine = {}  # Store calculated Antoine parameters for each candidate
         self._generated_count = 0  # Track number of generated (vs predefined) candidates
         self.results = None
         
-        # Initialize property calculator and validator
+        # Initialize property calculator, Antoine calculator, and validator
         data_path = Path(__file__).parent.parent / "data" / "json"
         self.property_calculator = PropertyCalculator(data_path=data_path, pure_method=pure_method, 
                                                    missing_group_action=missing_group_action)
+        self.antoine_calculator = AntoineCalculator(missing_group_action=missing_group_action, verbose=False)
         self.compound_validator = CompoundValidator(data_path=data_path, molecular_type=1)  # Default to acyclic
         
         self._create_output_directory()
@@ -615,6 +618,51 @@ class CAMD:
         self.property_calculator.print_missing_groups_summary()
         
         print(f"Property calculation complete: {successful_calculations}/{len(self.generated_compounds)} successful")
+        return successful_calculations
+    
+    def calculate_antoine_parameters(self):
+        """
+        Calculate Antoine parameters for ALL candidates using calculated pure component properties.
+        
+        Requires that calculate_pure_properties() has been called first.
+        Stores results in self.calculated_antoine where keys are candidate indices
+        and values are dicts with Antoine parameters: {'A': value, 'B': value, 'C': value}
+        
+        Returns:
+            int: Number of candidates with Antoine parameters calculated successfully
+        """
+        if not self.calculated_properties:
+            print("No calculated properties available. Run calculate_pure_properties() first.")
+            return 0
+        
+        print(f"Calculating Antoine parameters for {len(self.calculated_properties)} candidates...")
+        
+        self.calculated_antoine = {}  # Reset stored Antoine parameters
+        successful_calculations = 0
+        
+        for i, properties in self.calculated_properties.items():
+            if i >= len(self.generated_compounds):
+                continue  # Skip if compound was removed
+                
+            compound = self.generated_compounds[i]
+            
+            try:
+                antoine_params = self.antoine_calculator.calculate_antoine_parameters(compound, properties)
+                
+                if antoine_params is None:  # Compound marked for removal due to missing critical properties
+                    self.calculated_antoine[i] = None
+                else:
+                    self.calculated_antoine[i] = antoine_params
+                    successful_calculations += 1
+                    
+            except Exception as e:
+                print(f"Warning: Could not calculate Antoine parameters for candidate {i}: {e}")
+                self.calculated_antoine[i] = None
+        
+        # Print missing properties summary
+        self.antoine_calculator.print_missing_properties_summary()
+        
+        print(f"Antoine parameter calculation complete: {successful_calculations}/{len(self.calculated_properties)} successful")
         return successful_calculations
     
     def set_pure_property(self, candidate_index: int, property_name: str, value: float):

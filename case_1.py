@@ -223,8 +223,19 @@ def main():
     except Exception as e:
         print(f"   Error in property filtering: {e}")
     
-    # Step 11: Run screening calculations
-    print("\n11. Running screening calculations...")
+    # Step 11: Calculation of Antoine parameters for VLE calculation
+    print("\n11. Calculation of Antoine parameters for VLE calculation...")
+    try:
+        if camd.calculated_properties:
+            successful_antoine = camd.calculate_antoine_parameters()
+            print(f"   Antoine parameters calculated for {successful_antoine} candidates")
+        else:
+            print("   No calculated properties available for Antoine parameter calculation")
+    except Exception as e:
+        print(f"   Error calculating Antoine parameters: {e}")
+    
+    # Step 12: Run screening calculations
+    print("\n12. Running screening calculations...")
     # Commented out until VLE calculations are implemented
     # try:
     #     if compound_A and compound_B and camd.generated_compounds:
@@ -240,7 +251,7 @@ def main():
     #     print(f"   Error in calculations: {e}")
     print("   Screening calculations not implemented yet")
     
-    # Step 12: Summary
+    # Step 13: Summary
     print("\n=== Summary ===")
     print(f"Title: {camd.title}")
     print(f"Binary system: A={compound_A}, B={compound_B}")
@@ -274,7 +285,8 @@ def main():
     print("6. ✓ Pure component properties calculated")
     print("7. ✓ Property-based filtering applied")
     print("8. ✓ System validated")
-    print("9. ⏳ VLE screening calculations (to be implemented)")
+    print("9. ✓ Antoine parameters calculated for VLE")
+    print("10. ⏳ VLE screening calculations (to be implemented)")
     
     print("\n=== Next Development Steps ===")
     print("1. Implement VLE calculations using UNIFAC-LY method")
