@@ -89,3 +89,5 @@ target/
 .mypy_cache/
 
 trash/
+data/json/
+old_code
