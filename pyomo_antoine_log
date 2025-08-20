@@ -1,4 +1,4 @@
-Solver command line: ['/Users/arnaou/miniconda3/envs/camd/bin/ipopt', '/var/folders/5_/x5fhgj5d0252mwb_1nbb2d8r0000gp/T/tmp6owa4_hf.pyomo.nl', '-AMPL', 'halt_on_ampl_error=yes', 'max_iter=10000']
+Solver command line: ['/Users/arnaou/miniconda3/envs/camd/bin/ipopt', '/var/folders/5_/x5fhgj5d0252mwb_1nbb2d8r0000gp/T/tmpxyxo9er4.pyomo.nl', '-AMPL', 'halt_on_ampl_error=yes', 'max_iter=10000']
 
 Ipopt 3.14.13: halt_on_ampl_error=yes
 max_iter=10000
@@ -27,18 +27,18 @@ Total number of inequality constraints...............:        0
         inequality constraints with only upper bounds:        0
 
 iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du alpha_pr  ls
-   0  0.0000000e+00 1.25e-01 0.00e+00  -1.0 0.00e+00    -  0.00e+00 0.00e+00   0
-   1  0.0000000e+00 1.78e-15 0.00e+00  -2.5 1.32e+02    -  1.00e+00 1.00e+00h  1
+   0  0.0000000e+00 2.49e+00 0.00e+00  -1.0 0.00e+00    -  0.00e+00 0.00e+00   0
+   1  0.0000000e+00 2.97e-10 0.00e+00  -1.0 8.95e+05    -  1.00e+00 1.00e+00h  1
 
 Number of Iterations....: 1
 
                                    (scaled)                 (unscaled)
 Objective...............:   0.0000000000000000e+00    0.0000000000000000e+00
 Dual infeasibility......:   0.0000000000000000e+00    0.0000000000000000e+00
-Constraint violation....:   1.7763568394002505e-15    1.7763568394002505e-15
+Constraint violation....:   2.9657587496956239e-10    2.9657587496956239e-10
 Variable bound violation:   0.0000000000000000e+00    0.0000000000000000e+00
 Complementarity.........:   0.0000000000000000e+00    0.0000000000000000e+00
-Overall NLP error.......:   1.7763568394002505e-15    1.7763568394002505e-15
+Overall NLP error.......:   2.9657587496956239e-10    2.9657587496956239e-10
 
 
 Number of objective function evaluations             = 2
@@ -48,7 +48,7 @@ Number of inequality constraint evaluations          = 0
 Number of equality constraint Jacobian evaluations   = 2
 Number of inequality constraint Jacobian evaluations = 0
 Number of Lagrangian Hessian evaluations             = 1
-Total seconds in IPOPT                               = 0.002
+Total seconds in IPOPT                               = 0.001
 
 EXIT: Optimal Solution Found.
 

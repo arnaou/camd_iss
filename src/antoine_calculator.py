@@ -78,16 +78,9 @@ class AntoineCalculator:
             self.missing_properties_summary[compound_str] = set()
         self.missing_properties_summary[compound_str].update(missing_properties)
         
-        if self.missing_group_action == "remove_compounds":
-            print(f"Warning: Compound {compound} has missing critical properties: {missing_properties}")
-            print(f"         Action: Removing compound (missing_group_action='remove_compounds')")
-            return False
-        elif self.missing_group_action == "set_zero":
-            print(f"Warning: Compound {compound} has missing critical properties: {missing_properties}")
-            print(f"         Action: Cannot calculate Antoine parameters with missing critical properties")
-            return False  # Antoine calculation requires all critical properties
-        
-        return True
+        print(f"Warning: Compound {compound} has missing critical properties: {missing_properties}")
+        print(f"         Action: Cannot calculate Antoine parameters - all critical properties required")
+        return False
     
     def print_missing_properties_summary(self):
         """Print a summary of all missing properties encountered during calculations."""
@@ -122,11 +115,9 @@ class AntoineCalculator:
             if prop not in critical_properties or critical_properties[prop] is None:
                 missing_props.append(prop)
         
-        # Handle missing properties
-        if not self._handle_missing_properties(compound, missing_props):
-            return None
-        
-        if missing_props:  # If we get here, we're in "set_zero" mode, but can't proceed
+        # Handle missing properties - Antoine calculation requires all critical properties
+        if missing_props:
+            self._handle_missing_properties(compound, missing_props)
             return None
             
         # Extract critical properties
@@ -237,8 +228,6 @@ class AntoineCalculator:
         # Solver configuration
         opt = pyo.SolverFactory('ipopt')
         opt.options["halt_on_ampl_error"] = "yes"
-        #opt.options["hsllib"] = "libcoinhsl.so"
-        #opt.options["linear_solver"] = "MA27"
         opt.options["max_iter"] = 10000
         
         # Solve
@@ -266,9 +255,9 @@ class AntoineCalculator:
             'A0': A0,  # Initial guess
             'B0': B0,  # Initial guess
             'C0': C0,  # Initial guess
-            'A': model.A.value,  # Optimized value
-            'B': model.B.value,  # Optimized value
-            'C': model.C.value   # Optimized value
+            'A': pyo.value(model.A),  # Optimized value
+            'B': pyo.value(model.B),  # Optimized value
+            'C': pyo.value(model.C)   # Optimized value
         }
         
         return output
@@ -313,7 +302,7 @@ class AntoineCalculator:
     
     def plot_psat(self, A: float, B: float, C: float, 
                   tb: float, tc: float, pc: float, ac: float,
-                  compound: Dict[str, int] = None, compound_name: str = "Compound") -> None:
+                  compound: Optional[Dict[str, int]] = None, compound_name: str = "Compound") -> None:
         """
         Plot saturation pressure vs temperature showing Antoine equation validation.
         
@@ -413,38 +402,56 @@ if __name__ == "__main__":
     # Example usage
     print("=== Antoine Calculator Example ===")
     
-    # Test compounds with both calculated and manually adjusted critical properties
-    test_cases = {
-        'ethanol_calculated': {
+    # Test with experimental properties
+    experimental_cases = {
+        'ethanol': {
             'compound': {'CH3': 1, 'CH2': 1, 'OH': 1},
-            'properties': {'tc': 513.9, 'pc': 6.137e6, 'ac': 0.645, 'tb': 351.4},
-            'source': 'Calculated (PropertyCalculator)'
+            'properties': {'tc': 514.0, 'pc': 6.148e6, 'ac': 0.644, 'tb': 351.44}
         },
-        'ethanol_experimental': {
-            'compound': {'CH3': 1, 'CH2': 1, 'OH': 1},
-            'properties': {'tc': 514.0, 'pc': 6.148e6, 'ac': 0.644, 'tb': 351.44},
-            'source': 'Experimental data'
-        },
-        'acetone_calculated': {
-            'compound': {'CH3': 2, 'CH3CO': 1}, 
-            'properties': {'tc': 508.2, 'pc': 4.7e6, 'ac': 0.307, 'tb': 329.4},
-            'source': 'Calculated (PropertyCalculator)'
-        },
-        'acetone_experimental': {
-            'compound': {'CH3': 2, 'CH3CO': 1}, 
-            'properties': {'tc': 508.15, 'pc': 4.7e6, 'ac': 0.307, 'tb': 329.25},
-            'source': 'Experimental data'
+        'acetone': {
+            'compound': {'CH3': 1, 'CH3CO': 1}, 
+            'properties': {'tc': 508.15, 'pc': 4.7e6, 'ac': 0.307, 'tb': 329.25}
         }
     }
+    
+    # Test with PropertyCalculator
+    print("\n--- Testing with PropertyCalculator ---")
+    try:
+        from property_calculator import PropertyCalculator
+        
+        prop_calc = PropertyCalculator(missing_group_action="remove_compounds")
+        calculated_cases = {}
+        
+        for name, data in experimental_cases.items():
+            compound = data['compound']
+            calc_props = prop_calc.calculate_all_properties(compound)
+            
+            if calc_props and all(calc_props[p] is not None for p in ['tc', 'pc', 'ac', 'tb']):
+                # Convert PropertyCalculator units: pc from bar to Pa
+                calc_props_converted = calc_props.copy()
+                calc_props_converted['pc'] = calc_props['pc'] * 1e5  # bar to Pa
+                
+                calculated_cases[f"{name}_calculated"] = {
+                    'compound': compound,
+                    'properties': calc_props_converted
+                }
+                print(f"  {name}: Successfully calculated critical properties")
+            else:
+                print(f"  {name}: Failed to calculate properties (missing groups)")
+        
+        # Combine test cases
+        test_cases = {**experimental_cases, **calculated_cases}
+        
+    except ImportError:
+        print("  PropertyCalculator not available, using experimental data only")
+        test_cases = experimental_cases
     
     calculator = AntoineCalculator(verbose=False)
     
     for name, data in test_cases.items():
         print(f"\n{name.upper()}: {data['compound']}")
-        print(f"Source: {data['source']}")
-        print(f"Critical properties: Tc={data['properties']['tc']:.1f}K, "
-              f"Pc={data['properties']['pc']/1e6:.2f}MPa, "
-              f"w={data['properties']['ac']:.3f}, Tb={data['properties']['tb']:.1f}K")
+        props = data['properties']
+        print(f"Properties: Tc={props['tc']:.1f}K, Pc={props['pc']/1e6:.2f}MPa, ω={props['ac']:.3f}, Tb={props['tb']:.1f}K")
         
         antoine_params = calculator.calculate_antoine_parameters(
             data['compound'], data['properties']
@@ -454,36 +461,22 @@ if __name__ == "__main__":
             print("  Antoine parameters could not be calculated")
             continue
             
-        print(f"  Antoine parameters:")
-        print(f"    A: {antoine_params['A']:.4f}")
-        print(f"    B: {antoine_params['B']:.4f}")
-        print(f"    C: {antoine_params['C']:.4f}")
+        A, B, C = antoine_params['A'], antoine_params['B'], antoine_params['C']
+        print(f"  Antoine: A={A:.4f}, B={B:.4f}, C={C:.4f}")
         
         # Validate results
         validation = calculator.validate_antoine_parameters(
-            antoine_params['A'], antoine_params['B'], antoine_params['C'],
-            data['properties']['tb'], data['properties']['tc'], 
-            data['properties']['pc']/1e6
+            A, B, C, props['tb'], props['tc'], props['pc']/1e6
         )
         
-        print(f"  Validation:")
-        print(f"    P at boiling point: {validation['pressure_at_boiling_point']:.6f} MPa (target: 0.101325)")
-        print(f"    P at critical temp: {validation['pressure_at_critical_temp']:.3f} MPa "
-              f"(target: {data['properties']['pc']/1e6:.3f})")
-        print(f"    Relative error at Tc: {validation['relative_error_critical']:.2f}%")
+        print(f"  Validation: P(Tb)={validation['pressure_at_boiling_point']:.6f} MPa, "
+              f"P(Tc)={validation['pressure_at_critical_temp']:.3f} MPa, "
+              f"Error={validation['relative_error_critical']:.2f}%")
         
         # Create diagnostic plot
-        print(f"  Creating Psat diagnostic plot...")
         calculator.plot_psat(
-            A=antoine_params['A'],
-            B=antoine_params['B'], 
-            C=antoine_params['C'],
-            tb=data['properties']['tb'],
-            tc=data['properties']['tc'], 
-            pc=data['properties']['pc']/1e6,  # Convert Pa to MPa
-            ac=data['properties']['ac'],
-            compound=data['compound'],
-            compound_name=name
+            A, B, C, props['tb'], props['tc'], props['pc']/1e6, props['ac'],
+            compound=data['compound'], compound_name=name
         )
     
     # Print summary
