@@ -958,6 +958,227 @@ class CAMD:
         print("System validation passed")
         return True
     
+    def check_unifac(self, compounds=None, verbose=True):
+        """
+        Check UNIFAC R/Q parameters and binary interaction parameters for compounds.
+        
+        Validates that all groups in the compounds have:
+        1. R (volume) and Q (surface area) parameters for UNIFAC calculations
+        2. Binary interaction parameters between different main groups
+        
+        Args:
+            compounds: List of compound dictionaries or None to use generated_compounds
+                      Each compound should be {'group': count} format
+            verbose: Print detailed information about missing parameters
+        
+        Returns:
+            tuple: (missing_rq_groups, missing_interactions, compounds_to_remove)
+                   - missing_rq_groups: List of groups missing R/Q parameters
+                   - missing_interactions: List of main group pairs missing interactions  
+                   - compounds_to_remove: List of compound indices with missing parameters
+        """
+        import warnings
+        import pandas as pd
+        import json
+        from pathlib import Path
+        
+        # Use generated compounds if none provided
+        if compounds is None:
+            compounds = self.generated_compounds
+        
+        if not compounds:
+            if verbose:
+                print("No compounds to check")
+            return [], [], []
+        
+        # Collect all unique groups from compounds
+        all_groups = set()
+        for compound in compounds:
+            all_groups.update(compound.keys())
+        
+        # Load UNIFAC group data
+        try:
+            data_path = Path(__file__).parent.parent / "data"
+            with open(data_path / 'unifac_groups.pkl', 'rb') as f:
+                unifac_dict = pickle.load(f)
+        except FileNotFoundError as e:
+            if verbose:
+                warnings.warn(f"Could not load UNIFAC groups: {e}", UserWarning)
+            return list(all_groups), [], list(range(len(compounds)))
+        
+        # Load R/Q parameters and interaction data from JSON files
+        try:
+            # Load R and Q parameters from JSON files
+            with open(data_path / 'json' / 'rk.json', 'r') as f:
+                rk_data = json.load(f).get("data", {})
+            with open(data_path / 'json' / 'qk.json', 'r') as f:
+                qk_data = json.load(f).get("data", {})
+            
+            # Load interaction data from JSON file
+            with open(data_path / 'json' / 'a.json', 'r') as f:
+                interaction_data = json.load(f).get("data", {})
+            
+        except Exception as e:
+            if verbose:
+                warnings.warn(f"Could not load UNIFAC data: {e}", UserWarning)
+            return list(all_groups), [], list(range(len(compounds)))
+        
+        # Check R/Q parameters
+        missing_rq_groups = []
+        for group in all_groups:
+            rk_missing = group not in rk_data or rk_data[group] is None
+            qk_missing = group not in qk_data or qk_data[group] is None
+            
+            if rk_missing or qk_missing:
+                missing_rq_groups.append(group)
+                if verbose:
+                    rk_status = "missing" if group not in rk_data else f"None" if rk_data[group] is None else f"{rk_data[group]}"
+                    qk_status = "missing" if group not in qk_data else f"None" if qk_data[group] is None else f"{qk_data[group]}"
+                    print(f"    Group '{group}': RK={rk_status}, QK={qk_status}")
+        
+        # Check binary interaction parameters using JSON data
+        # Use only the groups that appear in the CAMD compounds
+        compound_groups = list(all_groups)
+        missing_interactions = []
+        missing_sub_groups = []
+        
+        # Check interactions between pairs of compound groups (upper triangle + diagonal)
+        for i, group_i in enumerate(compound_groups):
+            for j, group_j in enumerate(compound_groups):
+                if i <= j:  # Check upper triangular part including diagonal
+                    # Check if groups exist in interaction data
+                    if group_i in interaction_data and group_j in interaction_data[group_i]:
+                        interaction_value = interaction_data[group_i][group_j]
+                    elif group_j in interaction_data and group_i in interaction_data[group_j]:
+                        # Check symmetric entry
+                        interaction_value = interaction_data[group_j][group_i]
+                    else:
+                        # No interaction data found - treat as missing
+                        interaction_value = None
+                    
+                    # Check if the interaction is missing (None) or zero
+                    if interaction_value is None or interaction_value == 0:
+                        # Find main groups for these groups
+                        main_g1 = next((value['main_g'] for value in unifac_dict.values() 
+                                       if value['grp'] == group_i), None)
+                        main_g2 = next((value['main_g'] for value in unifac_dict.values() 
+                                       if value['grp'] == group_j), None)
+                        
+                        # If the main groups are different, this is a missing interaction
+                        # (Zero interactions within the same main group are expected)
+                        if main_g1 and main_g2 and main_g1 != main_g2:
+                            missing_interactions.append((main_g1, main_g2))
+                            missing_sub_groups.append((group_i, group_j))
+        
+        # Identify compounds that need to be removed
+        compounds_to_remove = []
+        for i, compound in enumerate(compounds):
+            
+            # Check if any groups in this compound are missing R/Q parameters
+            missing_in_compound = [g for g in compound.keys() if g in missing_rq_groups]
+            if missing_in_compound:
+                compounds_to_remove.append(i)
+                if verbose:
+                    print(f"Compound {i} missing R/Q parameters for groups: {missing_in_compound}")
+                continue
+            
+            # Check if any main group pairs in this compound have missing interactions
+            compound_main_groups = set()
+            for group in compound.keys():
+                # Find main group for this group
+                main_g = next((value['main_g'] for value in unifac_dict.values() 
+                              if value['grp'] == group), None)
+                if main_g:
+                    compound_main_groups.add(main_g)
+            
+            # Check for missing interactions between main groups in this compound
+            has_missing_interaction = False
+            for interaction in missing_interactions:
+                mg1, mg2 = interaction
+                if mg1 in compound_main_groups and mg2 in compound_main_groups:
+                    has_missing_interaction = True
+                    break
+            
+            if has_missing_interaction:
+                compounds_to_remove.append(i)
+                if verbose:
+                    print(f"Compound {i} has missing binary interactions")
+        
+        # Calculate total possible interactions for compound groups (upper triangle + diagonal)
+        total_compound_pairs = len(compound_groups) * (len(compound_groups) + 1) // 2
+        
+        # Print detailed summary (similar to inspect_interractions)
+        if verbose:
+            print(f"\n=== UNIFAC Parameter Check Results ===")
+            
+            # R/Q parameter summary
+            if missing_rq_groups:
+                print(f"❌ Groups missing R/Q parameters: {len(missing_rq_groups)} groups")
+                print(f"   Missing groups: {missing_rq_groups}")
+            else:
+                print(f"✅ All compound groups have R/Q parameters ({len(compound_groups)} groups)")
+            
+            # Binary interaction parameter summary
+            if missing_interactions:
+                print(f"\n❌ Binary interaction parameters:")
+                print(f"   Total compound group pairs checked: {total_compound_pairs}")
+                print(f"   Missing interactions: {len(missing_interactions)} main group pairs")
+                print(f"   Missing interaction percentage: {len(missing_interactions)/total_compound_pairs*100:.1f}%")
+                
+                # Show specific missing main group interactions
+                print(f"   Missing main group pairs: {missing_interactions}")
+                
+                # Show specific missing subgroup interactions
+                if missing_sub_groups:
+                    print(f"   Missing subgroup pairs: {missing_sub_groups}")
+                
+                # Display interaction matrix
+                if len(compound_groups) <= 20:  # Only show matrix for reasonably sized systems
+                    print(f"\n   Interaction Matrix ({len(compound_groups)}x{len(compound_groups)}):")
+                    print("   " + "".join(f"{g:>8}" for g in compound_groups))
+                    for i, group_i in enumerate(compound_groups):
+                        row_values = []
+                        for j, group_j in enumerate(compound_groups):
+                            if group_i in interaction_data and group_j in interaction_data[group_i]:
+                                value = interaction_data[group_i][group_j]
+                            elif group_j in interaction_data and group_i in interaction_data[group_j]:
+                                value = interaction_data[group_j][group_i]
+                            else:
+                                value = None
+                            
+                            if value is None:
+                                row_values.append("  MISS")
+                            elif value == 0:
+                                row_values.append("     0")
+                            else:
+                                row_values.append(f"{value:6.1f}")
+                        
+                        print(f"{group_i:>6} " + "".join(f"{v:>8}" for v in row_values))
+                
+                # # Issue warnings like inspect_interractions
+                # warnings.warn(f"\nWarning: A total of {len(missing_interactions)} out of {total_compound_pairs} "
+                #             f"interaction parameters are missing for compound groups", UserWarning)
+                # warnings.warn(f"\nWarning: The interaction between the following main groups "
+                #             f"{missing_interactions} have been set to 0", UserWarning)
+                # if missing_sub_groups:
+                #     warnings.warn(f"\nWarning: The interaction between the following sub groups "
+                #                 f"{missing_sub_groups} have been set to 0", UserWarning)
+            else:
+                print(f"✅ All binary interactions available ({total_compound_pairs} pairs checked)")
+            
+            # Compound removal summary
+            if compounds_to_remove:
+                print(f"\n❌ Compounds affected:")
+                print(f"   Compounds to remove: {len(compounds_to_remove)} out of {len(compounds)}")
+                print(f"   Removal percentage: {len(compounds_to_remove)/len(compounds)*100:.1f}%")
+                print(f"   Remaining compounds: {len(compounds) - len(compounds_to_remove)}")
+            else:
+                print(f"\n✅ All compounds have complete UNIFAC parameters")
+            
+            print("=" * 60)
+        
+        return missing_rq_groups, missing_interactions, compounds_to_remove
+    
     def filter_pure_properties(self):
         """
         Filter candidates based on pure component property constraints using stored properties.

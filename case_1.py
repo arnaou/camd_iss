@@ -234,8 +234,45 @@ def main():
     except Exception as e:
         print(f"   Error calculating Antoine parameters: {e}")
     
-    # Step 12: Run screening calculations
-    print("\n12. Running screening calculations...")
+    # Step 12: Check UNIFAC R/Q parameters and binary interaction parameters
+    print("\n12. Checking UNIFAC parameters...")
+    try:
+        if camd.generated_compounds:
+            missing_rq, missing_interactions, compounds_to_remove = camd.check_unifac(verbose=True)
+            
+            if missing_rq or missing_interactions or compounds_to_remove:
+                print(f"   Found UNIFAC parameter issues:")
+                if missing_rq:
+                    print(f"     Groups missing R/Q parameters: {len(missing_rq)} groups")
+                if missing_interactions:
+                    print(f"     Missing binary interactions: {len(missing_interactions)} main group pairs")
+                if compounds_to_remove:
+                    print(f"     Compounds to remove: {len(compounds_to_remove)} candidates")
+                    
+                    # Remove compounds with missing UNIFAC parameters
+                    remaining_compounds = [comp for i, comp in enumerate(camd.generated_compounds) 
+                                         if i not in compounds_to_remove]
+                    camd.generated_compounds = remaining_compounds
+                    
+                    # Also update calculated_properties to maintain consistency
+                    updated_properties = {}
+                    new_index = 0
+                    for old_index, properties in camd.calculated_properties.items():
+                        if old_index not in compounds_to_remove:
+                            updated_properties[new_index] = properties
+                            new_index += 1
+                    camd.calculated_properties = updated_properties
+                    
+                    print(f"     Remaining candidates after UNIFAC filtering: {len(camd.generated_compounds)}")
+            else:
+                print("   All candidates have complete UNIFAC parameters")
+        else:
+            print("   No candidates available for UNIFAC parameter check")
+    except Exception as e:
+        print(f"   Error checking UNIFAC parameters: {e}")
+    
+    # Step 13: Run screening calculations
+    print("\n13. Running screening calculations...")
     # Commented out until VLE calculations are implemented
     # try:
     #     if compound_A and compound_B and camd.generated_compounds:
@@ -251,7 +288,7 @@ def main():
     #     print(f"   Error in calculations: {e}")
     print("   Screening calculations not implemented yet")
     
-    # Step 13: Summary
+    # Step 14: Summary
     print("\n=== Summary ===")
     print(f"Title: {camd.title}")
     print(f"Binary system: A={compound_A}, B={compound_B}")
@@ -286,13 +323,15 @@ def main():
     print("7. ✓ Property-based filtering applied")
     print("8. ✓ System validated")
     print("9. ✓ Antoine parameters calculated for VLE")
-    print("10. ⏳ VLE screening calculations (to be implemented)")
+    print("10. ✓ UNIFAC parameters validated (R/Q + interactions)")
+    print("11. ⏳ VLE screening calculations (to be implemented)")
     
     print("\n=== Next Development Steps ===")
     print("1. Implement VLE calculations using UNIFAC-LY method")
     print("2. Add mixture property calculations")
     print("3. Implement solvent selection criteria")
     print("4. Add results export and visualization")
+    print("5. Add options for handling missing UNIFAC interactions")
 
 if __name__ == "__main__":
     main()
