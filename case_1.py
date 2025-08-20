@@ -234,38 +234,44 @@ def main():
     except Exception as e:
         print(f"   Error calculating Antoine parameters: {e}")
     
-    # Step 12: Check UNIFAC R/Q parameters and binary interaction parameters
-    print("\n12. Checking UNIFAC parameters...")
+    # Step 12: Check UNIFAC R/Q parameters and ternary system (A+B+solvent) interaction parameters
+    print("\n12. Checking UNIFAC parameters for ternary systems...")
+    
+    # Choose action for missing interactions: "remove_compounds" or "set_zero"
+    missing_interaction_action = "set_zero"  # Change to "remove_compounds" or "set_zero" if you prefer to exclude compounds
+    print(f"    Missing interaction handling: {missing_interaction_action}")
+    
     try:
         if camd.generated_compounds:
-            missing_rq, missing_interactions, compounds_to_remove = camd.check_unifac(verbose=True)
+            missing_rq, missing_interactions, compounds_to_remove = camd.check_unifac(
+                check_ternary_systems=True,
+                missing_interaction_action=missing_interaction_action,
+                verbose=True
+            )
             
-            if missing_rq or missing_interactions or compounds_to_remove:
-                print(f"   Found UNIFAC parameter issues:")
-                if missing_rq:
-                    print(f"     Groups missing R/Q parameters: {len(missing_rq)} groups")
-                if missing_interactions:
-                    print(f"     Missing binary interactions: {len(missing_interactions)} main group pairs")
-                if compounds_to_remove:
-                    print(f"     Compounds to remove: {len(compounds_to_remove)} candidates")
-                    
-                    # Remove compounds with missing UNIFAC parameters
-                    remaining_compounds = [comp for i, comp in enumerate(camd.generated_compounds) 
-                                         if i not in compounds_to_remove]
-                    camd.generated_compounds = remaining_compounds
-                    
-                    # Also update calculated_properties to maintain consistency
-                    updated_properties = {}
-                    new_index = 0
-                    for old_index, properties in camd.calculated_properties.items():
-                        if old_index not in compounds_to_remove:
-                            updated_properties[new_index] = properties
-                            new_index += 1
-                    camd.calculated_properties = updated_properties
-                    
-                    print(f"     Remaining candidates after UNIFAC filtering: {len(camd.generated_compounds)}")
+            if compounds_to_remove:
+                print(f"   Compounds to remove: {len(compounds_to_remove)} candidates")
+                
+                # Remove compounds that must be excluded (missing R/Q or interactions when action="remove_compounds")
+                remaining_compounds = [comp for i, comp in enumerate(camd.generated_compounds) 
+                                     if i not in compounds_to_remove]
+                camd.generated_compounds = remaining_compounds
+                
+                # Also update calculated_properties to maintain consistency
+                updated_properties = {}
+                new_index = 0
+                for old_index, properties in camd.calculated_properties.items():
+                    if old_index not in compounds_to_remove:
+                        updated_properties[new_index] = properties
+                        new_index += 1
+                camd.calculated_properties = updated_properties
+                
+                print(f"   Remaining candidates after UNIFAC filtering: {len(camd.generated_compounds)}")
             else:
-                print("   All candidates have complete UNIFAC parameters")
+                if missing_interaction_action == "set_zero":
+                    print("   All candidates usable (missing interactions will be set to 0.0)")
+                else:
+                    print("   All candidates have complete UNIFAC parameters")
         else:
             print("   No candidates available for UNIFAC parameter check")
     except Exception as e:

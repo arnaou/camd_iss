@@ -958,17 +958,22 @@ class CAMD:
         print("System validation passed")
         return True
     
-    def check_unifac(self, compounds=None, verbose=True):
+    def check_unifac(self, compounds=None, check_ternary_systems=True, 
+                     missing_interaction_action="remove_compounds", verbose=True):
         """
         Check UNIFAC R/Q parameters and binary interaction parameters for compounds.
         
         Validates that all groups in the compounds have:
         1. R (volume) and Q (surface area) parameters for UNIFAC calculations
         2. Binary interaction parameters between different main groups
+        3. If check_ternary_systems=True, validates A-B-solvent interactions for VLE
         
         Args:
             compounds: List of compound dictionaries or None to use generated_compounds
                       Each compound should be {'group': count} format
+            check_ternary_systems: Check interactions for A+B+each_solvent systems
+            missing_interaction_action: Action for missing interactions:
+                                       "remove_compounds" (default) or "set_zero"
             verbose: Print detailed information about missing parameters
         
         Returns:
@@ -1070,39 +1075,113 @@ class CAMD:
                             missing_interactions.append((main_g1, main_g2))
                             missing_sub_groups.append((group_i, group_j))
         
-        # Identify compounds that need to be removed
-        compounds_to_remove = []
-        for i, compound in enumerate(compounds):
+        # Check ternary system interactions (A+B+each solvent) if requested
+        ternary_missing_interactions = []
+        ternary_compounds_to_remove = []
+        
+        if check_ternary_systems and hasattr(self, 'system') and self.system:
+            # Get groups from compounds A and B
+            compound_A_groups = set(self.system['A'].keys())
+            compound_B_groups = set(self.system['B'].keys())
+            system_groups = compound_A_groups | compound_B_groups
             
-            # Check if any groups in this compound are missing R/Q parameters
+            if verbose:
+                print(f"\n   Checking ternary systems (A+B+solvent):")
+                print(f"   Compound A groups: {sorted(compound_A_groups)}")
+                print(f"   Compound B groups: {sorted(compound_B_groups)}")
+            
+            # Check each solvent candidate
+            for i, solvent in enumerate(compounds):
+                solvent_groups = set(solvent.keys())
+                ternary_system_groups = system_groups | solvent_groups
+                missing_for_solvent = []
+                
+                # Check all interactions in the ternary system
+                for group_i in ternary_system_groups:
+                    for group_j in ternary_system_groups:
+                        if group_i <= group_j:  # Upper triangle + diagonal
+                            # Check if interaction exists
+                            if group_i in interaction_data and group_j in interaction_data[group_i]:
+                                interaction_value = interaction_data[group_i][group_j]
+                            elif group_j in interaction_data and group_i in interaction_data[group_j]:
+                                interaction_value = interaction_data[group_j][group_i]
+                            else:
+                                interaction_value = None
+                            
+                            # Check if interaction is missing
+                            if interaction_value is None or interaction_value == 0:
+                                # Find main groups
+                                main_g1 = next((value['main_g'] for value in unifac_dict.values() 
+                                               if value['grp'] == group_i), None)
+                                main_g2 = next((value['main_g'] for value in unifac_dict.values() 
+                                               if value['grp'] == group_j), None)
+                                
+                                # Only flag if different main groups
+                                if main_g1 and main_g2 and main_g1 != main_g2:
+                                    missing_for_solvent.append((group_i, group_j, main_g1, main_g2))
+                
+                # If solvent has missing interactions, mark for removal
+                if missing_for_solvent:
+                    ternary_compounds_to_remove.append(i)
+                    ternary_missing_interactions.extend(missing_for_solvent)
+                    if verbose:
+                        print(f"   Solvent {i} ({solvent}): {len(missing_for_solvent)} missing interactions")
+                        for g1, g2, mg1, mg2 in missing_for_solvent[:3]:  # Show first 3
+                            print(f"     Missing: {g1}↔{g2} (main groups {mg1}↔{mg2})")
+                        if len(missing_for_solvent) > 3:
+                            print(f"     ... and {len(missing_for_solvent)-3} more")
+            
+            if verbose and ternary_compounds_to_remove:
+                print(f"   Ternary check: {len(ternary_compounds_to_remove)}/{len(compounds)} solvents have missing interactions")
+        
+        # Validate missing_interaction_action parameter
+        if missing_interaction_action not in ["remove_compounds", "set_zero"]:
+            raise ValueError(f"missing_interaction_action must be 'remove_compounds' or 'set_zero', got '{missing_interaction_action}'")
+        
+        # Combine results based on the chosen action for missing interactions
+        compounds_to_remove = []
+        
+        for i, compound in enumerate(compounds):
+            remove_reasons = []
+            
+            # Always remove compounds with missing R/Q parameters (can't be fixed by setting interactions to zero)
             missing_in_compound = [g for g in compound.keys() if g in missing_rq_groups]
             if missing_in_compound:
+                remove_reasons.append(f"missing R/Q parameters for {missing_in_compound}")
+            
+            # Handle missing interactions based on the chosen action
+            if missing_interaction_action == "remove_compounds":
+                # Check if any main group pairs in this compound have missing interactions (general check)
+                compound_main_groups = set()
+                for group in compound.keys():
+                    main_g = next((value['main_g'] for value in unifac_dict.values() 
+                                  if value['grp'] == group), None)
+                    if main_g:
+                        compound_main_groups.add(main_g)
+                
+                # Check for missing interactions between main groups in this compound
+                has_missing_interaction = False
+                for interaction in missing_interactions:
+                    mg1, mg2 = interaction
+                    if mg1 in compound_main_groups and mg2 in compound_main_groups:
+                        has_missing_interaction = True
+                        break
+                
+                if has_missing_interaction:
+                    remove_reasons.append("missing general binary interactions")
+                
+                # Check ternary system issues
+                if check_ternary_systems and i in ternary_compounds_to_remove:
+                    remove_reasons.append("missing ternary system interactions")
+            
+            # For "set_zero" action, we don't remove compounds due to missing interactions
+            # (they will be handled by setting interaction parameters to 0.0 in VLE calculations)
+            
+            # Add to removal list if any issues found
+            if remove_reasons:
                 compounds_to_remove.append(i)
                 if verbose:
-                    print(f"Compound {i} missing R/Q parameters for groups: {missing_in_compound}")
-                continue
-            
-            # Check if any main group pairs in this compound have missing interactions
-            compound_main_groups = set()
-            for group in compound.keys():
-                # Find main group for this group
-                main_g = next((value['main_g'] for value in unifac_dict.values() 
-                              if value['grp'] == group), None)
-                if main_g:
-                    compound_main_groups.add(main_g)
-            
-            # Check for missing interactions between main groups in this compound
-            has_missing_interaction = False
-            for interaction in missing_interactions:
-                mg1, mg2 = interaction
-                if mg1 in compound_main_groups and mg2 in compound_main_groups:
-                    has_missing_interaction = True
-                    break
-            
-            if has_missing_interaction:
-                compounds_to_remove.append(i)
-                if verbose:
-                    print(f"Compound {i} has missing binary interactions")
+                    print(f"Compound {i} ({compound}): {'; '.join(remove_reasons)}")
         
         # Calculate total possible interactions for compound groups (upper triangle + diagonal)
         total_compound_pairs = len(compound_groups) * (len(compound_groups) + 1) // 2
@@ -1118,53 +1197,127 @@ class CAMD:
             else:
                 print(f"✅ All compound groups have R/Q parameters ({len(compound_groups)} groups)")
             
-            # Binary interaction parameter summary
-            if missing_interactions:
-                print(f"\n❌ Binary interaction parameters:")
-                print(f"   Total compound group pairs checked: {total_compound_pairs}")
-                print(f"   Missing interactions: {len(missing_interactions)} main group pairs")
-                print(f"   Missing interaction percentage: {len(missing_interactions)/total_compound_pairs*100:.1f}%")
+            # Binary interaction parameter summary - commented out for cleaner display
+            # Focus on A-B binary and ternary system validation instead
+            # if missing_interactions:
+            #     print(f"\n❌ Binary interaction parameters:")
+            #     print(f"   Total compound group pairs checked: {total_compound_pairs}")
+            #     print(f"   Missing interactions: {len(missing_interactions)} main group pairs")
+            #     print(f"   Missing interaction percentage: {len(missing_interactions)/total_compound_pairs*100:.1f}%")
+            #     
+            #     # Show specific missing main group interactions
+            #     print(f"   Missing main group pairs: {missing_interactions}")
+            #     
+            #     # Show specific missing subgroup interactions
+            #     if missing_sub_groups:
+            #         print(f"   Missing subgroup pairs: {missing_sub_groups}")
+            #         
+            #     # Display interaction matrix
+            #     # Commented out for cleaner display - may be needed later
+            #     # if len(compound_groups) <= 20:  # Only show matrix for reasonably sized systems
+            #     #     print(f"\n   Interaction Matrix ({len(compound_groups)}x{len(compound_groups)}):")
+            #     #     print("   " + "".join(f"{g:>8}" for g in compound_groups))
+            #     #     for i, group_i in enumerate(compound_groups):
+            #     #         row_values = []
+            #     #         for j, group_j in enumerate(compound_groups):
+            #     #             if group_i in interaction_data and group_j in interaction_data[group_i]:
+            #     #                 value = interaction_data[group_i][group_j]
+            #     #             elif group_j in interaction_data and group_i in interaction_data[group_j]:
+            #     #                 value = interaction_data[group_j][group_i]
+            #     #             else:
+            #     #                 value = None
+            #     #             
+            #     #             if value is None:
+            #     #                 row_values.append("  MISS")
+            #     #             elif value == 0:
+            #     #                 row_values.append("     0")
+            #     #             else:
+            #     #                 row_values.append(f"{value:6.1f}")
+            #     #         
+            #     #         print(f"{group_i:>6} " + "".join(f"{v:>8}" for v in row_values))
+            #     
+            #     # Issue warnings like inspect_interractions
+            #     # warnings.warn(f"\nWarning: A total of {len(missing_interactions)} out of {total_compound_pairs} "
+            #     #             f"interaction parameters are missing for compound groups", UserWarning)
+            #     # warnings.warn(f"\nWarning: The interaction between the following main groups "
+            #     #             f"{missing_interactions} have been set to 0", UserWarning)
+            #     # if missing_sub_groups:
+            #     #     warnings.warn(f"\nWarning: The interaction between the following sub groups "
+            #     #                 f"{missing_sub_groups} have been set to 0", UserWarning)
+            # else:
+            #     print(f"✅ All binary interactions available ({total_compound_pairs} pairs checked)")
+            
+            # Show A-B system interaction matrix if ternary system check is enabled
+            if check_ternary_systems and hasattr(self, 'system') and self.system:
+                # Get groups from compounds A and B
+                compound_A_groups = sorted(self.system['A'].keys())
+                compound_B_groups = sorted(self.system['B'].keys())
+                system_groups = sorted(set(compound_A_groups + compound_B_groups))
                 
-                # Show specific missing main group interactions
-                print(f"   Missing main group pairs: {missing_interactions}")
+                # Get all solvent groups (excluding A and B groups)
+                solvent_groups = sorted([g for g in compound_groups if g not in system_groups])
                 
-                # Show specific missing subgroup interactions
-                if missing_sub_groups:
-                    print(f"   Missing subgroup pairs: {missing_sub_groups}")
-                
-                # Display interaction matrix
-                if len(compound_groups) <= 20:  # Only show matrix for reasonably sized systems
-                    print(f"\n   Interaction Matrix ({len(compound_groups)}x{len(compound_groups)}):")
-                    print("   " + "".join(f"{g:>8}" for g in compound_groups))
-                    for i, group_i in enumerate(compound_groups):
-                        row_values = []
-                        for j, group_j in enumerate(compound_groups):
-                            if group_i in interaction_data and group_j in interaction_data[group_i]:
-                                value = interaction_data[group_i][group_j]
-                            elif group_j in interaction_data and group_i in interaction_data[group_j]:
-                                value = interaction_data[group_j][group_i]
-                            else:
-                                value = None
-                            
-                            if value is None:
-                                row_values.append("  MISS")
-                            elif value == 0:
-                                row_values.append("     0")
-                            else:
-                                row_values.append(f"{value:6.1f}")
+                if system_groups and solvent_groups:
+                    print(f"\n   A-B System Interaction Matrix:")
+                    print(f"   System groups (A+B): {system_groups}")
+                    print(f"   Solvent groups: {solvent_groups[:10]}{'...' if len(solvent_groups) > 10 else ''}")
+                    
+                    # Create matrix with system groups as rows and solvent groups as columns
+                    if len(solvent_groups) <= 20:  # Show matrix for A-B system interactions
+                        print(f"\n   Interactions (System groups × Solvent groups):")
                         
-                        print(f"{group_i:>6} " + "".join(f"{v:>8}" for v in row_values))
-                
-                # # Issue warnings like inspect_interractions
-                # warnings.warn(f"\nWarning: A total of {len(missing_interactions)} out of {total_compound_pairs} "
-                #             f"interaction parameters are missing for compound groups", UserWarning)
-                # warnings.warn(f"\nWarning: The interaction between the following main groups "
-                #             f"{missing_interactions} have been set to 0", UserWarning)
-                # if missing_sub_groups:
-                #     warnings.warn(f"\nWarning: The interaction between the following sub groups "
-                #                 f"{missing_sub_groups} have been set to 0", UserWarning)
-            else:
-                print(f"✅ All binary interactions available ({total_compound_pairs} pairs checked)")
+                        # Header with solvent groups
+                        header = "".join(f"{g:>8}" for g in solvent_groups)
+                        print(f"{'':>8}{header}")
+                        
+                        # Each system group as a row
+                        for sys_group in system_groups:
+                            row_values = []
+                            missing_count = 0
+                            
+                            for solv_group in solvent_groups:
+                                # Check interaction between system group and solvent group
+                                if sys_group in interaction_data and solv_group in interaction_data[sys_group]:
+                                    value = interaction_data[sys_group][solv_group]
+                                elif solv_group in interaction_data and sys_group in interaction_data[solv_group]:
+                                    value = interaction_data[solv_group][sys_group]
+                                else:
+                                    value = None
+                                
+                                if value is None:
+                                    row_values.append("  MISS")
+                                    missing_count += 1
+                                elif value == 0:
+                                    row_values.append("     0")
+                                else:
+                                    row_values.append(f"{value:6.1f}")
+                            
+                            # Print row with system group name and values
+                            row_str = "".join(f"{v:>8}" for v in row_values)
+                            status = f" ({missing_count} missing)" if missing_count > 0 else " (complete)"
+                            print(f"{sys_group:>8}{row_str}{status}")
+                    else:
+                        print(f"   Matrix too large to display ({len(system_groups)}×{len(solvent_groups)})")
+                        
+                        # Show summary statistics instead
+                        total_interactions = len(system_groups) * len(solvent_groups)
+                        missing_interactions_count = 0
+                        
+                        for sys_group in system_groups:
+                            for solv_group in solvent_groups:
+                                if sys_group in interaction_data and solv_group in interaction_data[sys_group]:
+                                    value = interaction_data[sys_group][solv_group]
+                                elif solv_group in interaction_data and sys_group in interaction_data[solv_group]:
+                                    value = interaction_data[solv_group][sys_group]
+                                else:
+                                    value = None
+                                
+                                if value is None:
+                                    missing_interactions_count += 1
+                        
+                        print(f"   Total A-B system interactions: {total_interactions}")
+                        print(f"   Missing interactions: {missing_interactions_count} ({missing_interactions_count/total_interactions*100:.1f}%)")
+                        print(f"   Available interactions: {total_interactions - missing_interactions_count} ({(total_interactions - missing_interactions_count)/total_interactions*100:.1f}%)")
             
             # Compound removal summary
             if compounds_to_remove:
@@ -1172,8 +1325,21 @@ class CAMD:
                 print(f"   Compounds to remove: {len(compounds_to_remove)} out of {len(compounds)}")
                 print(f"   Removal percentage: {len(compounds_to_remove)/len(compounds)*100:.1f}%")
                 print(f"   Remaining compounds: {len(compounds) - len(compounds_to_remove)}")
+                
+                # Show action taken for missing interactions
+                if missing_interaction_action == "set_zero" and (missing_interactions or ternary_missing_interactions):
+                    print(f"   Missing interactions handling: Set to 0.0 (missing_interaction_action='set_zero')")
+                    if ternary_missing_interactions:
+                        print(f"   Ternary interactions set to 0.0: {len(ternary_missing_interactions)} pairs")
+                elif check_ternary_systems:
+                    print(f"   Ternary system issues: {len(ternary_compounds_to_remove)} compounds removed")
             else:
                 print(f"\n✅ All compounds have complete UNIFAC parameters")
+                if check_ternary_systems:
+                    if missing_interaction_action == "set_zero" and (missing_interactions or ternary_missing_interactions):
+                        print(f"✅ All compounds usable (missing interactions set to 0.0)")
+                    else:
+                        print(f"✅ All compounds compatible with A+B ternary systems")
             
             print("=" * 60)
         
