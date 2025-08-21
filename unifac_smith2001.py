@@ -164,7 +164,7 @@ def example_usage():
     }
     # Component mole fractions x_i
     x = np.array([0.4, 0.6])  # 40% diethylamine, 60% heptane
-    T = 308.15  # Temperature T_t in Kelvin
+    T = [308.15, 310]  # Temperature T_t in Kelvin
 
     print(f"Mixture: Diethylamine(40%) + Heptane(60%)")
     print(f"Temperature: {T} K ({T-273.15:.1f}°C)")

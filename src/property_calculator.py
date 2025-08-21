@@ -1,8 +1,11 @@
 """
-Pure Component Property Calculator for CAMD
+Pure Component Property Calculator
 
 Calculates pure component properties using the Constantinou-Gani method.
-This module can be used standalone for testing properties of individual compounds
+original paper: https://doi.org/10.1002/aic.690401011
+extension: https://doi.org/10.1016/0378-3812(94)02593-P 
+
+This module can be used standalone for calculating properties of individual compounds
 or integrated into the CAMD workflow.
 
 Example Usage:
@@ -27,13 +30,13 @@ class PropertyCalculator:
     """
     Calculator for pure component properties using Constantinou-Gani method.
     
-    Calculates:
+    Calculates (so far):
     - Tm: Melting point [K]
     - Tb: Boiling point [K] 
     - Tc: Critical temperature [K]
-    - Pc: Critical pressure [Pa]
+    - Pc: Critical pressure [bar]
     - Ac: Acentric factor [-]
-    - Hv: Heat of vaporization [J/mol]
+    - Hv: Heat of vaporization [kJ/mol]
     """
     
     def __init__(self, data_path: Union[str, Path] = None, pure_method: str = "Constantinou-Gani", 
@@ -102,7 +105,7 @@ class PropertyCalculator:
         
         Args:
             compound: The compound being calculated
-            missing_groups: List of groups without property data
+            missing_groups: List of groups with missing contributions
             property_name: Name of the property being calculated
             
         Returns:
@@ -206,12 +209,12 @@ class PropertyCalculator:
         if not self._handle_missing_groups(compound, missing_groups, 'tm'):
             return None
         
-        if tm_sum <= 0:
-            return None
+        # if tm_sum <= 0:
+        #     return None
             
-        # Get scalar for Tm calculation (should be 102.425)
-        tm_scalar = scalars.get('Tm0', 102.425)
-        return tm_scalar * np.log(tm_sum)
+        # Get scalar for Tm calculation
+        tm0 = scalars.get('Tm0')
+        return tm0 * np.log(tm_sum)
     
     def calculate_tb(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate boiling point: Tb0 * ln(sum(contrib.Tb[i] * mol[i]))"""
@@ -234,12 +237,12 @@ class PropertyCalculator:
         if not self._handle_missing_groups(compound, missing_groups, 'tb'):
             return None
         
-        if tb_sum <= 0:
-            return None
+        # if tb_sum <= 0:
+        #     return None
             
         # Get scalar for Tb calculation (should be 204.359)
-        tb_scalar = scalars.get('Tb0', 204.359)
-        return tb_scalar * np.log(tb_sum)
+        tb0 = scalars.get('Tb0')
+        return tb0 * np.log(tb_sum)
     
     def calculate_tc(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate critical temperature: Tc0 * ln(sum(contrib.Tc[i] * mol[i]))"""
@@ -262,12 +265,12 @@ class PropertyCalculator:
         if not self._handle_missing_groups(compound, missing_groups, 'tc'):
             return None
         
-        if tc_sum <= 0:
-            return None
+        # if tc_sum <= 0:
+        #     return None
             
         # Get scalar for Tc calculation (should be 181.128)
-        tc_scalar = scalars.get('Tc0', 181.128)
-        return tc_scalar * np.log(tc_sum)
+        tc0 = scalars.get('Tc0')
+        return tc0 * np.log(tc_sum)
     
     def calculate_pc(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate critical pressure: 1 / (sum(contrib.Pc[i] * mol[i]) + pc02)^2 + pc01"""
@@ -291,15 +294,18 @@ class PropertyCalculator:
             return None
         
         # Get scalars for Pc calculation
-        pc01 = scalars.get('Pc01', 1.3705)
-        pc02 = scalars.get('Pc02', 0.10022)
+        pc01 = scalars.get('Pc01')
+        pc02 = scalars.get('Pc02')
         
         # Pc = 1 / (sum(contrib.Pc[i] * mol[i]) + pc02)^2 + pc01
         denominator = pc_sum + pc02
-        if denominator > 0:
-            return 1 / (denominator ** 2) + pc01
-        else:
-            return pc01  # Return just the constant if calculation fails
+
+        return 1 / (denominator ** 2) + pc01 
+    
+        # if denominator > 0:
+        #     return 1 / (denominator ** 2) + pc01
+        # else:
+        #     return pc01  # Return just the constant if calculation fails
     
     def calculate_ac(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate acentric factor: w01 * ln(sum(contrib.Ac[i] * mol[i]) + w03)^(1/w02)"""
