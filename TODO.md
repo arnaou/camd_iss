@@ -3,8 +3,6 @@
 ## Current Tasks
 
 ### High Priority
-- [ ] Verify the compound_validator.py
-- [ ] Simplify the compound_validator.py
 - [ ] Verify the antoine parameter calculator
 - [ ] Simplify tge antoine parameter calculator
 
@@ -18,6 +16,8 @@
 ---
 
 ## Completed Tasks ✅
+- [x] Verify the compound_validator.py
+- [x] Simplify the compound_validator.py
 
 ### Property Calculator
 - [x] Create PropertyCalculator class with Constantinou-Gani method

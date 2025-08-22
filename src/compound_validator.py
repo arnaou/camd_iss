@@ -412,7 +412,7 @@ if __name__ == "__main__":
         {'OH': 5},                                 # Too many OH - not valid
         {'CH3': 1, 'CH2': 2, 'OH': 1},             # Propanol - should be valid
         {'CH3': 1, 'CH2': 3, 'H2O': 1, 'CHO': 1},  # invalid - standalone molecule mixed with others
-        {'H2O': 1, 'CO2': 1},                      # invalid - multiple different standalone molecules
+        {'H2O': 1, 'DOH': 1},                      # invalid - multiple different standalone molecules
     ]
     
     validator = CompoundValidator()
