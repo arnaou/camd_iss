@@ -1,7 +1,8 @@
 """
-Compound Validator for CAMD
+Compound Validator routine
 
 Validates compound structures using Odele and Macchietto structural feasibility rules.
+https://doi.org/10.1016/0378-3812(93)87127-M
 This module can be used standalone for validating individual compounds or integrated
 into the CAMD workflow.
 
@@ -32,7 +33,7 @@ class CompoundValidator:
     
     Where:
     - m: molecular type (1=acyclic, 0=monocyclic, -1=bicyclic)
-    - noc_i: number of connections for group i
+    - noc_i: number of connections for group i (valence)
     - x_i: occurrence count of group i
     """
     
@@ -44,6 +45,10 @@ class CompoundValidator:
             data_path: Path to directory containing noc.json file
             molecular_type: 1=acyclic, 0=monocyclic, -1=bicyclic (default: 1)
         """
+        # Validate molecular_type
+        if molecular_type not in [-1, 0, 1]:
+            raise ValueError("molecular_type must be -1 (bicyclic), 0 (monocyclic), or 1 (acyclic)")
+        
         self.molecular_type = molecular_type
         self.noc_data = {}
         
@@ -95,6 +100,17 @@ class CompoundValidator:
             return True  # Assume valid if no data to check against
         
         try:
+            # Check for standalone molecules (NOC = 0)
+            if not self._check_standalone_molecules(compound, verbose):
+                return False
+            
+            # Check if this is a pure standalone molecule
+            if self._is_pure_standalone_molecule(compound):
+                if verbose:
+                    print(f"Compound {compound} is a valid standalone molecule")
+                return True
+            
+            # For non-standalone molecules, check octet and connectivity rules
             # Check octet rule
             if not self._check_octet_rule(compound, verbose):
                 return False
@@ -111,6 +127,82 @@ class CompoundValidator:
             if verbose:
                 print(f"Validation error for {compound}: {e}")
             return False
+    
+    def _check_standalone_molecules(self, compound: Dict[str, int], verbose: bool = False) -> bool:
+        """
+        Check for standalone molecules (groups with NOC = 0).
+        
+        Rules for standalone molecules:
+        1. A single standalone molecule with count=1 is valid (e.g., {'H2O': 1})
+        2. Multiple standalone molecules are invalid (e.g., {'H2O': 2})
+        3. Standalone molecules mixed with other groups are invalid (e.g., {'H2O': 1, 'CH3': 1})
+        
+        Args:
+            compound: Compound to validate
+            verbose: Print detailed messages
+            
+        Returns:
+            True if standalone molecule rules are satisfied, False otherwise
+        """
+        standalone_groups = []
+        other_groups = []
+        
+        for group, count in compound.items():
+            if group in self.noc_data and self.noc_data[group] == 0:
+                standalone_groups.append((group, count))
+            else:
+                other_groups.append((group, count))
+        
+        # If no standalone molecules, validation passes
+        if not standalone_groups:
+            return True
+        
+        # If there are standalone molecules, check the rules
+        if len(standalone_groups) > 1:
+            # Multiple different standalone molecules
+            if verbose:
+                group_names = [group for group, _ in standalone_groups]
+                print(f"Invalid compound: Multiple standalone molecules: {group_names}")
+                print("Only one type of standalone molecule is allowed per compound")
+            return False
+        
+        if len(standalone_groups) == 1:
+            group, count = standalone_groups[0]
+            
+            # Check if count > 1
+            if count > 1:
+                if verbose:
+                    print(f"Invalid compound: Standalone molecule '{group}' has count > 1 ({count})")
+                    print("Standalone molecules must have count = 1")
+                return False
+            
+            # Check if mixed with other groups
+            if other_groups:
+                if verbose:
+                    other_group_names = [group for group, _ in other_groups]
+                    print(f"Invalid compound: Standalone molecule '{group}' mixed with other groups: {other_group_names}")
+                    print("Standalone molecules cannot be part of larger structures")
+                return False
+        
+        return True
+    
+    def _is_pure_standalone_molecule(self, compound: Dict[str, int]) -> bool:
+        """
+        Check if compound is a pure standalone molecule (single group with NOC=0 and count=1).
+        
+        Args:
+            compound: Compound to check
+            
+        Returns:
+            True if it's a pure standalone molecule
+        """
+        if len(compound) != 1:
+            return False
+        
+        group, count = next(iter(compound.items()))
+        return (group in self.noc_data and 
+                self.noc_data[group] == 0 and 
+                count == 1)
     
     def _check_octet_rule(self, compound: Dict[str, int], verbose: bool = False) -> bool:
         """
@@ -228,6 +320,7 @@ class CompoundValidator:
             'total': len(compounds),
             'valid': 0,
             'invalid': 0,
+            'standalone_violations': 0,
             'octet_violations': 0,
             'connectivity_violations': 0,
             'missing_data': 0
@@ -241,7 +334,9 @@ class CompoundValidator:
                 
                 # Check specific violation types
                 try:
-                    if not self._check_octet_rule(compound):
+                    if not self._check_standalone_molecules(compound):
+                        stats['standalone_violations'] += 1
+                    elif not self._check_octet_rule(compound):
                         stats['octet_violations'] += 1
                     elif not self._check_connectivity_rule(compound):
                         stats['connectivity_violations'] += 1
@@ -309,11 +404,15 @@ if __name__ == "__main__":
     
     # Test compounds
     test_compounds = [
-        {'CH3': 2, 'OH': 1},           # Ethanol - should be valid
-        {'CH3': 2, 'CH3CO': 1},        # Acetone - should be valid
-        {'CH3': 10},                   # Too many CH3 - likely invalid
-        {'OH': 5},                     # Too many OH - likely invalid
-        {'CH3': 1, 'CH2': 2, 'OH': 1}, # Propanol - should be valid
+        {'H2O': 1},                                # water - valid standalone molecule
+        {'H2O': 2},                                # invalid - multiple standalone molecules
+        {'CH3': 1, 'CH2': 1, 'OH': 1},             # Ethanol - should be valid
+        {'CH3': 1, 'CH3CO': 1},                    # Acetone - should be valid
+        {'CH3': 10},                               # Too many CH3 - not valid
+        {'OH': 5},                                 # Too many OH - not valid
+        {'CH3': 1, 'CH2': 2, 'OH': 1},             # Propanol - should be valid
+        {'CH3': 1, 'CH2': 3, 'H2O': 1, 'CHO': 1},  # invalid - standalone molecule mixed with others
+        {'H2O': 1, 'CO2': 1},                      # invalid - multiple different standalone molecules
     ]
     
     validator = CompoundValidator()

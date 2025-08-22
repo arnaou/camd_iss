@@ -189,7 +189,11 @@ class PropertyCalculator:
         return properties
     
     def calculate_tm(self, compound: Dict[str, int]) -> Optional[float]:
-        """Calculate melting point: Tm0 * ln(sum(contrib.Tm[i] * mol[i]))"""
+        """Calculate melting point: Tm0 * ln(sum(contrib.Tm[i] * mol[i]))
+        
+        Returns:
+            Melting point in Kelvin [K] or None if calculation fails
+        """
         if 'tm' not in self.pure_properties or 'scalars' not in self.pure_properties:
             return None
             
@@ -217,7 +221,11 @@ class PropertyCalculator:
         return tm0 * np.log(tm_sum)
     
     def calculate_tb(self, compound: Dict[str, int]) -> Optional[float]:
-        """Calculate boiling point: Tb0 * ln(sum(contrib.Tb[i] * mol[i]))"""
+        """Calculate boiling point: Tb0 * ln(sum(contrib.Tb[i] * mol[i]))
+        
+        Returns:
+            Boiling point in Kelvin [K] or None if calculation fails
+        """
         if 'tb' not in self.pure_properties or 'scalars' not in self.pure_properties:
             return None
             
@@ -245,7 +253,11 @@ class PropertyCalculator:
         return tb0 * np.log(tb_sum)
     
     def calculate_tc(self, compound: Dict[str, int]) -> Optional[float]:
-        """Calculate critical temperature: Tc0 * ln(sum(contrib.Tc[i] * mol[i]))"""
+        """Calculate critical temperature: Tc0 * ln(sum(contrib.Tc[i] * mol[i]))
+        
+        Returns:
+            Critical temperature in Kelvin [K] or None if calculation fails
+        """
         if 'tc' not in self.pure_properties or 'scalars' not in self.pure_properties:
             return None
             
@@ -273,7 +285,11 @@ class PropertyCalculator:
         return tc0 * np.log(tc_sum)
     
     def calculate_pc(self, compound: Dict[str, int]) -> Optional[float]:
-        """Calculate critical pressure: 1 / (sum(contrib.Pc[i] * mol[i]) + pc02)^2 + pc01"""
+        """Calculate critical pressure: 1 / (sum(contrib.Pc[i] * mol[i]) + pc02)^2 + pc01
+        
+        Returns:
+            Critical pressure in bar [bar] or None if calculation fails
+        """
         if 'pc' not in self.pure_properties or 'scalars' not in self.pure_properties:
             return None
             
@@ -308,7 +324,11 @@ class PropertyCalculator:
         #     return pc01  # Return just the constant if calculation fails
     
     def calculate_ac(self, compound: Dict[str, int]) -> Optional[float]:
-        """Calculate acentric factor: w01 * ln(sum(contrib.Ac[i] * mol[i]) + w03)^(1/w02)"""
+        """Calculate acentric factor: w01 * ln(sum(contrib.Ac[i] * mol[i]) + w03)^(1/w02)
+        
+        Returns:
+            Acentric factor (dimensionless) [-] or None if calculation fails
+        """
         if 'ac' not in self.pure_properties or 'scalars' not in self.pure_properties:
             return None
             
@@ -335,13 +355,16 @@ class PropertyCalculator:
         
         # acc = w01 * ln(sum(contrib.Ac[i] * mol[i]) + w03)^(1/w02)
         argument = ac_sum + w03
-        if argument > 0:
-            return w01 * (np.log(argument) ** (1/w02))
-        else:
-            return 0.0  # Return 0 if calculation fails
+
+        return w01 * (np.log(argument) ** (1/w02))
+
     
     def calculate_hv(self, compound: Dict[str, int]) -> Optional[float]:
-        """Calculate heat of vaporization: Hv0 + sum(contrib.Hv[i] * mol[i])"""
+        """Calculate heat of vaporization: Hv0 + sum(contrib.Hv[i] * mol[i])
+        
+        Returns:
+            Heat of vaporization in kJ/mol [kJ/mol] or None if calculation fails
+        """
         if 'hv' not in self.pure_properties or 'scalars' not in self.pure_properties:
             return None
             
@@ -361,11 +384,11 @@ class PropertyCalculator:
         if not self._handle_missing_groups(compound, missing_groups, 'hv'):
             return None
         
-        # Get scalar for Hv calculation (should be 6.829)
-        hv_scalar = scalars.get('Hv0', 6.829)
-        # Return in kJ/mol (no conversion needed)
-        return (hv_scalar + hv_sum)
-    
+        # Get scalar for Hv calculation
+        hv0 = scalars.get('hv0')
+        # Return in kJ/mol
+        return (hv0 + hv_sum)
+
     def get_available_properties(self) -> list:
         """Get list of properties that can be calculated based on loaded data."""
         available = []
@@ -397,7 +420,7 @@ def calculate_properties(compound: Dict[str, int], data_path: Union[str, Path] =
         Dict with calculated properties, or None if compound should be removed
         
     Example:
-        >>> compound = {'CH3': 2, 'OH': 1}  # Ethanol
+        >>> compound = {'CH3': 1, 'CH2': 1, 'OH': 1}  # Ethanol
         >>> props = calculate_properties(compound)
         >>> if props:
         >>>     print(f"Tb: {props['tb']:.1f} K")
@@ -413,8 +436,9 @@ if __name__ == "__main__":
     # Test compounds
     test_compounds = {
         'ethanol': {'CH3': 1, 'CH2': 1, 'OH': 1},
-        'acetone': {'CH3': 2, 'CH3CO': 1},
+        'acetone': {'CH3': 1, 'CH3CO': 1},
         'water': {'H2O': 1},
+        'methanol': {'CH3OH': 1}
     }
     
     calculator = PropertyCalculator()
@@ -426,9 +450,9 @@ if __name__ == "__main__":
         if properties is None:
             print("  Compound removed due to missing group contributions")
             continue
-            
-        units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'Pa', 'ac': '-', 'hv': 'J/mol'}
-        
+
+        units = {'tm': 'K', 'tb': 'K', 'tc': 'K', 'pc': 'bar', 'ac': '-', 'hv': 'kJ/mol'}
+
         for prop_name, value in properties.items():
             if value is not None:
                 unit = units.get(prop_name, '')
