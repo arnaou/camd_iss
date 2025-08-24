@@ -94,6 +94,21 @@ class AntoineCalculator:
         print(f"Action taken: {self.missing_group_action}")
         print("=" * 65)
     
+    def _handle_calculation_error(self, error: Exception, compound: Dict[str, int], context: str = "") -> None:
+        """Handle calculation errors with consistent logging."""
+        if self.verbose:
+            context_str = f" during {context}" if context else ""
+            print(f"Calculation failed for {compound}{context_str}: {error}")
+    
+    def _has_required_properties(self, properties: Dict[str, Optional[float]], 
+                               required: list = ['tc', 'pc', 'ac', 'tb']) -> tuple[bool, list]:
+        """Check if all required properties are present and valid."""
+        missing_props = []
+        for prop in required:
+            if prop not in properties or properties[prop] is None:
+                missing_props.append(prop)
+        return len(missing_props) == 0, missing_props
+    
     def calculate_antoine_parameters(self, compound: Dict[str, int], 
                                    critical_properties: Dict[str, Optional[float]]) -> Optional[Dict[str, float]]:
         """
@@ -107,16 +122,11 @@ class AntoineCalculator:
         Returns:
             Dict with Antoine parameters {'A', 'B', 'C'} or None if compound should be removed
         """
-        # Check for required critical properties
-        required_props = ['tc', 'pc', 'ac', 'tb']
-        missing_props = []
-        
-        for prop in required_props:
-            if prop not in critical_properties or critical_properties[prop] is None:
-                missing_props.append(prop)
+        # Check for required critical properties using helper method
+        has_props, missing_props = self._has_required_properties(critical_properties)
         
         # Handle missing properties - Antoine calculation requires all critical properties
-        if missing_props:
+        if not has_props:
             self._handle_missing_properties(compound, missing_props)
             return None
             
@@ -147,7 +157,7 @@ class AntoineCalculator:
             }
             
         except Exception as e:
-            print(f"Error calculating Antoine parameters for compound {compound}: {e}")
+            self._handle_calculation_error(e, compound, "Antoine parameter calculation")
             return None
     
     def solve_antoine(self, Tb: float, Tc: float, Pc: float, P0: float, w: float, verbose: bool = None) -> dict:
@@ -300,6 +310,24 @@ class AntoineCalculator:
             'relative_error_critical': abs(p_at_tc - pc) / pc * 100  # Percentage error
         }
     
+    def calculate_psat_vector(self, T_vector: np.ndarray, A: float, B: float, C: float) -> np.ndarray:
+        """
+        Vectorized vapor pressure calculation using Antoine equation.
+        
+        Args:
+            T_vector: Array of temperatures [K]
+            A, B, C: Antoine equation parameters
+            
+        Returns:
+            Array of vapor pressures [bar]
+            
+        Example:
+            >>> import numpy as np
+            >>> T_range = np.linspace(250, 400, 100)
+            >>> P_range = calculator.calculate_psat_vector(T_range, A, B, C)
+        """
+        return 10**(A - B/(T_vector + C))
+    
     def plot_psat(self, A: float, B: float, C: float, 
                   tb: float, tc: float, pc: float, ac: float,
                   compound: Optional[Dict[str, int]] = None, compound_name: str = "Compound") -> None:
@@ -319,8 +347,8 @@ class AntoineCalculator:
             # Temperature range from Tb to Tc
             T_range = np.linspace(tb, tc, 1000)
             
-            # Calculate Psat using Antoine equation
-            P_antoine = np.array([self.antoine_correlation(A, B, C, T) for T in T_range])
+            # Calculate Psat using vectorized Antoine equation (more efficient)
+            P_antoine = self.calculate_psat_vector(T_range, A, B, C)
             
             # Key points
             T_ac = 0.7 * tc  # Temperature where acentric factor is defined (Tr = 0.7)

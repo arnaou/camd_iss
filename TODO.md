@@ -4,7 +4,7 @@
 
 ### High Priority
 - [ ] Verify the antoine parameter calculator
-- [ ] Simplify tge antoine parameter calculator
+- [ ] Simplify the antoine parameter calculator
 
 ### Medium Priority
 - [ ] 
