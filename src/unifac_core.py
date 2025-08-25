@@ -41,9 +41,9 @@ def unifac(mixture, x, T, rk_data, qk_data, interaction_data):
     # Calculate qi
     q = np.dot(v.T, Qk)
     # Calculate Li
-    L = np.matrix(q) / np.matrix(np.dot(x, q)).T
+    L = q / np.dot(x, q).T
     # Calculate Ji
-    J = np.matrix(r) / np.matrix(np.dot(x, r)).T 
+    J = r / np.dot(x, r).T 
     # Calculate gammaC
     log_gamma_c = 1 - J + np.log(J) - 5 * np.multiply(q, (1 - J / L + np.log(J / L)))
     # Calculate ei,k
@@ -71,6 +71,6 @@ def unifac(mixture, x, T, rk_data, qk_data, interaction_data):
         "psi": psi,
         "omega": omega,
         "log_gamma_r": log_gamma_r,
-        "gamma": gamma.flatten()
+        "gamma": gamma
     }
     return results
