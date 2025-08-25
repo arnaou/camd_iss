@@ -575,7 +575,7 @@ class CAMD:
         
         for i, compound in enumerate(self.generated_compounds):
             try:
-                properties = self.property_calculator.calculate_all_properties(compound)
+                properties = self.property_calculator.calculate(compound)
                 if properties is None:  # Compound marked for removal due to missing groups
                     compounds_to_remove.append(i)
                 else:
@@ -604,7 +604,7 @@ class CAMD:
             
             for i, compound in enumerate(self.generated_compounds):
                 try:
-                    properties = self.property_calculator.calculate_all_properties(compound)
+                    properties = self.property_calculator.calculate(compound)
                     if properties is not None:
                         self.calculated_properties[i] = properties
                         successful_calculations += 1
@@ -767,7 +767,7 @@ class CAMD:
         
         # Calculate property using property calculator
         compound_composition = self.system[compound]
-        all_properties = self.property_calculator.calculate_all_properties(compound_composition)
+        all_properties = self.property_calculator.calculate(compound_composition)
         return all_properties.get(property_name)
     
     def show_binary_system_properties(self):

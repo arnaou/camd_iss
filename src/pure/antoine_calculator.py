@@ -448,7 +448,7 @@ if __name__ == "__main__":
         
         for name, compound in test_compounds.items():
             print(f"  Calculating properties for {name}: {compound}")
-            calc_props = prop_calc.calculate_all_properties(compound)
+            calc_props = prop_calc.calculate(compound)
             
             if calc_props and all(calc_props[p] is not None for p in ['tc', 'pc', 'ac', 'tb']):
                 # PropertyCalculator units: Tc[K], Pc[bar], Ac[-], Tb[K]
