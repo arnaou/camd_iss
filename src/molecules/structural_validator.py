@@ -14,7 +14,10 @@ Example Usage:
     cyclic_validator = StructuralValidator(molecular_type=0)  # monocyclic
     
     # Batch validation
-    compounds = [{'CH3': 2, 'OH': 1}, {'CH3': 3, 'CH2': 2}]
+    compounds = {
+        'invalid_ethanol': {'CH3': 2, 'OH': 1}, 
+        'invalid_compound': {'CH3': 5, 'CH2': 2}
+    }
     results = validator.validate_batch(compounds)
 """
 
@@ -116,15 +119,39 @@ class StructuralValidator:
         
         return True
     
-    def validate_batch(self, compounds: List[Dict[str, int]]) -> Dict[str, List[Dict[str, int]]]:
-        """Validate a batch of compounds."""
-        valid = []
-        invalid = []
+    def validate_batch(self, compounds: Dict[str, Dict[str, int]]) -> Dict[str, bool]:
+        """
+        Validate a batch of named compounds.
         
-        for compound in compounds:
-            if self.is_valid(compound):
-                valid.append(compound)
-            else:
-                invalid.append(compound)
+        Args:
+            compounds: Dict of {compound_name: {group: count}}
+                      e.g., {'acetone': {'CH3': 1, 'CH3CO': 1}, 'ethanol': {'CH3': 1, 'CH2': 1, 'OH': 1}}
         
-        return {'valid': valid, 'invalid': invalid}
+        Returns:
+            Dict mapping compound names to validation results (True/False)
+        """
+        results = {}
+        
+        for compound_name, compound_groups in compounds.items():
+            results[compound_name] = self.is_valid(compound_groups)
+        
+        return results
+    
+    def print_batch_results(self, results: Dict[str, bool], title: str = "Structural Validation Results"):
+        """
+        Print batch validation results in a formatted table.
+        
+        Args:
+            results: Results from validate_batch()
+            title: Title for the output table
+        """
+        print(f"\n=== {title} ===")
+        
+        for compound_name, is_valid in results.items():
+            status = '✓ Valid' if is_valid else '✗ Invalid'
+            print(f"{compound_name:15}: {status}")
+        
+        # Summary
+        valid_count = sum(results.values())
+        total_count = len(results)
+        print(f"\nSummary: {valid_count}/{total_count} compounds are structurally valid")
