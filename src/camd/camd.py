@@ -6,9 +6,9 @@ from typing import Dict, List, Optional, Union
 import pickle
 import json
 
-from .property_calculator import PropertyCalculator
-from .compound_validator import CompoundValidator
-from .antoine_calculator import AntoineCalculator
+from ..pure.property_calculator import PropertyCalculator
+from ..molecules.compound_validator import CompoundValidator
+from ..pure.antoine_calculator import AntoineCalculator
 
 
 class CAMD:

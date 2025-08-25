@@ -26,7 +26,7 @@ def load_unifac_data(data_path=None):
         json.JSONDecodeError: If JSON files are malformed
     """
     if data_path is None:
-        data_path = Path(__file__).parent.parent / "data" / "json"
+        data_path = Path(__file__).parent.parent.parent / "data" / "json"
     else:
         data_path = Path(data_path)
     

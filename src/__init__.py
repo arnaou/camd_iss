@@ -1,20 +1,35 @@
 """
 CAMD - Computer-Aided Molecular Design for Solvent Screening
 
-Includes UNIFAC calculation package for activity coefficient calculations in liquid mixtures.
+Modular package for molecular design with clean separation of concerns:
+- molecules: Molecule representation and validation
+- pure: Pure component property calculations  
+- mixture: Mixture properties and thermodynamics
+- data: Data loading and management
+- camd: CAMD optimization and screening
 """
 
+# Submodule imports
+from . import molecules
+from . import pure  
+from . import mixture
+from . import data
+from . import camd
+
+# Convenience imports for common functionality
 from .camd import CAMD
-from .unifac_core import unifac
-from .unifac_wrapper import unifac_wrapper
-from .unifac_data_loader import load_unifac_data, get_available_groups, validate_mixture_groups
+from .mixture import unifac, unifac_wrapper, UNIFACCalculator
+from .pure import PropertyCalculator, AntoineCalculator
+from .data import load_unifac_data, DataExporter
+from .molecules import CompoundValidator
 
 __all__ = [
-    'CAMD',
-    'unifac', 
-    'unifac_wrapper', 
-    'load_unifac_data', 
-    'get_available_groups', 
-    'validate_mixture_groups'
+    # Submodules
+    'molecules', 'pure', 'mixture', 'data', 'camd',
+    # Main classes
+    'CAMD', 'PropertyCalculator', 'AntoineCalculator', 'UNIFACCalculator', 
+    'DataExporter', 'CompoundValidator',
+    # Functions
+    'unifac', 'unifac_wrapper', 'load_unifac_data'
 ]
 __version__ = '0.1.0'

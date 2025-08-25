@@ -27,7 +27,7 @@ import sys
 import os
 
 # Add utils to path for pyomo utilities
-sys.path.append(str(Path(__file__).parent.parent / "utils"))
+sys.path.append(str(Path(__file__).parent.parent.parent / "utils"))
 from pyom import parse_pyomo_log, ensure_file_exists_in_cwd
 
 

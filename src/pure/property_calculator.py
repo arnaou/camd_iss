@@ -59,7 +59,7 @@ class PropertyCalculator:
         
         if data_path is None:
             # Default to data directory relative to this file
-            data_path = Path(__file__).parent.parent / "data" / "json"
+            data_path = Path(__file__).parent.parent.parent / "data" / "json"
         else:
             data_path = Path(data_path)
             
