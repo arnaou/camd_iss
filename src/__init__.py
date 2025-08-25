@@ -21,14 +21,14 @@ from .camd import CAMD
 from .mixture import unifac, unifac_wrapper, UNIFACCalculator
 from .pure import PropertyCalculator, AntoineCalculator
 from .data import load_unifac_data, DataExporter
-from .molecules import CompoundValidator
+from .molecules import StructuralValidator
 
 __all__ = [
     # Submodules
     'molecules', 'pure', 'mixture', 'data', 'camd',
     # Main classes
     'CAMD', 'PropertyCalculator', 'AntoineCalculator', 'UNIFACCalculator', 
-    'DataExporter', 'CompoundValidator',
+    'DataExporter', 'StructuralValidator',
     # Functions
     'unifac', 'unifac_wrapper', 'load_unifac_data'
 ]

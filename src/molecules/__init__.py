@@ -2,6 +2,6 @@
 Molecules module - Molecule representation and validation.
 """
 
-from .compound_validator import CompoundValidator
+from .structural_validator import StructuralValidator
 
-__all__ = ['CompoundValidator']
+__all__ = ['StructuralValidator']

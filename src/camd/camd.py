@@ -7,7 +7,7 @@ import pickle
 import json
 
 from ..pure.property_calculator import PropertyCalculator
-from ..molecules.compound_validator import CompoundValidator
+from ..molecules.structural_validator import StructuralValidator
 from ..pure.antoine_calculator import AntoineCalculator
 
 
@@ -65,7 +65,7 @@ class CAMD:
         self.property_calculator = PropertyCalculator(data_path=data_path, pure_method=pure_method, 
                                                    missing_group_action=missing_group_action)
         self.antoine_calculator = AntoineCalculator(missing_group_action=missing_group_action, verbose=False)
-        self.compound_validator = CompoundValidator(data_path=data_path, molecular_type=1)  # Default to acyclic
+        self.compound_validator = StructuralValidator(data_path=data_path, molecular_type=1)  # Default to acyclic
         
         self._create_output_directory()
         self._load_data()
@@ -918,7 +918,7 @@ class CAMD:
     
     def _validate_single_compound(self, compound_groups: Dict[str, int], compound_index: int):
         """
-        Validate a single compound using CompoundValidator.
+        Validate a single compound using StructuralValidator.
         
         Args:
             compound_groups: Groups and their counts for this compound
@@ -927,8 +927,8 @@ class CAMD:
         if not compound_groups:
             return
         
-        # Use CompoundValidator to check structural feasibility
-        is_valid = self.compound_validator.validate_compound(compound_groups, verbose=False)
+        # Use StructuralValidator to check structural feasibility
+        is_valid = self.compound_validator.is_valid(compound_groups)
         if not is_valid:
             raise ValueError(f"Compound {compound_index} violates structural feasibility rules")
     
