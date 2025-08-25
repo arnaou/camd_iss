@@ -37,9 +37,9 @@ T = np.array([308.15])  # Temperature T_t in Kelvin
 # start the unifac calculations
 groups = list(mixture.keys())
 
-def unifac(mixture, x, t, rk,qk, interaction_data):
+def unifac(mixture, x, T, rk,qk, interaction_data):
     """
-    
+
     """
     #unifac starts here
     v = np.array([mixture[group] for group in groups])  # Shape: (n_groups, n_components)
@@ -56,9 +56,9 @@ def unifac(mixture, x, t, rk,qk, interaction_data):
     # calculate qi
     q = np.dot(v.T, Qk)
     # calculate Li
-    L = np.matrix(q) / np.matrix(np.dot(x, q)).T
+    L = q / np.dot(x, q).T
     # calculate Ji
-    J = np.matrix(r) / np.matrix(np.dot(x, r)).T 
+    J = r / np.dot(x, r).T 
     # calculate gammaC
     log_gamma_c = 1 - J + np.log(J) - 5 * np.multiply(q, (1 - J / L + np.log(J / L)))
     # caculate ei,k
@@ -93,6 +93,80 @@ def unifac(mixture, x, t, rk,qk, interaction_data):
 
 results = unifac(mixture, x, T, rk_data, qk_data, interaction_data)
 # %%
+
+def unifac_wrapper(mixture, x_input, T_input, rk_data, 
+  qk_data, interaction_data):
+      """
+      Flexible UNIFAC wrapper that handles various input 
+  combinations.
+      
+      Args:
+          mixture: Dict {group: [counts for each component]}
+          x_input: Single composition array or multiple 
+  compositions
+          T_input: Single temperature or multiple temperatures
+          rk_data, qk_data, interaction_data: UNIFAC parameter
+   dictionaries
+      
+      Returns:
+          gamma: Activity coefficients array with appropriate 
+  shape
+      """
+
+      # Normalize inputs to consistent shapes
+      x = np.atleast_2d(x_input)  # Shape: (n_datapoints, n_components)
+      T = np.atleast_1d(T_input)  # Shape: (n_temperatures,)
+
+      # Validate input combinations
+      if len(T) > 1 and x.shape[0] > 1:
+          if len(T) != x.shape[0]:
+              raise ValueError(f"Multiple x ({x.shape[0]}) and T ({len(T)}) must have same length")
+
+      # Determine calculation mode
+      single_x = x.shape[0] == 1
+      single_T = len(T) == 1
+
+      if single_x and single_T:
+          # Case 1: Single x, single T
+          result = unifac(mixture, x, T, rk_data, qk_data,
+  interaction_data)
+          return result["gamma"]
+
+      elif single_x and not single_T:
+          # Case 2: Single x, multiple T  
+          gamma_list = []
+          for t in T:
+              result = unifac(mixture, x, np.array([t]),
+  rk_data, qk_data, interaction_data)
+              gamma_list.append(result["gamma"])
+          return np.array(gamma_list).T  # Shape: (n_components, n_temperatures)
+
+      elif not single_x and single_T:
+          # Case 3: Multiple x, single T
+          gamma_list = []
+          for x_i in x:
+              result = unifac(mixture, np.array([x_i]), T,
+  rk_data, qk_data, interaction_data)
+              gamma_list.append(result["gamma"])
+          return np.array(gamma_list)  # Shape: (n_datapoints, n_components)
+
+      else:
+          # Case 4: Multiple x, multiple T (same length)
+          gamma_list = []
+          for x_i, t_i in zip(x, T):
+              result = unifac(mixture, np.array([x_i]),
+  np.array([t_i]), rk_data, qk_data, interaction_data)
+              gamma_list.append(result["gamma"])
+          return np.array(gamma_list)  # Shape: (n_datapoints, n_components)
+          
+#%% testing
+#single x single T
+gamma = unifac_wrapper(mixture, [0.4, 0.6], 308.15, rk_data,
+   qk_data, interaction_data)
+
+# single x and mutiple T
+gamma = unifac_wrapper(mixture, [0.4, 0.6], [308.15, 150.15], rk_data,
+   qk_data, interaction_data)
 # # Create flattened interaction data after loading JSON
 # interaction_params = {}
 # for group_i, group_dict in interaction_data.items():
@@ -176,3 +250,5 @@ results = unifac(mixture, x, T, rk_data, qk_data, interaction_data)
 
 # def eq_gamma(m, dp, i):
 #     return m.gamma[dp, i] == pyo.exp(m.gamma_r[dp, i] + m.gamma_c[dp, i])
+
+# %%
