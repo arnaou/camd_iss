@@ -20,7 +20,6 @@ Example Usage:
 
 import numpy as np
 import pyomo.environ as pyo
-import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Dict, Optional, Union
 import sys
@@ -42,57 +41,16 @@ class AntoineCalculator:
     Requires critical properties: Tc [K], Pc [bar], ac (acentric factor), and Tb [K]
     """
     
-    def __init__(self, missing_group_action: str = "remove_compounds", verbose: bool = False):
+    def __init__(self, verbose: bool = False):
         """
         Initialize the Antoine parameter calculator.
         
         Args:
-            missing_group_action: Action for compounds with missing critical properties:
-                                "remove_compounds" (default) or "set_zero"
             verbose: Enable verbose solver output
         """
-        self.missing_group_action = missing_group_action
         self.verbose = verbose
-        self.missing_properties_summary = {}  # Track missing properties
-        
-        if missing_group_action not in ["remove_compounds", "set_zero"]:
-            raise ValueError(f"missing_group_action must be 'remove_compounds' or 'set_zero', got '{missing_group_action}'")
     
-    def _handle_missing_properties(self, compound: Dict[str, int], missing_properties: list) -> bool:
-        """
-        Handle missing critical properties according to the configured action.
-        
-        Args:
-            compound: The compound being calculated
-            missing_properties: List of missing critical properties
-            
-        Returns:
-            bool: True if calculation should continue, False if compound should be removed
-        """
-        if not missing_properties:
-            return True
-            
-        # Track missing properties for summary
-        compound_str = str(compound)
-        if compound_str not in self.missing_properties_summary:
-            self.missing_properties_summary[compound_str] = set()
-        self.missing_properties_summary[compound_str].update(missing_properties)
-        
-        print(f"Warning: Compound {compound} has missing critical properties: {missing_properties}")
-        print(f"         Action: Cannot calculate Antoine parameters - all critical properties required")
-        return False
     
-    def print_missing_properties_summary(self):
-        """Print a summary of all missing properties encountered during calculations."""
-        if not self.missing_properties_summary:
-            print("No missing critical properties found for Antoine calculations.")
-            return
-            
-        print("\n=== Missing Critical Properties Summary (Antoine Calculator) ===")
-        for compound, missing_props in self.missing_properties_summary.items():
-            print(f"Compound {compound}: {sorted(missing_props)}")
-        print(f"Action taken: {self.missing_group_action}")
-        print("=" * 65)
     
     def _handle_calculation_error(self, error: Exception, compound: Dict[str, int], context: str = "") -> None:
         """Handle calculation errors with consistent logging."""
@@ -100,17 +58,9 @@ class AntoineCalculator:
             context_str = f" during {context}" if context else ""
             print(f"Calculation failed for {compound}{context_str}: {error}")
     
-    def _has_required_properties(self, properties: Dict[str, Optional[float]], 
-                               required: list = ['tc', 'pc', 'ac', 'tb']) -> tuple[bool, list]:
-        """Check if all required properties are present and valid."""
-        missing_props = []
-        for prop in required:
-            if prop not in properties or properties[prop] is None:
-                missing_props.append(prop)
-        return len(missing_props) == 0, missing_props
     
     def calculate_antoine_parameters(self, compound: Dict[str, int], 
-                                   critical_properties: Dict[str, Optional[float]]) -> Optional[Dict[str, float]]:
+                                   critical_properties: Dict[str, float]) -> Optional[Dict[str, float]]:
         """
         Calculate Antoine parameters for a compound using its critical properties.
         
@@ -120,19 +70,17 @@ class AntoineCalculator:
                                 Required: 'tc', 'pc', 'ac', 'tb'
                                 
         Returns:
-            Dict with Antoine parameters {'A', 'B', 'C'} or None if compound should be removed
+            Dict with Antoine parameters {'A', 'B', 'C'} or None if calculation failed
         """
-        # Check for required critical properties using helper method
-        has_props, missing_props = self._has_required_properties(critical_properties)
-        
-        # Handle missing properties - Antoine calculation requires all critical properties
-        if not has_props:
-            self._handle_missing_properties(compound, missing_props)
-            return None
+        # Validate required properties are present
+        required = ['tc', 'pc', 'ac', 'tb']
+        missing = [prop for prop in required if prop not in critical_properties]
+        if missing:
+            raise ValueError(f"Missing required critical properties for {compound}: {missing}")
             
         # Extract critical properties
         tc = critical_properties['tc']  # Critical temperature [K]
-        pc = critical_properties['pc']  # Critical pressure [Pa] 
+        pc = critical_properties['pc']  # Critical pressure [bar] 
         ac = critical_properties['ac']  # Acentric factor [-]
         tb = critical_properties['tb']  # Boiling point [K]
 
@@ -285,6 +233,24 @@ class AntoineCalculator:
         """
         return 10 ** (A - B / (C + T))
     
+    def calculate_psat_vector(self, T_vector: np.ndarray, A: float, B: float, C: float) -> np.ndarray:
+        """
+        Vectorized vapor pressure calculation using Antoine equation.
+        
+        Args:
+            T_vector: Array of temperatures [K]
+            A, B, C: Antoine equation parameters
+            
+        Returns:
+            Array of vapor pressures [bar]
+            
+        Example:
+            >>> import numpy as np
+            >>> T_range = np.linspace(250, 400, 100)
+            >>> P_range = calculator.calculate_psat_vector(T_range, A, B, C)
+        """
+        return 10**(A - B/(T_vector + C))
+    
     def validate_antoine_parameters(self, A: float, B: float, C: float, 
                                   tb: float, tc: float, pc: float) -> Dict[str, float]:
         """
@@ -310,119 +276,30 @@ class AntoineCalculator:
             'relative_error_critical': abs(p_at_tc - pc) / pc * 100  # Percentage error
         }
     
-    def calculate_psat_vector(self, T_vector: np.ndarray, A: float, B: float, C: float) -> np.ndarray:
-        """
-        Vectorized vapor pressure calculation using Antoine equation.
-        
-        Args:
-            T_vector: Array of temperatures [K]
-            A, B, C: Antoine equation parameters
-            
-        Returns:
-            Array of vapor pressures [bar]
-            
-        Example:
-            >>> import numpy as np
-            >>> T_range = np.linspace(250, 400, 100)
-            >>> P_range = calculator.calculate_psat_vector(T_range, A, B, C)
-        """
-        return 10**(A - B/(T_vector + C))
     
-    def plot_psat(self, A: float, B: float, C: float, 
-                  tb: float, tc: float, pc: float, ac: float,
-                  compound: Optional[Dict[str, int]] = None, compound_name: str = "Compound") -> None:
-        """
-        Plot saturation pressure vs temperature showing Antoine equation validation.
-        
-        Args:
-            A, B, C: Antoine parameters
-            tb: Boiling point [K]
-            tc: Critical temperature [K]
-            pc: Critical pressure [bar]
-            ac: Acentric factor [-]
-            compound: Dict with group names and counts (optional)
-            compound_name: Name for plot title (used if compound not provided)
-        """
-        try:
-            # Temperature range from Tb to Tc
-            T_range = np.linspace(tb, tc, 1000)
-            
-            # Calculate Psat using vectorized Antoine equation (more efficient)
-            P_antoine = self.calculate_psat_vector(T_range, A, B, C)
-            
-            # Key points
-            T_ac = 0.7 * tc  # Temperature where acentric factor is defined (Tr = 0.7)
-            P_tb = 1.01325  # Atmospheric pressure at boiling point bar
-            P_ac = np.power(10, -(ac + 1)) * pc  # Pressure at Tr = 0.7
-            
-            # Calculate Antoine values at key points
-            P_antoine_tb = self.antoine_correlation(A, B, C, tb)
-            P_antoine_ac = self.antoine_correlation(A, B, C, T_ac)
-            P_antoine_tc = self.antoine_correlation(A, B, C, tc)
-            
-            # Create the plot
-            plt.figure(figsize=(10, 6))
-            plt.plot(T_range, P_antoine, 'b-', linewidth=2, label='Antoine equation')
-            plt.plot(tb, P_antoine_tb, 'ro', markersize=8, label=f'Boiling point (Tb={tb:.1f}K)')
-            plt.plot(T_ac, P_antoine_ac, 'go', markersize=8, label=f'Tr=0.7 (T={T_ac:.1f}K, ω={ac:.3f})')
-            plt.plot(tc, P_antoine_tc, 'mo', markersize=8, label=f'Critical point (Tc={tc:.1f}K)')
-            
-            # Add horizontal lines for reference pressures
-            plt.axhline(y=P_tb, color='r', linestyle='--', alpha=0.5)
-            plt.axhline(y=P_ac, color='g', linestyle='--', alpha=0.5)
-            plt.axhline(y=pc, color='m', linestyle='--', alpha=0.5)
-            
-            plt.xlabel('Temperature [K]')
-            plt.ylabel('Saturation Pressure [bar]')
-            plt.title(f'Psat vs T (Antoine Parameters: A={A:.3f}, B={B:.3f}, C={C:.3f})')
-            plt.grid(True, alpha=0.3)
-            plt.legend()
-            
-            # Add compound composition box
-            if compound:
-                # Create compound composition text
-                comp_text = "Compound Make Up:\n"
-                comp_text += " + ".join([f"{count} {group}" for group, count in compound.items()])
-            else:
-                comp_text = f"Compound: {compound_name}"
-            
-            # Add text box with compound composition
-            props = dict(boxstyle='round', facecolor='lightblue', alpha=0.8)
-            plt.text(0.02, 0.75, comp_text, transform=plt.gca().transAxes, fontsize=10,
-                    verticalalignment='top', bbox=props)
-            
-            plt.tight_layout()
-            plt.show()
-            
-        except ImportError:
-            print("Warning: matplotlib not available. Skipping Psat plot.")
-        except Exception as e:
-            print(f"Error creating Psat plot: {e}")
 
 
 # Convenience function for quick calculations  
 def calculate_antoine_parameters(compound: Dict[str, int], 
-                               critical_properties: Dict[str, Optional[float]],
-                               missing_group_action: str = "remove_compounds") -> Optional[Dict[str, float]]:
+                               critical_properties: Dict[str, float]) -> Optional[Dict[str, float]]:
     """
     Convenience function to calculate Antoine parameters for a compound.
     
     Args:
         compound: Dict with group names as keys and counts as values
         critical_properties: Dict with critical properties (tc, pc, ac, tb)
-        missing_group_action: Action for missing properties
         
     Returns:
-        Dict with Antoine parameters or None if compound should be removed
+        Dict with Antoine parameters or None if calculation failed
         
     Example:
         >>> compound = {'CH3': 2, 'OH': 1}  # Ethanol
-        >>> props = {'tc': 513.9, 'pc': 6.137e6, 'ac': 0.645, 'tb': 351.4}
+        >>> props = {'tc': 513.9, 'pc': 61.37, 'ac': 0.645, 'tb': 351.4}
         >>> antoine_params = calculate_antoine_parameters(compound, props)
         >>> if antoine_params:
         >>>     print(f"A: {antoine_params['A']:.3f}")
     """
-    calculator = AntoineCalculator(missing_group_action=missing_group_action)
+    calculator = AntoineCalculator()
     return calculator.calculate_antoine_parameters(compound, critical_properties)
 
 
@@ -441,7 +318,10 @@ if __name__ == "__main__":
     # Calculate critical properties using PropertyCalculator
     print("--- Calculating Critical Properties ---")
     try:
-        from property_calculator import PropertyCalculator
+        try:
+            from .property_calculator import PropertyCalculator
+        except ImportError:
+            from property_calculator import PropertyCalculator
         
         prop_calc = PropertyCalculator(missing_group_action="remove_compounds")
         test_cases = {}
@@ -450,15 +330,15 @@ if __name__ == "__main__":
             print(f"  Calculating properties for {name}: {compound}")
             calc_props = prop_calc.calculate(compound)
             
-            if calc_props and all(calc_props[p] is not None for p in ['tc', 'pc', 'ac', 'tb']):
-                # PropertyCalculator units: Tc[K], Pc[bar], Ac[-], Tb[K]
+            if calc_props and all(p in calc_props and calc_props[p] is not None for p in ['tc', 'pc', 'ac', 'tb']):
+                # Convert numpy types to regular float for consistency
                 test_cases[name] = {
                     'compound': compound,
                     'properties': {
-                        'tc': calc_props['tc'],
-                        'pc': calc_props['pc'], 
-                        'ac': calc_props['ac'],
-                        'tb': calc_props['tb']
+                        'tc': float(calc_props['tc']),
+                        'pc': float(calc_props['pc']), 
+                        'ac': float(calc_props['ac']),
+                        'tb': float(calc_props['tb'])
                     }
                 }
                 print(f"    ✓ Success: Tc={calc_props['tc']:.1f}K, Pc={calc_props['pc']:.1f}bar")
@@ -508,11 +388,13 @@ if __name__ == "__main__":
               f"P(Tc)={validation['pressure_at_critical_temp']:.3f} bar, "
               f"Error={validation['relative_error_critical']:.2f}%")
         
-        # Create diagnostic plot
-        calculator.plot_psat(
-            A, B, C, props['tb'], props['tc'], props['pc'], props['ac'],
-            compound=data['compound'], compound_name=name
-        )
+        # Create diagnostic plot (using separate visualization module)
+        try:
+            from antoine_visualizations import plot_psat
+            plot_psat(
+                A, B, C, props['tb'], props['tc'], props['pc'], props['ac'],
+                compound=data['compound'], compound_name=name
+            )
+        except ImportError:
+            print("  Note: antoine_visualizations module not available for plotting")
     
-    # Print summary
-    calculator.print_missing_properties_summary()

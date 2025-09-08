@@ -1,5 +1,5 @@
 """
-Ultra-Minimal Structural Validator
+Structural Validator
 
 Validates compound structures using Odele and Macchietto structural feasibility rules.
 https://doi.org/10.1016/0378-3812(93)87127-M
