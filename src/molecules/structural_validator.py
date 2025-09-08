@@ -8,22 +8,23 @@ Example Usage:
     # Simple validation (default: acyclic molecules)
     validator = StructuralValidator()
     compound = {'CH3': 1, 'CH2': 1, 'OH': 1}  # Ethanol
-    is_valid = validator.is_valid(compound)
+    is_valid = validator.validate(compound)  # Auto-detects single compound
     
     # Validate cyclic molecules
     cyclic_validator = StructuralValidator(molecular_type=0)  # monocyclic
     
-    # Batch validation
+    # Batch validation (auto-detected)
     compounds = {
+        'ethanol': {'CH3': 1, 'CH2': 1, 'OH': 1},
         'invalid_ethanol': {'CH3': 2, 'OH': 1}, 
         'invalid_compound': {'CH3': 5, 'CH2': 2}
     }
-    results = validator.validate_batch(compounds)
+    results = validator.validate(compounds)  # Auto-detects batch
 """
 
 import json
 from pathlib import Path
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, overload
 
 
 class StructuralValidator:
@@ -56,14 +57,9 @@ class StructuralValidator:
     def _load_noc_data(self, data_path: Path):
         """Load number of connections data."""
         noc_file = data_path / "noc.json"
-        
         if noc_file.exists():
-            try:
-                with open(noc_file, 'r') as f:
-                    noc_json = json.load(f)
-                self.noc_data = noc_json.get("data", {})
-            except Exception:
-                self.noc_data = {}
+            with open(noc_file, 'r') as f:
+                self.noc_data = json.load(f).get("data", {})
     
     def is_valid(self, compound: Dict[str, int]) -> bool:
         """Check if compound is structurally valid."""
@@ -72,19 +68,14 @@ class StructuralValidator:
         if not self.noc_data:
             return False  # Cannot validate without NOC data
         
-        try:
-            # Check standalone molecules first
-            standalone_groups = [(g, c) for g, c in compound.items() 
-                               if g in self.noc_data and self.noc_data[g] == 0]
-            
-            if standalone_groups:
-                return self._validate_standalone(compound, standalone_groups)
-            
-            # Check structural rules for connected molecules
-            return self._validate_connected(compound)
-            
-        except Exception:
-            return False
+        # Check standalone molecules first
+        standalone_groups = [(g, c) for g, c in compound.items() 
+                           if g in self.noc_data and self.noc_data[g] == 0]
+        
+        if standalone_groups:
+            return self._validate_standalone(compound, standalone_groups)
+        
+        return self._validate_connected(compound)
     
     def _validate_standalone(self, compound: Dict[str, int], standalone_groups: List) -> bool:
         """Validate standalone molecules (NOC = 0)."""
@@ -97,14 +88,12 @@ class StructuralValidator:
     def _validate_connected(self, compound: Dict[str, int]) -> bool:
         """Validate connected molecules using octet and connectivity rules."""
         # Check for missing noc data
-        missing_groups = [g for g in compound.keys() if g not in self.noc_data]
-        if missing_groups:
+        if any(g not in self.noc_data for g in compound):
             return False
         
         # Octet rule: 2*m = sum((2 - noc_i) * x_i)
         total_valency = sum((2 - self.noc_data[group]) * count 
                            for group, count in compound.items())
-        
         if total_valency != 2 * self.molecular_type:
             return False
         
@@ -112,46 +101,30 @@ class StructuralValidator:
         for group_i, count_i in compound.items():
             noc_i = self.noc_data[group_i]
             sum_others = sum(count for group, count in compound.items() if group != group_i)
-            min_required = (noc_i - 2) * count_i + 2
-            
-            if sum_others < min_required:
+            if sum_others < (noc_i - 2) * count_i + 2:
                 return False
-        
         return True
     
-    def validate_batch(self, compounds: Dict[str, Dict[str, int]]) -> Dict[str, bool]:
-        """
-        Validate a batch of named compounds.
-        
-        Args:
-            compounds: Dict of {compound_name: {group: count}}
-                      e.g., {'acetone': {'CH3': 1, 'CH3CO': 1}, 'ethanol': {'CH3': 1, 'CH2': 1, 'OH': 1}}
-        
-        Returns:
-            Dict mapping compound names to validation results (True/False)
-        """
-        results = {}
-        
-        for compound_name, compound_groups in compounds.items():
-            results[compound_name] = self.is_valid(compound_groups)
-        
-        return results
     
-    def print_batch_results(self, results: Dict[str, bool], title: str = "Structural Validation Results"):
-        """
-        Print batch validation results in a formatted table.
+    def validate(self, input_data: Union[Dict[str, int], Dict[str, Dict[str, int]]]) -> Union[bool, Dict[str, bool]]:
+        """Validate single compound or batch. Auto-detects input type."""
+        if not input_data:
+            return False if self._is_single_compound(input_data) else {}
         
-        Args:
-            results: Results from validate_batch()
-            title: Title for the output table
-        """
-        print(f"\n=== {title} ===")
-        
-        for compound_name, is_valid in results.items():
-            status = '✓ Valid' if is_valid else '✗ Invalid'
-            print(f"{compound_name:15}: {status}")
-        
-        # Summary
-        valid_count = sum(results.values())
-        total_count = len(results)
-        print(f"\nSummary: {valid_count}/{total_count} compounds are structurally valid")
+        # Auto-detect if this is a single compound or batch
+        if self._is_single_compound(input_data):
+            return self.is_valid(input_data)
+        else:
+            # Inline batch processing
+            results = {}
+            for compound_name, compound_groups in input_data.items():
+                results[compound_name] = self.is_valid(compound_groups)
+            return results
+    
+    def _is_single_compound(self, input_data: Union[Dict[str, int], Dict[str, Dict[str, int]]]) -> bool:
+        """Determine if input is single compound or batch."""
+        if not input_data:
+            return True
+        return isinstance(next(iter(input_data.values())), int)
+    
+    
