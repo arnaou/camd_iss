@@ -54,25 +54,6 @@ class PropertyMethod(ABC):
         """Get the name of this estimation method."""
         pass
     
-    def calculate_batch(self, compounds: Dict[str, Dict[str, int]], 
-                       properties: Optional[List[str]] = None) -> Dict[str, Optional[Dict[str, Optional[float]]]]:
-        """
-        Calculate properties for multiple named compounds.
-        
-        Args:
-            compounds: Dict of {compound_name: {group: count}} 
-                      e.g., {'acetone': {'CH3': 1, 'CH3CO': 1}, 'methanol': {'CH3OH': 1}}
-            properties: List of properties to calculate (None = all available)
-            
-        Returns:
-            Dict mapping compound names to property results
-        """
-        results = {}
-        
-        for compound_name, compound_groups in compounds.items():
-            results[compound_name] = self.calculate_properties(compound_groups, properties)
-            
-        return results
     
     def _handle_missing_groups(self, compound: Dict[str, int], missing_groups: list, 
                               property_name: str) -> bool:

@@ -140,7 +140,7 @@ class ConstantinouGani(PropertyMethod):
         if scalar is None or prop_sum <= 0:
             return None
             
-        return scalar * np.log(prop_sum)
+        return float(scalar * np.log(prop_sum))
     
     def _calculate_pc(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate critical pressure: 1 / (sum(contrib[i] * count[i]) + pc02)^2 + pc01"""
@@ -169,7 +169,7 @@ class ConstantinouGani(PropertyMethod):
             return None
         
         denominator = pc_sum + pc02
-        return 1 / (denominator ** 2) + pc01
+        return float(1 / (denominator ** 2) + pc01)
     
     def _calculate_ac(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate acentric factor: w01 * ln(sum(contrib[i] * count[i]) + w03)^(1/w02)"""
@@ -196,7 +196,7 @@ class ConstantinouGani(PropertyMethod):
         w03 = scalars.get('w03', 1.1507)
         
         argument = ac_sum + w03
-        return w01 * (np.log(argument) ** (1/w02))
+        return float(w01 * (np.log(argument) ** (1/w02)))
     
     def _calculate_hv(self, compound: Dict[str, int]) -> Optional[float]:
         """Calculate heat of vaporization: Hv0 + sum(contrib[i] * count[i])"""
@@ -222,4 +222,4 @@ class ConstantinouGani(PropertyMethod):
         if hv0 is None:
             return None
             
-        return hv0 + hv_sum
+        return float(hv0 + hv_sum)
