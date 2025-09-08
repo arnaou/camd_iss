@@ -9,7 +9,7 @@ Example Usage:
     # Standalone usage
     calculator = AntoineCalculator(missing_group_action="remove_compounds")
     compound = {'CH3': 2, 'OH': 1}  # Ethanol
-    properties = {'tc': 513.9, 'pc': 6.137e6, 'ac': 0.645, 'tb': 351.4}  # Critical props from PropertyCalculator
+    properties = {'tc': 513.9, 'pc': 6.137, 'ac': 0.645, 'tb': 351.4}  # Critical props from PropertyCalculator
     antoine_params = calculator.calculate_antoine_parameters(compound, properties)
     print(f"Antoine A: {antoine_params['A']:.3f}")
     
@@ -220,36 +220,28 @@ class AntoineCalculator:
         
         return output
     
-    def antoine_correlation(self, A: float, B: float, C: float, T: float) -> float:
+    def antoine_correlation(self, A: float, B: float, C: float, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """
         Calculate saturation pressure using Antoine equation.
         
-        Args:
-            A, B, C: Antoine parameters
-            T: Temperature in Kelvin
-            
-        Returns:
-            Saturation pressure in bar
-        """
-        return 10 ** (A - B / (C + T))
-    
-    def calculate_psat_vector(self, T_vector: np.ndarray, A: float, B: float, C: float) -> np.ndarray:
-        """
-        Vectorized vapor pressure calculation using Antoine equation.
+        Handles both scalar and vector temperature inputs automatically.
         
         Args:
-            T_vector: Array of temperatures [K]
-            A, B, C: Antoine equation parameters
+            A, B, C: Antoine parameters
+            T: Temperature in Kelvin (scalar or array)
             
         Returns:
-            Array of vapor pressures [bar]
+            Saturation pressure in bar (same type as T input)
             
         Example:
+            >>> # Scalar usage
+            >>> P_scalar = calculator.antoine_correlation(A, B, C, 350.0)
+            >>> # Vector usage
             >>> import numpy as np
             >>> T_range = np.linspace(250, 400, 100)
-            >>> P_range = calculator.calculate_psat_vector(T_range, A, B, C)
+            >>> P_range = calculator.antoine_correlation(A, B, C, T_range)
         """
-        return 10**(A - B/(T_vector + C))
+        return 10 ** (A - B / (C + T))
     
     def validate_antoine_parameters(self, A: float, B: float, C: float, 
                                   tb: float, tc: float, pc: float) -> Dict[str, float]:
@@ -279,122 +271,5 @@ class AntoineCalculator:
     
 
 
-# Convenience function for quick calculations  
-def calculate_antoine_parameters(compound: Dict[str, int], 
-                               critical_properties: Dict[str, float]) -> Optional[Dict[str, float]]:
-    """
-    Convenience function to calculate Antoine parameters for a compound.
-    
-    Args:
-        compound: Dict with group names as keys and counts as values
-        critical_properties: Dict with critical properties (tc, pc, ac, tb)
-        
-    Returns:
-        Dict with Antoine parameters or None if calculation failed
-        
-    Example:
-        >>> compound = {'CH3': 2, 'OH': 1}  # Ethanol
-        >>> props = {'tc': 513.9, 'pc': 61.37, 'ac': 0.645, 'tb': 351.4}
-        >>> antoine_params = calculate_antoine_parameters(compound, props)
-        >>> if antoine_params:
-        >>>     print(f"A: {antoine_params['A']:.3f}")
-    """
-    calculator = AntoineCalculator()
-    return calculator.calculate_antoine_parameters(compound, critical_properties)
 
 
-if __name__ == "__main__":
-    # Example usage
-    print("=== Antoine Calculator Example ===")
-    
-    # Test compounds
-    test_compounds = {
-        'ethanol': {'CH3': 1, 'CH2': 1, 'OH': 1},
-        'acetone': {'CH3': 2, 'CH3CO': 1}, 
-        'water': {'H2O': 1},
-        'methanol': {'CH3OH': 1}
-    }
-    
-    # Calculate critical properties using PropertyCalculator
-    print("--- Calculating Critical Properties ---")
-    try:
-        try:
-            from .property_calculator import PropertyCalculator
-        except ImportError:
-            from property_calculator import PropertyCalculator
-        
-        prop_calc = PropertyCalculator(missing_group_action="remove_compounds")
-        test_cases = {}
-        
-        for name, compound in test_compounds.items():
-            print(f"  Calculating properties for {name}: {compound}")
-            calc_props = prop_calc.calculate(compound)
-            
-            if calc_props and all(p in calc_props and calc_props[p] is not None for p in ['tc', 'pc', 'ac', 'tb']):
-                # Convert numpy types to regular float for consistency
-                test_cases[name] = {
-                    'compound': compound,
-                    'properties': {
-                        'tc': float(calc_props['tc']),
-                        'pc': float(calc_props['pc']), 
-                        'ac': float(calc_props['ac']),
-                        'tb': float(calc_props['tb'])
-                    }
-                }
-                print(f"    ✓ Success: Tc={calc_props['tc']:.1f}K, Pc={calc_props['pc']:.1f}bar")
-            else:
-                print(f"    ✗ Failed: Missing group contributions")
-        
-        if not test_cases:
-            print("  No compounds could be calculated. Exiting example.")
-            exit()
-            
-    except ImportError:
-        print("  PropertyCalculator not available. Cannot run example without calculated properties.")
-        print("  To use experimental properties instead, uncomment the lines below:")
-        print("  # experimental_cases = {")
-        print("  #     'ethanol': {")
-        print("  #         'compound': {'CH3': 1, 'CH2': 1, 'OH': 1},")
-        print("  #         'properties': {'tc': 514.0, 'pc': 61.48, 'ac': 0.644, 'tb': 351.44}")
-        print("  #     }")
-        print("  # }")
-        print("  # test_cases = experimental_cases")
-        exit()
-    
-    calculator = AntoineCalculator(verbose=False)
-    
-    for name, data in test_cases.items():
-        print(f"\n{name.upper()}: {data['compound']}")
-        props = data['properties']
-        print(f"Properties: Tc={props['tc']:.1f}K, Pc={props['pc']:.2f}bar, ω={props['ac']:.3f}, Tb={props['tb']:.1f}K")
-        
-        antoine_params = calculator.calculate_antoine_parameters(
-            data['compound'], data['properties']
-        )
-        
-        if antoine_params is None:
-            print("  Antoine parameters could not be calculated")
-            continue
-            
-        A, B, C = antoine_params['A'], antoine_params['B'], antoine_params['C']
-        print(f"  Antoine: A={A:.4f}, B={B:.4f}, C={C:.4f}")
-        
-        # Validate results
-        validation = calculator.validate_antoine_parameters(
-            A, B, C, props['tb'], props['tc'], props['pc']
-        )
-
-        print(f"  Validation: P(Tb)={validation['pressure_at_boiling_point']:.6f} bar, "
-              f"P(Tc)={validation['pressure_at_critical_temp']:.3f} bar, "
-              f"Error={validation['relative_error_critical']:.2f}%")
-        
-        # Create diagnostic plot (using separate visualization module)
-        try:
-            from antoine_visualizations import plot_psat
-            plot_psat(
-                A, B, C, props['tb'], props['tc'], props['pc'], props['ac'],
-                compound=data['compound'], compound_name=name
-            )
-        except ImportError:
-            print("  Note: antoine_visualizations module not available for plotting")
-    
