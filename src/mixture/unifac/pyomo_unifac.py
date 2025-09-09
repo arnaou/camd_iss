@@ -50,7 +50,7 @@ def pyo_unifac(x, T, mixture, rk_data, qk_data, interaction_data, verbose=False)
     :return: (solution, model)
     """
     # create the model
-    model = pyo.ConcreteModel()
+    model = pyo.ConcreteModel('unifac')
     
     # Auto-convert mixture format 
     mixture = _convert_mixture_format(mixture)
