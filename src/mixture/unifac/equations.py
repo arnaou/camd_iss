@@ -7,7 +7,7 @@ following the Smith et al. (2001) formulation.
 import numpy as np
 
 
-def unifac(mixture, x, T, rk_data, qk_data, interaction_data):
+def unifac_equations(mixture, x, T, rk_data, qk_data, interaction_data):
     """
     Calculate UNIFAC activity coefficients for given mixture, composition, and temperature.
     
@@ -63,6 +63,8 @@ def unifac(mixture, x, T, rk_data, qk_data, interaction_data):
     
     # Wrap the results in a dictionary
     results = {
+        "r": r,
+        "q": q,
         "J": J,
         "L": L,
         "log_gamma_c": log_gamma_c,

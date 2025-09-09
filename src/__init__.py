@@ -18,7 +18,7 @@ from . import camd
 
 # Convenience imports for common functionality
 from .camd import CAMD
-from .mixture import unifac, unifac_wrapper, UNIFACCalculator
+from .mixture import unifac, unifac_equations, UNIFACCalculator
 from .pure import PropertyCalculator, AntoineCalculator
 from .data import load_unifac_data, DataExporter
 from .molecules import StructuralValidator
