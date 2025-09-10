@@ -71,6 +71,7 @@ def unifac_equations(mixture, x, T, rk_data, qk_data, interaction_data):
         "e": e,
         "theta": theta,
         "psi": psi,
+        'beta': beta,
         "omega": omega,
         "log_gamma_r": log_gamma_r,
         "gamma": gamma

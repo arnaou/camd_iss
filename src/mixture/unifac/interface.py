@@ -92,11 +92,14 @@ def unifac(mixture, x, T, rk_data, qk_data, interaction_data):
         if key in ["r", "q", "J", "L", "log_gamma_c", "log_gamma_r", "gamma"]:
             # Stack component-wise results
             combined_results[key] = np.vstack([r[key] for r in results_list])
-        elif key in ["e"]:
-            # Stack group-component results  
+        elif key in ["e", "beta"]:
+            # Stack group-component results - shape (n_components, n_groups) per data point
+            combined_results[key] = np.array([r[key] for r in results_list])
+        elif key in ["theta", "omega"]:
+            # Stack group-wise results - theta and omega are 1D arrays per data point
             combined_results[key] = np.vstack([r[key] for r in results_list])
-        elif key in ["theta", "psi", "omega"]:
-            # Stack data-point wise results
+        elif key in ["psi"]:
+            # Stack 2D matrix results - psi is a 2D matrix per data point
             combined_results[key] = np.array([r[key] for r in results_list])
     
     return combined_results

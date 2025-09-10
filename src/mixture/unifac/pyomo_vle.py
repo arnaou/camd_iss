@@ -8,6 +8,7 @@ the specific variable naming convention (tau, s, eta, G, etc.).
 import pyomo.environ as pyo
 import numpy as np
 from typing import Dict, List, Optional, Tuple
+from .interface import unifac
 
 
 def _convert_mixture_format(mixture):
@@ -60,6 +61,70 @@ def _convert_antoine_format(antoine_params):
     return antoine_array
 
 
+def _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params):
+    """
+    Generate initialization values using the UNIFAC interface for better convergence.
+    
+    Args:
+        x: liquid composition array (n_data, n_components)
+        T: temperature array (n_data,) in Kelvin
+        mixture: compound format {compound_name: {group: count}}
+        rk_data, qk_data, interaction_data: UNIFAC parameter dictionaries
+        antoine_params: Antoine parameters dict
+    
+    Returns:
+        Dict with initialization values for all variables
+    """
+    try:
+        # Calculate UNIFAC values using the interface
+        results = unifac(mixture, x, T, rk_data, qk_data, interaction_data)
+        
+        # Convert Antoine parameters
+        antoine_array = _convert_antoine_format(antoine_params)
+        n_data, n_comp = x.shape
+        
+        # Calculate vapor pressures using Antoine equation
+        psat_init = np.zeros((n_data, n_comp))
+        for j in range(n_data):
+            for i in range(n_comp):
+                A, B, C = antoine_array[i]
+                psat_init[j, i] = 10**(A - B / (C + T[j]))
+        
+        # Calculate initial vapor compositions using VLE equilibrium
+        P = 1.01325  # Default pressure in bar
+        y_init = np.zeros((n_data, n_comp))
+        for j in range(n_data):
+            for i in range(n_comp):
+                y_init[j, i] = psat_init[j, i] * x[j, i] * results['gamma'][j, i] / P
+            # Normalize y to sum to 1
+            y_init[j, :] = y_init[j, :] / np.sum(y_init[j, :])
+        
+        # Create initialization dictionary
+        init_values = {
+            'r': results['r'],
+            'q': results['q'], 
+            'J': results['J'],
+            'L': results['L'],
+            'e': results['e'],
+            'theta': results['theta'],
+            'psi': results['psi'],
+            'beta': results['beta'],
+            'omega': results['omega'],
+            'log_gamma_c': results['log_gamma_c'],
+            'log_gamma_r': results['log_gamma_r'],
+            'gamma': results['gamma'],
+            'psat': psat_init,
+            'y': y_init
+        }
+        
+        return init_values
+        
+    except Exception as e:
+        print(f"Warning: Failed to generate initialization values: {e}")
+        print("Using default initialization values instead.")
+        return None
+
+
 def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, verbose=False):
     """
     Pyomo model for vapour-liquid equilibrium.
@@ -74,9 +139,13 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     :param verbose: If True, print solver output
     :return: (solution, model)
     """
-    # Auto-convert formats
+    # Generate initialization values using original mixture format
+    init_values = _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params)
+    
+    # Auto-convert formats for pyomo model
     mixture = _convert_mixture_format(mixture)
     antoine_array = _convert_antoine_format(antoine_params)
+    
     # create the model
     model = pyo.ConcreteModel('vle')
     
@@ -133,26 +202,86 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     # System pressure parameter (default 1.01325 bar = 1 atm)
     model.P = pyo.Param(initialize=1.01325, mutable=False, name='Total pressure in bar', domain=pyo.PositiveReals)
     
-    # define the model variables - matching equations.py nomenclature exactly
-    model.r = pyo.Var(model.i, initialize=1.2, within=pyo.PositiveReals, name='unifac r_i')
-    model.q = pyo.Var(model.i, initialize=4.5, within=pyo.PositiveReals, name='unifac q_i')
-    model.J = pyo.Var(model.dp, model.i, initialize=1.13, within=pyo.PositiveReals, name='unifac J_i')
-    model.L = pyo.Var(model.dp, model.i, initialize=1.15, within=pyo.PositiveReals, name='unifac L_i')
-    model.e = pyo.Var(model.i, model.k, initialize=0.5, within=pyo.NonNegativeReals, name='unifac e_ik')
-    model.theta = pyo.Var(model.dp, model.k, initialize=1.2, within=pyo.PositiveReals, name='unifac theta_k')
+    # Helper function to create initialization dictionaries
+    def create_init_dict_1d(values, fallback):
+        """Create 1D initialization dict"""
+        if init_values is not None and values is not None:
+            return {i: float(values[i]) for i in range(len(values))}
+        return fallback
     
-    model.psi = pyo.Var(model.dp, model.k, model.k, initialize=0.79, within=pyo.PositiveReals, name='unifac psi_mk')
-    model.beta = pyo.Var(model.dp, model.i, model.k, initialize=1.7, within=pyo.PositiveReals, name='unifac beta_ik')
-    model.omega = pyo.Var(model.dp, model.k, initialize=1.1, within=pyo.PositiveReals, name='unifac omega_k')
-    model.log_gamma_c = pyo.Var(model.dp, model.i, initialize=0.1, within=pyo.Reals, name='unifac log_gamma_c')
-    model.log_gamma_r = pyo.Var(model.dp, model.i, initialize=0.1, within=pyo.Reals, name='unifac log_gamma_r')
-    model.gamma = pyo.Var(model.dp, model.i, initialize=1.5, within=pyo.Reals, name='unifac total gamma')
+    def create_init_dict_2d(values, fallback, keys1=None, keys2=None):
+        """Create 2D initialization dict with optional custom keys"""
+        if init_values is not None and values is not None:
+            if keys1 is not None and keys2 is not None:
+                return {(k1, k2): float(values[i, j]) for i, k1 in enumerate(keys1) for j, k2 in enumerate(keys2)}
+            else:
+                return {(j, i): float(values[j, i]) for j in range(values.shape[0]) for i in range(values.shape[1])}
+        return fallback
+    
+    def create_init_dict_3d(values, fallback, keys1=None, keys2=None, keys3=None):
+        """Create 3D initialization dict with optional custom keys"""
+        if init_values is not None and values is not None:
+            if keys1 is not None and keys2 is not None and keys3 is not None:
+                return {(k1, k2, k3): float(values[i, j, k]) 
+                       for i, k1 in enumerate(keys1) 
+                       for j, k2 in enumerate(keys2) 
+                       for k, k3 in enumerate(keys3)}
+            else:
+                return {(j, i, k): float(values[j, i, k]) for j in range(values.shape[0]) 
+                        for i in range(values.shape[1]) for k in range(values.shape[2])}
+        return fallback
+
+    # define the model variables - matching equations.py nomenclature exactly
+    model.r = pyo.Var(model.i, 
+                     initialize=create_init_dict_1d(init_values['r'][0] if init_values else None, 1.2), 
+                     within=pyo.PositiveReals, name='unifac r_i')
+    model.q = pyo.Var(model.i, 
+                     initialize=create_init_dict_1d(init_values['q'][0] if init_values else None, 4.5), 
+                     within=pyo.PositiveReals, name='unifac q_i')
+    model.J = pyo.Var(model.dp, model.i, 
+                     initialize=create_init_dict_2d(init_values['J'] if init_values else None, 1.13), 
+                     within=pyo.PositiveReals, name='unifac J_i')
+    model.L = pyo.Var(model.dp, model.i, 
+                     initialize=create_init_dict_2d(init_values['L'] if init_values else None, 1.15), 
+                     within=pyo.PositiveReals, name='unifac L_i')
+    model.e = pyo.Var(model.i, model.k, 
+                     initialize=create_init_dict_2d(init_values['e'][0,:,:] if init_values else None, 0.5, 
+                                                   keys1=range(n_comp), keys2=groups), 
+                     within=pyo.NonNegativeReals, name='unifac e_ik')
+    model.theta = pyo.Var(model.dp, model.k, 
+                         initialize=create_init_dict_2d(init_values['theta'] if init_values else None, 1.2,
+                                                       keys1=range(n_data), keys2=groups), 
+                         within=pyo.NonNegativeReals, name='unifac theta_k')
+    
+    model.psi = pyo.Var(model.dp, model.k, model.k, 
+                       initialize=create_init_dict_3d(init_values['psi'] if init_values else None, 0.79,
+                                                     keys1=range(n_data), keys2=groups, keys3=groups), 
+                       within=pyo.PositiveReals, name='unifac psi_mk')
+    model.beta = pyo.Var(model.dp, model.i, model.k, 
+                        initialize=create_init_dict_3d(init_values['beta'] if init_values else None, 1.7,
+                                                      keys1=range(n_data), keys2=range(n_comp), keys3=groups),
+                          within=pyo.PositiveReals, name='unifac beta_ik')
+    model.omega = pyo.Var(model.dp, model.k, 
+                         initialize=create_init_dict_2d(init_values['omega'] if init_values else None, 1.1,
+                                                       keys1=range(n_data), keys2=groups), 
+                         within=pyo.PositiveReals, name='unifac omega_k')
+    model.log_gamma_c = pyo.Var(model.dp, model.i, 
+                               initialize=create_init_dict_2d(init_values['log_gamma_c'] if init_values else None, 0.1), 
+                               within=pyo.Reals, name='unifac log_gamma_c')
+    model.log_gamma_r = pyo.Var(model.dp, model.i, 
+                               initialize=create_init_dict_2d(init_values['log_gamma_r'] if init_values else None, 0.1), 
+                               within=pyo.Reals, name='unifac log_gamma_r')
+    model.gamma = pyo.Var(model.dp, model.i, 
+                         initialize=create_init_dict_2d(init_values['gamma'] if init_values else None, 1.5), 
+                         within=pyo.Reals, name='unifac total gamma')
     
     # VLE-specific variables
-    model.psat = pyo.Var(model.dp, model.i, initialize=101325, within=pyo.PositiveReals, 
-                        name='vapor pressure in Pa')
-    model.y = pyo.Var(model.dp, model.i, initialize=0.5, within=pyo.UnitInterval, 
-                     name='vapor composition y')
+    model.psat = pyo.Var(model.dp, model.i, 
+                        initialize=create_init_dict_2d(init_values['psat'] if init_values else None, 101325), 
+                        within=pyo.PositiveReals, name='vapor pressure in Pa')
+    model.y = pyo.Var(model.dp, model.i, 
+                     initialize=create_init_dict_2d(init_values['y'] if init_values else None, 0.5), 
+                     within=pyo.UnitInterval, name='vapor composition y')
     
     def eq_r(m, i):
         """
