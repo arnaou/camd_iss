@@ -113,7 +113,7 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     
     model.x = pyo.Param(model.dp, model.i, 
                        initialize={(j, i): float(x[j, i]) for j in range(n_data) for i in range(n_comp)},
-                       mutable=False, name='Liquid composition x', domain=pyo.Reals)
+                       mutable=False, name='Liquid composition x', domain=pyo.UnitInterval)
     
     # Group composition matrix
     v_dict = {}
