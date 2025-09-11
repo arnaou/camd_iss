@@ -60,7 +60,7 @@ def _convert_antoine_format(antoine_params):
     return antoine_array
 
 
-def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, verbose=False):
+def pyo_azeo(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, verbose=False):
     """
     Pyomo model for vapour-liquid equilibrium.
     
@@ -98,7 +98,7 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     
     # define the constants/parameters
     model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)}, 
-                       within=pyo.PositiveReals, name='Temperature in K')
+                       within=pyo.PositiveReals, name='azeotrope Temperature in K')
     
     # Flatten interaction parameters for Pyomo
     a_dict = {}
@@ -288,7 +288,17 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
         """Vapor composition normalization"""
         return sum(m.y[dp, i] for i in m.i) == 1.0
     model.eq_sum_y = pyo.Constraint(model.dp, rule=eq_sum_y, name='Vapor composition normalization')
-    
+
+    def eq_sum_x(m, dp):
+        """liquid composition normalization"""
+        return sum(m.x[dp, i] for i in m.i) == 1.0
+    model.eq_sum_x = pyo.Constraint(model.dp, rule=eq_sum_x, name='liquid composition normalization')
+
+    def eq_azeotrope(m, dp):
+        """Azeotrope condition: 1 = gamma_A/psat_A * gamma_B/psat_B"""
+        return 1 == (m.gamma[dp, 0] / m.gamma[dp, 1]) * (m.psat[dp, 0] / m.psat[dp, 1])#(m.y[dp,0]/m.x[dp,0])/(m.y[dp,1]/m.x[dp,1])# (m.gamma[dp, 0] / m.gamma[dp, 1]) * (m.psat[dp, 0] / m.psat[dp, 1])
+    model.eq_azeotrope = pyo.Constraint(model.dp, rule=eq_azeotrope, name='Azeotrope condition')
+
     # define the solver
     opt = pyo.SolverFactory('ipopt')
     # define solver options
