@@ -1,8 +1,5 @@
 """
-Pyomo UNIFAC implementation for optimization and molecular design.
-
-Following the established coding style with commented-out variables and 
-the specific variable naming convention (tau, s, eta, G, etc.).
+New Pyomo ISS implementation using modern initialization approach.
 """
 
 import pyomo.environ as pyo
@@ -93,9 +90,11 @@ def _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction
         # Calculate initial vapor compositions using VLE equilibrium
         P = 1.01325  # Default pressure in bar
         y_init = np.zeros((n_data, n_comp))
+        K_init = np.zeros((n_data, n_comp))
         for j in range(n_data):
             for i in range(n_comp):
-                y_init[j, i] = psat_init[j, i] * x[j, i] * results['gamma'][j, i] / P
+                K_init[j, i] = results['gamma'][j, i] * psat_init[j, i] / P
+                y_init[j, i] = K_init[j, i] * x[j, i]
             # Normalize y to sum to 1
             y_init[j, :] = y_init[j, :] / np.sum(y_init[j, :])
         
@@ -114,7 +113,8 @@ def _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction
             'log_gamma_r': results['log_gamma_r'],
             'gamma': results['gamma'],
             'psat': psat_init,
-            'y': y_init
+            'y': y_init,
+            'K': K_init
         }
         
         return init_values
@@ -125,19 +125,21 @@ def _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction
         return None
 
 
-def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x_iso,verbose=False):
+def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, P=1.01325, verbose=False):
     """
-    Pyomo model for vapour-liquid equilibrium.
+    New Pyomo ISS model using modern initialization approach.
     
-    :param x: liquid composition array (n_data, n_components)
-    :param T: temperature array (n_data,) in Kelvin
-    :param mixture: compound format {compound_name: {group: count}}
-    :param rk_data: UNIFAC Rk parameters dict
-    :param qk_data: UNIFAC Qk parameters dict  
-    :param interaction_data: UNIFAC interaction parameters dict
-    :param antoine_params: Antoine parameters dict {compound_name: {'A': val, 'B': val, 'C': val}}
-    :param verbose: If True, print solver output
-    :return: (solution, model)
+    Args:
+        x: liquid composition array (n_data, n_components) 
+        T: temperature array (n_data,) in Kelvin
+        mixture: compound format {compound_name: {group: count}}
+        rk_data, qk_data, interaction_data: UNIFAC parameter dictionaries
+        antoine_params: Antoine parameters dict
+        P: pressure in bar (default 1.01325)
+        verbose: If True, print solver output
+    
+    Returns:
+        (solution, model)
     """
     # Generate initialization values using original mixture format
     init_values = _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params)
@@ -145,18 +147,9 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
     # Auto-convert formats for pyomo model
     mixture = _convert_mixture_format(mixture)
     antoine_array = _convert_antoine_format(antoine_params)
-
-    # we need the 
-    def x_bounds_rule(model, dp, i):
-      if dp == 0 and i == 0:  # Only for x[0,0]
-          return (0.1, x_iso)  # (lower, upper)
-      else:
-          return (0, 1)  # Default bounds for other variables
     
     # create the model
-    model = pyo.ConcreteModel('vle')
-    
-    # Formats already converted above
+    model = pyo.ConcreteModel('iss')
     
     # define the parameters of the model
     x = np.atleast_2d(x)
@@ -173,8 +166,8 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
     model.grp = pyo.Set(initialize=all_groups, name='all Groups')
     
     # define the constants/parameters
-    model.T = pyo.Var(model.dp, initialize=T, 
-                       within=pyo.PositiveReals, name='azeotrope Temperature in K')
+    model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)}, 
+                       within=pyo.PositiveReals, name='Temperature in K')
     
     # Flatten interaction parameters for Pyomo
     a_dict = {}
@@ -187,10 +180,6 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
     model.Rk = pyo.Param(model.grp, initialize=rk_data, mutable=False, name='unifac Rk parameters')
     model.Qk = pyo.Param(model.grp, initialize=qk_data, mutable=False, name='unifac Qk parameters')
     
-    model.x = pyo.Var(model.dp, model.i, 
-                       initialize={(j, i): float(x[j, i]) for j in range(n_data) for i in range(n_comp)},
-                       name='Liquid composition x', bounds=x_bounds_rule, domain=pyo.UnitInterval)
-
     # Group composition matrix
     v_dict = {}
     for i in range(n_comp):
@@ -206,20 +195,18 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
     model.C = pyo.Param(model.i, initialize={i: float(antoine_array[i, 2]) for i in range(n_comp)}, 
                        mutable=False, name='Antoine C', domain=pyo.Reals)
 
-    # System pressure parameter (default 1.01325 bar = 1 atm)
-    model.P = pyo.Param(initialize=1.01325, mutable=False, name='Total pressure in bar', domain=pyo.PositiveReals)
+    # System pressure parameter
+    model.P = pyo.Param(initialize=P, mutable=False, name='Total pressure in bar', domain=pyo.PositiveReals)
     
-    # Helper function to create initialization dictionaries
+    # Helper functions to create initialization dictionaries
     def create_init_dict_1d(values, fallback):
-        """Create 1D initialization dict"""
         if init_values is not None and values is not None:
             return {i: float(values[i]) for i in range(len(values))}
         return fallback
     
     def create_init_dict_2d(values, fallback, keys1=None, keys2=None):
-        """Create 2D initialization dict with optional custom keys"""
         if init_values is not None and values is not None:
-            values = np.atleast_2d(values)  # Ensure 2D for single data point case
+            values = np.atleast_2d(values)
             if keys1 is not None and keys2 is not None:
                 return {(k1, k2): float(values[i, j]) for i, k1 in enumerate(keys1) for j, k2 in enumerate(keys2)}
             else:
@@ -227,11 +214,9 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
         return fallback
     
     def create_init_dict_3d(values, fallback, keys1=None, keys2=None, keys3=None):
-        """Create 3D initialization dict with optional custom keys"""
         if init_values is not None and values is not None:
-            # Ensure at least 3D (handle single data point case)
             if values.ndim == 2:
-                values = values[np.newaxis, :, :]  # Add data point dimension
+                values = values[np.newaxis, :, :]
             if keys1 is not None and keys2 is not None and keys3 is not None:
                 return {(k1, k2, k3): float(values[i, j, k]) 
                        for i, k1 in enumerate(keys1) 
@@ -242,12 +227,12 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
                         for i in range(values.shape[1]) for k in range(values.shape[2])}
         return fallback
 
-    # define the model variables - matching equations.py nomenclature exactly
+    # define the model variables with initialization
     model.r = pyo.Var(model.i, 
-                     initialize=create_init_dict_1d(init_values['r'] if init_values else None, 1.2), 
+                     initialize=create_init_dict_1d(init_values['r'][0] if init_values else None, 1.2), 
                      within=pyo.PositiveReals, name='unifac r_i')
     model.q = pyo.Var(model.i, 
-                     initialize=create_init_dict_1d(init_values['q'] if init_values else None, 4.5), 
+                     initialize=create_init_dict_1d(init_values['q'][0] if init_values else None, 4.5), 
                      within=pyo.PositiveReals, name='unifac q_i')
     model.J = pyo.Var(model.dp, model.i, 
                      initialize=create_init_dict_2d(init_values['J'] if init_values else None, 1.13), 
@@ -256,7 +241,7 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
                      initialize=create_init_dict_2d(init_values['L'] if init_values else None, 1.15), 
                      within=pyo.PositiveReals, name='unifac L_i')
     model.e = pyo.Var(model.i, model.k, 
-                     initialize=create_init_dict_2d(init_values['e'] if init_values else None, 0.5, 
+                     initialize=create_init_dict_2d(init_values['e'][0,:,:] if init_values else None, 0.5, 
                                                    keys1=range(n_comp), keys2=groups), 
                      within=pyo.NonNegativeReals, name='unifac e_ik')
     model.theta = pyo.Var(model.dp, model.k, 
@@ -286,14 +271,25 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
                          initialize=create_init_dict_2d(init_values['gamma'] if init_values else None, 1.5), 
                          within=pyo.Reals, name='unifac total gamma')
     
-    # VLE-specific variables
+    # VLE and ISS-specific variables
     model.psat = pyo.Var(model.dp, model.i, 
                         initialize=create_init_dict_2d(init_values['psat'] if init_values else None, 101325), 
                         within=pyo.PositiveReals, name='vapor pressure in Pa')
     model.y = pyo.Var(model.dp, model.i, 
-                     initialize=create_init_dict_2d(init_values['y'] if init_values else None, 0.5), 
+                     initialize=create_init_dict_2d(init_values['y'] if init_values else None, 0.33), 
                      within=pyo.UnitInterval, name='vapor composition y')
+    model.x = pyo.Var(model.dp, model.i, 
+                     initialize={(j, i): float(x[j, i]) for j in range(n_data) for i in range(n_comp)},
+                     within=pyo.UnitInterval, name='liquid composition x')
+    model.K = pyo.Var(model.dp, model.i, 
+                     initialize=create_init_dict_2d(init_values['K'] if init_values else None, 1.0), 
+                     within=pyo.PositiveReals, name='equilibrium constants')
     
+    # ISS-specific variables
+    model.ED = pyo.Var(initialize=3.2, within=pyo.PositiveReals, name='Entrainer to distillate ratio')
+    model.R = pyo.Var(initialize=3.5, within=pyo.PositiveReals, name='Reflux ratio')
+    
+    # UNIFAC constraint definitions
     def eq_r(m, i):
         """
         Molecular volume parameter (Equation A.3):
@@ -424,37 +420,58 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
         return m.y[dp, i] == m.psat[dp, i] * m.x[dp, i] * m.gamma[dp, i] / m.P
     model.eq_y = pyo.Constraint(model.dp, model.i, rule=eq_y, name='VLE equilibrium equation')
     
+    def eq_K(m, dp, i):
+        """Equilibrium constants"""
+        return m.K[dp, i] == m.gamma[dp, i] * m.psat[dp, i] / m.P
+    model.eq_K = pyo.Constraint(model.dp, model.i, rule=eq_K, name='calculation rule for equilibrium constant')
+    
     def eq_sum_y(m, dp):
         """Vapor composition normalization"""
         return sum(m.y[dp, i] for i in m.i) == 1.0
     model.eq_sum_y = pyo.Constraint(model.dp, rule=eq_sum_y, name='Vapor composition normalization')
-
-    def eq_xb(m):
-        """ absence of B in the rectifying section"""
-        return m.x[0, 1] == 0
     
-    model.eq_xb = pyo.Constraint(rule=eq_xb, name='absence of B in the rectifying section')
-    
-    def eq_ED(m):
-        """ entrainer-to-distilate ratio equaton"""
-        return 1 - ((1 - (m.gamma[0, 1] * m.psat[0, 1]))/ (m.x[0, 0] * ((m.gamma[0, 0] * m.psat[0, 0]) - (m.gamma[0, 1] * m.psat[0, 1]))))
-
-    model.obj = pyo.Objective(rule=eq_ED, sense=pyo.minimize, name='Objective: Minimize entrainer-to-distilate ratio')
-
     def eq_sum_x(m, dp):
-        """liquid composition normalization"""
+        """Liquid composition normalization"""
         return sum(m.x[dp, i] for i in m.i) == 1.0
     model.eq_sum_x = pyo.Constraint(model.dp, rule=eq_sum_x, name='liquid composition normalization')
     
-
-
+    # ISS-specific constraints
+    def eq_iso_vol(m):
+        """Condition for iso-volatility"""
+        return 1.00 == m.K[0, 0] / m.K[0, 1]
+    model.eq_iso_vol = pyo.Constraint(rule=eq_iso_vol, name='condition for iso-volatility')
     
+    def eq_R(m):
+        """Calculation of reflux ratio"""
+        return m.R == (m.K[1, 1] - m.ED) / (1.00 - m.K[1, 1])
+    model.eq_R = pyo.Constraint(rule=eq_R, name='calculation of reflux ratio')
+    
+    def eq_ED_calc(m):
+        """Calculation of entrainer to distillate ratio"""
+        return m.ED == 1 - ((1 - (m.K[1, 1])) / (m.x[1, 0] * (m.K[1, 0] - m.K[1, 1])))
+    model.eq_ED_calc = pyo.Constraint(rule=eq_ED_calc, name='calculation of entrainer to distillate ratio')
+    
+    def con_x_min(m):
+        """x_min has to be lower than the iso-volatility composition"""
+        return m.x[1, 0] <= m.x[0, 0] - 0.005
+    model.con_x_min = pyo.Constraint(rule=con_x_min, name='xmin has to be lower than the iso-volatility')
+    
+    def con_x_B(m, dp):
+        """Absence of B component"""
+        return m.x[dp, 1] == 0.0
+    model.con_x_B = pyo.Constraint(model.dp, rule=con_x_B, name='absence of B component')
+    
+    # Objective
+    model.obj = pyo.Objective(expr=model.ED, sense=pyo.minimize, name='Minimize entrainer-to-distillate ratio')
+    
+
     # define the solver
     opt = pyo.SolverFactory('ipopt')
     # define solver options
     opt.options["halt_on_ampl_error"] = "yes"
     opt.options["max_iter"] = 10000
     opt.options["tol"] = 1e-8
+    
     # solve the optimization problem
     solution = opt.solve(model, tee=verbose, symbolic_solver_labels=True)
     
@@ -462,5 +479,5 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, x
 
 
 if __name__ == "__main__":
-    print("=== Pyomo VLE Implementation ===")
-    print("Use pyo_vle() function for VLE calculations in optimization frameworks.")
+    print("=== New Pyomo ISS Implementation ===")
+    print("Use pyo_iss_new() function for ISS calculations with modern initialization.")
