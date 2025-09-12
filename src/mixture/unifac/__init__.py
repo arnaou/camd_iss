@@ -30,5 +30,9 @@ Example:
 
 from .interface import unifac
 from .equations import unifac_equations
+from .pyomo_vle import pyo_vle
+from .pyomo_iss import pyo_iss
+from .pyomo_azeo import pyo_azeo
+from .pyomo_unifac import pyo_unifac
 
-__all__ = ['unifac', 'unifac_equations']
+__all__ = ['unifac', 'unifac_equations', 'pyo_vle', 'pyo_iss', 'pyo_azeo', 'pyo_unifac']
