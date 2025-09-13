@@ -7,8 +7,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.molecules import StructuralValidator, generate_molecules
 from src.pure import PropertyCalculator, AntoineCalculator
-from src.data import load_unifac_data
-from src.data.unifac_compatibility import check_binary_compatibility, check_ternary_compatibility
+from src.data import load_unifac_data, check_unifac_parameters
 
 
 # Step 1: Define binary system (compounds A and B to be separated)
@@ -57,15 +56,19 @@ print(f"Antoine parameters calculated for {len(antoine_params)} compounds")
 
 
 # step 3: check if all interaction parameters of the mixture groups are available
-print("\nStep 3: Checking binary mixture compatibility...")
-compatibility_result = check_binary_compatibility(mixture, verbose=True)
+print("\nStep 3: Checking binary mixture UNIFAC parameters...")
+compatibility_result = check_unifac_parameters(mixture=mixture)
 
 if compatibility_result['compatible']:
-    print("✅ Binary mixture is compatible for UNIFAC calculations")
+    print("✅ Binary mixture has all required UNIFAC parameters")
 else:
-    print("❌ Binary mixture has compatibility issues:")
-    for issue in compatibility_result['summary']:
-        print(f"   {issue}")
+    print("❌ Binary mixture has missing UNIFAC parameters:")
+    if compatibility_result['missing_rq']:
+        print(f"   Missing R/Q parameters: {compatibility_result['missing_rq']}")
+    if compatibility_result['missing_interactions_groups']:
+        print(f"   Missing interaction groups: {compatibility_result['missing_interactions_groups']}")
+    if compatibility_result['missing_interactions_main']:
+        print(f"   Missing main group interactions: {compatibility_result['missing_interactions_main']}")
     print("⚠ Proceeding may lead to calculation errors")
 
 
@@ -246,40 +249,65 @@ else:
     print("⚠ No solvent properties available for screening")
     screened_solvents = {}
 
-# Step 10: Check missing interaction parameters and handle them
-print("\nStep 10: Checking interaction parameters for screened solvents...")
+# Step 10: Check UNIFAC parameters for screened solvents
+print("\nStep 10: Checking UNIFAC parameters for screened solvents...")
 
 if screened_solvents:
     compatible_solvents = {}
-    
-    for name, data in screened_solvents.items():
-        # Create solvent candidate in the expected format
-        solvent_candidate = {name: data['groups']}
-        
-        try:
-            # Check compatibility
-            ternary_compatibility = check_ternary_compatibility(
-                binary_mixture=mixture, 
-                solvent_candidates=solvent_candidate, 
-                verbose=True
-            )
+    incompatible_solvents = {}
 
-            if ternary_compatibility['compatible']:
-                compatible_solvents[name] = data
-                print(f"✅ {name}: All interaction parameters available")
-            else:
-                print(f"❌ {name}: Missing interaction parameters:")
-                for issue in ternary_compatibility['summary']:
-                    print(f"    {issue}")
-                    
-        except Exception as e:
-            print(f"❌ {name}: Error checking compatibility: {e}")
-    
-    print(f"\n{len(compatible_solvents)} solvents have complete interaction parameters")
+    # Extract solvent candidates in the format expected by check_unifac_parameters
+    solvent_candidates = [data['groups'] for data in screened_solvents.values()]
+    solvent_names = list(screened_solvents.keys())
+
+    print(f"Screening {len(solvent_candidates)} solvents for UNIFAC parameter availability...")
+
+    # Check UNIFAC parameters for all solvents at once
+    unifac_results = check_unifac_parameters(
+        mixture=mixture,
+        solvent_candidates=solvent_candidates
+    )
+
+    # Process results
+    for i, solvent_name in enumerate(solvent_names):
+        if i in unifac_results['compatible_solvents']:
+            compatible_solvents[solvent_name] = screened_solvents[solvent_name]
+            groups_str = ", ".join([f"{k}:{v}" for k, v in screened_solvents[solvent_name]['groups'].items()])
+            print(f"✅ {solvent_name}: {groups_str}")
+        else:
+            incompatible_solvents[solvent_name] = screened_solvents[solvent_name]
+            groups_str = ", ".join([f"{k}:{v}" for k, v in screened_solvents[solvent_name]['groups'].items()])
+            print(f"❌ {solvent_name}: {groups_str}")
+
+            # Show specific issues for this solvent
+            if i in unifac_results['solvent_issues']:
+                issues = unifac_results['solvent_issues'][i]
+                if 'missing_rq' in issues:
+                    print(f"    Missing R/Q parameters: {issues['missing_rq']}")
+                if 'missing_interactions_groups' in issues:
+                    print(f"    Missing interaction groups: {issues['missing_interactions_groups']}")
+                if 'missing_interactions_main' in issues:
+                    print(f"    Missing main group interactions: {issues['missing_interactions_main']}")
+
+    print(f"\n✅ {len(compatible_solvents)} solvents have complete UNIFAC parameters")
+    print(f"❌ {len(incompatible_solvents)} solvents have missing parameters")
+
+    if compatible_solvents:
+        print("\nCompatible solvents ready for VLE calculations:")
+        for name, data in list(compatible_solvents.items())[:5]:  # Show first 5
+            groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
+            print(f"  {name}: {groups_str}")
+    else:
+        print("⚠ No solvents have complete UNIFAC parameters for VLE calculations")
+        print("  Consider:")
+        print("  - Using different functional groups in design_groups")
+        print("  - Relaxing structural constraints")
+        print("  - Checking UNIFAC parameter database coverage")
 
 else:
-    print("⚠ No screened solvents available for interaction parameter check")
+    print("⚠ No screened solvents available for UNIFAC parameter check")
     compatible_solvents = {}
+    incompatible_solvents = {}
 
 # step 11.a: calculate the VLE based on bubble-T of A+B+solvent system at the specified conditions (P= 1.01325)
 # define the liquid composition and an intial guess for the temperature
