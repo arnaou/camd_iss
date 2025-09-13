@@ -18,7 +18,7 @@ from . import camd
 
 # Convenience imports for common functionality
 from .camd import CAMD
-from .mixture import unifac, unifac_equations, UNIFACCalculator
+#from .mixture import unifac, unifac_equations, UNIFACCalculator
 from .pure import PropertyCalculator, AntoineCalculator
 from .data import load_unifac_data, DataExporter
 from .molecules import StructuralValidator
@@ -27,9 +27,9 @@ __all__ = [
     # Submodules
     'molecules', 'pure', 'mixture', 'data', 'camd',
     # Main classes
-    'CAMD', 'PropertyCalculator', 'AntoineCalculator', 'UNIFACCalculator', 
+    'CAMD', 'PropertyCalculator', 'AntoineCalculator',# 'UNIFACCalculator', 
     'DataExporter', 'StructuralValidator',
     # Functions
-    'unifac', 'unifac_wrapper', 'load_unifac_data'
+     'load_unifac_data', #'unifac', 'unifac_wrapper',
 ]
 __version__ = '0.1.0'

@@ -8,7 +8,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from src.molecules import StructuralValidator, generate_molecules
 from src.pure import PropertyCalculator, AntoineCalculator
 from src.data import load_unifac_data
-from src.data.unifac_compatibility import check_binary_compatibility
+from src.data.unifac_compatibility import check_binary_compatibility, check_ternary_compatibility
 
 
 # Step 1: Define binary system (compounds A and B to be separated)
@@ -121,8 +121,8 @@ pure_props_constraints = {
     'tm': [0.0, 298.0],        # Melting point 298K+ (noß upper limit)ß
     'hv': [-9999.0, 67.0]      # Heat of vaporization range
 }
-# step 8: calculate the pure component properties of the solvents
-print("\nStep 8: Calculating pure component properties for solvent candidates...")
+# step 8: calculate the pure component properties of the solvents and then the antoine parameters
+print("\nStep 8: Calculating pure component properties and Antoine parameters for solvent candidates...")
 
 if candidates:
     # Create a dictionary format for solvent candidates
@@ -151,18 +151,137 @@ if candidates:
     except Exception as e:
         print(f"❌ Property calculation failed: {e}")
         solvent_props = {}
+
+    # Calculate Antoine parameters for solvents with complete properties
+    print("\nCalculating Antoine parameters for solvent candidates...")
+    solvent_antoine_params = {}
+    
+    if solvent_props:
+        for name, props in solvent_props.items():
+            # Check if we have the required properties for Antoine calculation
+            required_props = ['tc', 'pc', 'tb', 'ac']
+            if all(prop in props and props[prop] is not None for prop in required_props):
+                try:
+                    candidate_idx = int(name.split('_')[1]) - 1
+                    candidate_dict = {name: candidates[candidate_idx]}
+                    
+                    # Use the calculated properties for Antoine parameter estimation
+                    results = antoine_calc.calculate_antoine_parameters(
+                        candidate_dict, 
+                        critical_properties=props
+                    )
+                    
+                    if results['termination_condition'] == 'optimal':
+                        solvent_antoine_params[name] = {
+                            'A': results['A'],
+                            'B': results['B'], 
+                            'C': results['C']
+                        }
+                        print(f"  ✅ {name}: A={results['A']:.3f}, B={results['B']:.1f}, C={results['C']:.1f}")
+                    else:
+                        print(f"  ⚠ Antoine parameter calculation failed for {name}: {results['termination_condition']}")
+                        
+                except Exception as e:
+                    print(f"  ❌ Error calculating Antoine parameters for {name}: {e}")
+            else:
+                missing_props = [prop for prop in required_props if prop not in props or props[prop] is None]
+                print(f"  ⚠ {name}: Missing required properties for Antoine calculation: {missing_props}")
+        
+        print(f"\n✅ Antoine parameters calculated for {len(solvent_antoine_params)} out of {len(solvent_props)} solvents")
+        
+        if len(solvent_antoine_params) == 0:
+            print("⚠ No solvents have complete Antoine parameters")
+            print("  This may affect VLE calculations in subsequent steps")
+    else:
+        print("⚠ No solvent properties available for Antoine parameter calculation")
         
 else:
     print("⚠ No candidates available for property calculation")
     solvent_props = {}
+    solvent_antoine_params = {}
 
 # step 9: screen the solvents based on pure component properties
+print("\nStep 9: Screening solvents based on pure component properties...")
 
+if solvent_props:
+    screened_solvents = {}
+    
+    for name, props in solvent_props.items():
+        # Check if properties meet constraints
+        meets_constraints = True
+        constraint_results = {}
+        
+        for prop, (min_val, max_val) in pure_props_constraints.items():
+            prop_value = props.get(prop)
+            if prop_value is not None:
+                constraint_results[prop] = min_val <= prop_value <= max_val
+                if not constraint_results[prop]:
+                    meets_constraints = False
+            else:
+                constraint_results[prop] = False
+                meets_constraints = False
+        
+        if meets_constraints:
+            screened_solvents[name] = {
+                'groups': candidates[int(name.split('_')[1]) - 1],
+                'properties': props,
+                'constraint_check': constraint_results
+            }
+    
+    print(f"✅ {len(screened_solvents)} solvents passed property screening out of {len(solvent_props)}")
+    
+    # Show screened solvents
+    if screened_solvents:
+        print("\nScreened solvent candidates:")
+        for i, (name, data) in enumerate(list(screened_solvents.items())[:5]):
+            groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
+            props = data['properties']
+            print(f"  {name}: {groups_str}")
+            print(f"    Tb={props['tb']:.1f}K, Tm={props['tm']:.1f}K, Hv={props['hv']:.1f}kJ/mol")
+    else:
+        print("❌ No solvents passed the screening criteria")
+        print("Consider relaxing property constraints or generating more candidates")
 
-# step 10: check if there are any missing interaction parameters handle tem based on what is instructed
+else:
+    print("⚠ No solvent properties available for screening")
+    screened_solvents = {}
 
+# Step 10: Check missing interaction parameters and handle them
+print("\nStep 10: Checking interaction parameters for screened solvents...")
 
-# step 11: calculate the VLE based on bubble-T of A+B+solvent system at the specified conditions (P= 1.01325)
+if screened_solvents:
+    compatible_solvents = {}
+    
+    for name, data in screened_solvents.items():
+        # Create solvent candidate in the expected format
+        solvent_candidate = {name: data['groups']}
+        
+        try:
+            # Check compatibility
+            ternary_compatibility = check_ternary_compatibility(
+                binary_mixture=mixture, 
+                solvent_candidates=solvent_candidate, 
+                verbose=True
+            )
+
+            if ternary_compatibility['compatible']:
+                compatible_solvents[name] = data
+                print(f"✅ {name}: All interaction parameters available")
+            else:
+                print(f"❌ {name}: Missing interaction parameters:")
+                for issue in ternary_compatibility['summary']:
+                    print(f"    {issue}")
+                    
+        except Exception as e:
+            print(f"❌ {name}: Error checking compatibility: {e}")
+    
+    print(f"\n{len(compatible_solvents)} solvents have complete interaction parameters")
+
+else:
+    print("⚠ No screened solvents available for interaction parameter check")
+    compatible_solvents = {}
+
+# step 11.a: calculate the VLE based on bubble-T of A+B+solvent system at the specified conditions (P= 1.01325)
 # define the liquid composition and an intial guess for the temperature
 n_data = 50
 # x1-x3 binary (x2=0) 
@@ -181,6 +300,20 @@ x = np.vstack([
     np.column_stack([x1_23, x2_23, x3_23])
 ])
 
+
+
+# step 11.b: calculate mixture properties based on the VLE
+# check for azeotropes
+
+# calculate Gmix
+
+# calculate G2mix
+
+# calculate selectivity at infinite dilution
+
+# calculate capacity at infinite dilution
+
+# calculate relative volatility at infinite dilution
 
 # step 12: screen based on mixture properties
 
