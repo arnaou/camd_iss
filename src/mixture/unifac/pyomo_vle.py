@@ -167,8 +167,8 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     
     # define the constants/parameters
     model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)}, 
-                       within=pyo.PositiveReals, name='Temperature in K')
-    
+                       within=pyo.PositiveReals, bounds=(T.min()-3, T.max()+5), name='Temperature in K')
+    #print(f"Temperature bounds: {T.min()-5} - {T.max()+5}")
     # Flatten interaction parameters for Pyomo
     a_dict = {}
     for k1 in interaction_data:
@@ -273,7 +273,7 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
                                within=pyo.Reals, name='unifac log_gamma_r')
     model.gamma = pyo.Var(model.dp, model.i, 
                          initialize=create_init_dict_2d(init_values['gamma'] if init_values else None, 1.5), 
-                         within=pyo.Reals, name='unifac total gamma')
+                         within=pyo.PositiveReals, name='unifac total gamma')
     
     # VLE-specific variables
     model.psat = pyo.Var(model.dp, model.i, 
@@ -422,8 +422,8 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     opt = pyo.SolverFactory('ipopt')
     # define solver options
     opt.options["halt_on_ampl_error"] = "yes"
-    opt.options["max_iter"] = 10000
-    opt.options["tol"] = 1e-8
+    opt.options["max_iter"] = 100000
+    opt.options["tol"] = 1e-6
     # solve the optimization problem
     solution = opt.solve(model, tee=verbose, symbolic_solver_labels=True)
     

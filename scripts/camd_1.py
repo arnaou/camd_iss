@@ -2,12 +2,14 @@
 import sys
 import os
 import numpy as np
+from datetime import datetime
 # Add the parent directory to path to access src module
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 from src.molecules import StructuralValidator, generate_molecules
 from src.pure import PropertyCalculator, AntoineCalculator
 from src.data import load_unifac_data, check_unifac_parameters
+from src.mixture.unifac import pyo_vle
 
 
 # Step 1: Define binary system (compounds A and B to be separated)
@@ -309,33 +311,134 @@ else:
     compatible_solvents = {}
     incompatible_solvents = {}
 
-# step 11.a: calculate the VLE based on bubble-T of A+B+solvent system at the specified conditions (P= 1.01325)
-# define the liquid composition and an intial guess for the temperature
-n_data = 50
-# x1-x3 binary (x2=0) 
-x1_13 = np.linspace(0, 1, n_data)
-x2_13 = np.zeros(n_data)
-x3_13 = 1 - x1_13
+# Step 11: VLE calculations for each compatible solvent
+print("\nStep 11: Performing VLE calculations for compatible solvents...")
 
-# x2-x3 binary (x1=0)
-x1_23 = np.zeros(n_data)
-x2_23 = np.linspace(0, 1, n_data)
-x3_23 = 1 - x2_23
+if compatible_solvents:
+    # Load UNIFAC data for VLE calculations
+    rk_data, qk_data, interaction_data = load_unifac_data()
 
-# combine binary combinations AE & BE
-x = np.vstack([
-    np.column_stack([x1_13, x2_13, x3_13]),
-    np.column_stack([x1_23, x2_23, x3_23])
-])
+    # Operating pressure (bar)
+    P = 1.01325
 
+    # Number of composition points for each binary edge
+    n_data = 50
 
+    vle_results = {}
+    failed_solvents = []
 
-# step 11.b: calculate mixture properties based on the VLE
-# check for azeotropes
+    # Get binary mixture boiling points
+    binary_compounds = list(mixture.keys())
+    tb_A = pure_props[binary_compounds[0]]['tb']
+    tb_B = pure_props[binary_compounds[1]]['tb']
 
-# calculate Gmix
+    successful_solvents = []
 
-# calculate G2mix
+    # DEBUG: Only process first 10 solvents for testing
+    solvent_items = list(compatible_solvents.items())[:10]
+    print(f"DEBUG: Testing only first {len(solvent_items)} solvents out of {len(compatible_solvents)} total")
+
+    for solvent_name, solvent_data in solvent_items:
+        groups_str = ", ".join([f"{k}:{v}" for k, v in solvent_data['groups'].items()])
+        print(f"Calculating VLE for {solvent_name} ({groups_str})...")
+
+        try:
+            # Create ternary mixture: A + B + Solvent
+            ternary_mixture = dict(mixture)
+            ternary_mixture[solvent_name] = solvent_data['groups']
+
+            # Get solvent boiling point and Antoine parameters
+            if solvent_name not in solvent_props or solvent_name not in solvent_antoine_params:
+                failed_solvents.append(solvent_name)
+                print(f"  {solvent_name}: Missing properties - Failed")
+                continue
+
+            tb_E = solvent_props[solvent_name]['tb']
+            ternary_antoine = dict(antoine_params)
+            ternary_antoine[solvent_name] = solvent_antoine_params[solvent_name]
+
+            # Define composition grids for ternary VLE (A-E and B-E binary edges)
+            # A-E binary edge (B=0): x1 + x3 = 1
+            x1_ae = np.linspace(0.00, 1.00, n_data)
+            x2_ae = np.zeros(n_data)
+            x3_ae = 1 - x1_ae
+
+            # B-E binary edge (A=0): x2 + x3 = 1
+            x1_be = np.zeros(n_data)
+            x2_be = np.linspace(0.00, 1.00, n_data)
+            x3_be = 1 - x2_be
+
+            x_all = np.vstack([
+                np.column_stack([x1_ae, x2_ae, x3_ae]),  # A-E edge
+                np.column_stack([x1_be, x2_be, x3_be])   # B-E edge
+            ])
+
+            # Temperature initialization based on pure component boiling points
+            # A-E edge: When A=0,E=1 → T=Tb(E), When A=1,E=0 → T=Tb(A)
+            T0_ae = tb_E * (1 - x1_ae) + tb_A * x1_ae
+            # B-E edge: When B=0,E=1 → T=Tb(E), When B=1,E=0 → T=Tb(B)
+            T0_be = tb_E * (1 - x2_be) + tb_B * x2_be
+            T_guess = np.concatenate([T0_ae, T0_be])
+
+            # Perform VLE calculation using pyo_vle
+            vle_solution, vle_model = pyo_vle(
+                x_all, T_guess, ternary_mixture,
+                rk_data, qk_data, interaction_data, ternary_antoine, verbose=False
+            )
+
+            # Extract results
+            if vle_solution is not None and vle_model is not None:
+                solv_stat = str(vle_solution.solver.status)
+                term_cond = str(vle_solution.solver.termination_condition)
+
+                if solv_stat != 'ok' or term_cond != 'optimal':
+                    solver_success = False
+                    print(f"  {solvent_name}: Solver failed - Status: {solv_stat}, Condition: {term_cond}")
+                else:
+                    solver_success = True
+            else:
+                solver_success = False
+
+            if solver_success:
+                # Extract results
+                n_points = len(x_all)
+                T_bubble = np.zeros(n_points)
+                y_vapor = np.zeros((n_points, 3))
+                gamma = np.zeros((n_points, 3))
+
+                for i in range(n_points):
+                    T_bubble[i] = vle_model.T[i].value if vle_model.T[i].value else T_guess[i]
+                    for j in range(3):
+                        y_vapor[i, j] = vle_model.y[i, j].value if vle_model.y[i, j].value else 0.0
+                        gamma[i, j] = vle_model.gamma[i, j].value if vle_model.gamma[i, j].value else 1.0
+
+                vle_results[solvent_name] = {
+                    'x_liquid': x_all,
+                    'T_bubble': T_bubble,
+                    'y_vapor': y_vapor,
+                    'gamma': gamma,
+                    'compound_names': list(ternary_mixture.keys())
+                }
+                successful_solvents.append(solvent_name)
+                print(f"  {solvent_name}: Solver succeeded")
+            else:
+                failed_solvents.append(solvent_name)
+                print(f"  {solvent_name}: Solver failed")
+
+        except Exception:
+            failed_solvents.append(solvent_name)
+            print(f"  {solvent_name}: Solver failed")
+
+    # VLE Overview
+    print(f"\nVLE Overview:")
+    print(f"  Successful: {successful_solvents}")
+    print(f"  Failed: {failed_solvents}")
+    print(f"  Success rate: {len(successful_solvents)}/{len(compatible_solvents)} ({len(successful_solvents)/len(compatible_solvents)*100:.0f}%)")
+
+else:
+    print("⚠ No compatible solvents available for VLE calculations")
+    vle_results = {}
+    failed_solvents = []
 
 # calculate selectivity at infinite dilution
 
