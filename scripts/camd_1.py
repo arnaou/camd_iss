@@ -24,7 +24,7 @@ print(f"Structural validation of binary mixture: {binary_validation}")
 
 # step 2.b: validate that the binary mixture: pure component properties
 print("\nStep 2.b: Calculating pure component properties...")
-prop_list = ['tc', 'pc', 'tb', 'ac']
+prop_list = ['tc', 'pc', 'tb', 'ac', 'hv']
 pure_calc = PropertyCalculator()
 pure_props = pure_calc.calculate(mixture, prop_list)
 
@@ -43,7 +43,7 @@ antoine_calc = AntoineCalculator()
 antoine_params = {}
 for compound, props in pure_props.items():
     compound_dict = {compound: mixture[compound]}  # Single compound dict
-    results = antoine_calc.calculate_antoine_parameters(compound_dict, critical_properties=props)
+    results = antoine_calc.calculate_antoine_parameters(compound_dict, critical_properties=props, method='enthalpy_vap')
     if results['termination_condition'] == 'optimal':
         antoine_params[compound] = {
             'A': results['A'],
@@ -157,50 +157,50 @@ if candidates:
         print(f"❌ Property calculation failed: {e}")
         solvent_props = {}
     
-    # Additional constraint: Filter out compounds where Tb > 0.7*Tc
-    print("\nFiltering compounds based on Tb/Tc ratio...")
+    # # Additional constraint: Filter out compounds where Tb > 0.7*Tc
+    # print("\nFiltering compounds based on Tb/Tc ratio...")
 
-    eliminated_compounds = {}
-    valid_compounds = {}
+    # eliminated_compounds = {}
+    # valid_compounds = {}
 
-    if solvent_props:
-        for name, props in solvent_props.items():
-            tb = props.get('tb')
-            tc = props.get('tc')
+    # if solvent_props:
+    #     for name, props in solvent_props.items():
+    #         tb = props.get('tb')
+    #         tc = props.get('tc')
 
-            if tb is not None and tc is not None and tc > 0:
-                tb_tc_ratio = tb / tc
-                candidate_idx = int(name.split('_')[1]) - 1
-                groups_str = ", ".join([f"{k}:{v}" for k, v in candidates[candidate_idx].items()])
+    #         if tb is not None and tc is not None and tc > 0:
+    #             tb_tc_ratio = tb / tc
+    #             candidate_idx = int(name.split('_')[1]) - 1
+    #             groups_str = ", ".join([f"{k}:{v}" for k, v in candidates[candidate_idx].items()])
 
-                if tb > 0.7 * tc:
-                    eliminated_compounds[name] = {
-                        'groups': candidates[candidate_idx],
-                        'properties': props,
-                        'tb_tc_ratio': tb_tc_ratio,
-                        'reason': f'Tb ({tb:.1f}K) > 0.7*Tc ({0.7*tc:.1f}K)'
-                    }
-                else:
-                    valid_compounds[name] = props
-            else:
-                # If missing critical properties, keep for now but flag
-                valid_compounds[name] = props
+    #             if tb > 0.7 * tc:
+    #                 eliminated_compounds[name] = {
+    #                     'groups': candidates[candidate_idx],
+    #                     'properties': props,
+    #                     'tb_tc_ratio': tb_tc_ratio,
+    #                     'reason': f'Tb ({tb:.1f}K) > 0.7*Tc ({0.7*tc:.1f}K)'
+    #                 }
+    #             else:
+    #                 valid_compounds[name] = props
+    #         else:
+    #             # If missing critical properties, keep for now but flag
+    #             valid_compounds[name] = props
 
-        print(f"Eliminated {len(eliminated_compounds)} compounds where Tb > 0.7*Tc")
-        print(f"Retained {len(valid_compounds)} compounds for further screening")
+    #     print(f"Eliminated {len(eliminated_compounds)} compounds where Tb > 0.7*Tc")
+    #     print(f"Retained {len(valid_compounds)} compounds for further screening")
 
-        # Print overview of eliminated compounds
-        if eliminated_compounds:
-            print("\nEliminated compounds (Tb > 0.7*Tc):")
-            for name, data in eliminated_compounds.items():
-                groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
-                print(f"  {name}: {groups_str}")
-                print(f"    {data['reason']}, Ratio: {data['tb_tc_ratio']:.3f}")
+    #     # Print overview of eliminated compounds
+    #     if eliminated_compounds:
+    #         print("\nEliminated compounds (Tb > 0.7*Tc):")
+    #         for name, data in eliminated_compounds.items():
+    #             groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
+    #             print(f"  {name}: {groups_str}")
+    #             print(f"    {data['reason']}, Ratio: {data['tb_tc_ratio']:.3f}")
 
-        # Update solvent_props to only include valid compounds
-        solvent_props = valid_compounds
-    else:
-        print("No solvent properties available for Tb/Tc filtering")
+    #     # Update solvent_props to only include valid compounds
+    #     solvent_props = valid_compounds
+    # else:
+    #     print("No solvent properties available for Tb/Tc filtering")
 
     # Calculate Antoine parameters for solvents with complete properties
     print("\nCalculating Antoine parameters for solvent candidates...")
@@ -209,7 +209,7 @@ if candidates:
     if solvent_props:
         for name, props in solvent_props.items():
             # Check if we have the required properties for Antoine calculation
-            required_props = ['tc', 'pc', 'tb', 'ac']
+            required_props = ['tc', 'pc', 'tb', 'ac', 'hv']
             if all(prop in props and props[prop] is not None for prop in required_props):
                 try:
                     candidate_idx = int(name.split('_')[1]) - 1
@@ -217,9 +217,10 @@ if candidates:
                     
                     # Use the calculated properties for Antoine parameter estimation
                     results = antoine_calc.calculate_antoine_parameters(
-                        candidate_dict, 
-                        critical_properties=props
-                    )
+                                                                        candidate_dict, 
+                                                                        critical_properties=props,  
+                                                                        method='enthalpy_vap'
+                                                                    )
                     
                     if results['termination_condition'] == 'optimal':
                         solvent_antoine_params[name] = {
@@ -261,6 +262,14 @@ if solvent_props:
         meets_constraints = True
         constraint_results = {}
         
+        # Sanity check: Tb should be below Tc
+        tb_value = props.get('tb')
+        tc_value = props.get('tc')
+        if tb_value is not None and tc_value is not None:
+            if tb_value >= tc_value:
+                print(f"  ❌ {name}: Tb ({tb_value:.1f}K) >= Tc ({tc_value:.1f}K) - discarded")
+                meets_constraints = False
+
         for prop, (min_val, max_val) in pure_props_constraints.items():
             prop_value = props.get(prop)
             if prop_value is not None:
@@ -485,16 +494,21 @@ else:
     vle_results = {}
     failed_solvents = []
 
-# # calculate selectivity at infinite dilution
-
-# # calculate capacity at infinite dilution
-
-# # calculate relative volatility at infinite dilution
-
-# # step 12: screen based on mixture properties
+# calculate selectivity at infinite dilution
 
 
-# # step 13: perform the iss-methodology
+# calculate capacity at infinite dilution
+
+# calculate relative volatility at infinite dilution
+
+# calculate deltaG mix
+
+# calculate delta2G min
+
+# step 12: screen based on mixture properties
 
 
-# # step 14: print the results
+# step 13: perform the iss-methodology
+
+
+# step 14: print the results
