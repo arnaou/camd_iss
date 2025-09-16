@@ -156,6 +156,51 @@ if candidates:
     except Exception as e:
         print(f"❌ Property calculation failed: {e}")
         solvent_props = {}
+    
+    # Additional constraint: Filter out compounds where Tb > 0.7*Tc
+    print("\nFiltering compounds based on Tb/Tc ratio...")
+
+    eliminated_compounds = {}
+    valid_compounds = {}
+
+    if solvent_props:
+        for name, props in solvent_props.items():
+            tb = props.get('tb')
+            tc = props.get('tc')
+
+            if tb is not None and tc is not None and tc > 0:
+                tb_tc_ratio = tb / tc
+                candidate_idx = int(name.split('_')[1]) - 1
+                groups_str = ", ".join([f"{k}:{v}" for k, v in candidates[candidate_idx].items()])
+
+                if tb > 0.7 * tc:
+                    eliminated_compounds[name] = {
+                        'groups': candidates[candidate_idx],
+                        'properties': props,
+                        'tb_tc_ratio': tb_tc_ratio,
+                        'reason': f'Tb ({tb:.1f}K) > 0.7*Tc ({0.7*tc:.1f}K)'
+                    }
+                else:
+                    valid_compounds[name] = props
+            else:
+                # If missing critical properties, keep for now but flag
+                valid_compounds[name] = props
+
+        print(f"Eliminated {len(eliminated_compounds)} compounds where Tb > 0.7*Tc")
+        print(f"Retained {len(valid_compounds)} compounds for further screening")
+
+        # Print overview of eliminated compounds
+        if eliminated_compounds:
+            print("\nEliminated compounds (Tb > 0.7*Tc):")
+            for name, data in eliminated_compounds.items():
+                groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
+                print(f"  {name}: {groups_str}")
+                print(f"    {data['reason']}, Ratio: {data['tb_tc_ratio']:.3f}")
+
+        # Update solvent_props to only include valid compounds
+        solvent_props = valid_compounds
+    else:
+        print("No solvent properties available for Tb/Tc filtering")
 
     # Calculate Antoine parameters for solvents with complete properties
     print("\nCalculating Antoine parameters for solvent candidates...")
@@ -334,8 +379,8 @@ if compatible_solvents:
 
     successful_solvents = []
 
-    # DEBUG: Only process first 10 solvents for testing
-    solvent_items = list(compatible_solvents.items())[:10]
+    # DEBUG: Only process first 10 solvents for testing: only 10 first
+    solvent_items = list(compatible_solvents.items())#[:10]
     print(f"DEBUG: Testing only first {len(solvent_items)} solvents out of {len(compatible_solvents)} total")
 
     for solvent_name, solvent_data in solvent_items:
@@ -440,16 +485,16 @@ else:
     vle_results = {}
     failed_solvents = []
 
-# calculate selectivity at infinite dilution
+# # calculate selectivity at infinite dilution
 
-# calculate capacity at infinite dilution
+# # calculate capacity at infinite dilution
 
-# calculate relative volatility at infinite dilution
+# # calculate relative volatility at infinite dilution
 
-# step 12: screen based on mixture properties
-
-
-# step 13: perform the iss-methodology
+# # step 12: screen based on mixture properties
 
 
-# step 14: print the results
+# # step 13: perform the iss-methodology
+
+
+# # step 14: print the results

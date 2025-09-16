@@ -6,7 +6,9 @@ Pure component properties calculated/adjusted successfully:
   acetone: Tc=508.1K, Pc=48.0bar, Tb=329.3K, ac=0.332
   methanol: Tc=513.0K, Pc=81.0bar, Tb=337.8K, ac=0.564
 Calculating Antoine parameters...
+Characteristic points (T [K], P [bar]): (329.3, 1.01325), (355.67, 2.2334282469263593), (508.1, 48.0)
   acetone: A=5.105, B=1863.5, C=36.1
+Characteristic points (T [K], P [bar]): (337.84999999999985, 1.01325), (359.1000000000003, 2.210517812748135), (513.0000000000005, 80.99999999999997)
   methanol: A=5.254, B=1616.1, C=-29.9
 Antoine parameters calculated for 2 compounds
 
@@ -101,491 +103,976 @@ Example calculated properties:
   solvent_3 (DOH:1):
     Tb=470.4K, Tc=719.7K, Pc=85.4bar
 
-Calculating Antoine parameters for solvent candidates...
-  ✅ solvent_1: A=5.276, B=1810.3, C=-29.7
-  ✅ solvent_2: A=4.300, B=1666.1, C=-75.1
-  ✅ solvent_3: A=4.044, B=1104.7, C=-196.9
-  ✅ solvent_4: A=14.813, B=21216.3, C=1046.4
-  ✅ solvent_5: A=2.646, B=402.1, C=-320.8
-  ✅ solvent_6: A=2.224, B=177.2, C=-319.7
-  ✅ solvent_7: A=-0.365, B=70.1, C=-550.7
-  ✅ solvent_8: A=0.303, B=-5.0, C=-352.9
-  ✅ solvent_9: A=2.927, B=501.3, C=-292.9
-  ✅ solvent_10: A=0.167, B=-10.8, C=-454.8
-  ✅ solvent_11: A=0.098, B=-7.9, C=-489.6
-  ✅ solvent_12: A=7.188, B=3960.7, C=93.2
-  ✅ solvent_13: A=-0.903, B=217.0, C=-646.6
-  ✅ solvent_14: A=3.297, B=709.7, C=-248.9
-  ✅ solvent_15: A=-11.302, B=13506.2, C=-1617.4
-  ✅ solvent_16: A=4.433, B=1351.4, C=-95.1
-  ✅ solvent_17: A=5.041, B=1637.4, C=51.1
-  ✅ solvent_18: A=2.148, B=152.6, C=-370.6
-  ✅ solvent_19: A=4.350, B=1370.7, C=-26.0
-  ✅ solvent_20: A=13.309, B=18346.0, C=1031.8
-  ✅ solvent_21: A=2.655, B=388.3, C=-235.6
-  ✅ solvent_22: A=3.698, B=858.5, C=-187.2
-  ✅ solvent_23: A=-8.686, B=8304.8, C=-1387.3
-  ✅ solvent_24: A=9.810, B=8644.3, C=481.3
-  ✅ solvent_25: A=2.092, B=131.9, C=-378.7
-  ✅ solvent_26: A=4.435, B=1369.2, C=-141.2
-  ✅ solvent_27: A=17.410, B=26098.1, C=1054.0
-  ✅ solvent_28: A=4.045, B=1080.1, C=-182.8
-  ✅ solvent_29: A=3.896, B=1035.4, C=-201.0
-  ✅ solvent_30: A=4.484, B=1123.5, C=-79.1
-  ✅ solvent_31: A=-0.316, B=59.3, C=-555.5
-  ✅ solvent_32: A=7.468, B=4641.5, C=197.2
-  ✅ solvent_33: A=8.377, B=5597.3, C=202.9
-  ✅ solvent_34: A=8.329, B=5535.8, C=206.7
-  ✅ solvent_35: A=2068.361, B=462236445.0, C=223121.4
-  ✅ solvent_36: A=2.859, B=455.9, C=-255.6
-  ✅ solvent_37: A=0.733, B=-62.8, C=-471.2
-  ✅ solvent_38: A=-7.228, B=7535.5, C=-1431.3
-  ✅ solvent_39: A=2.944, B=559.9, C=-285.2
-  ✅ solvent_40: A=2.787, B=443.6, C=-300.0
-  ✅ solvent_41: A=1.752, B=54.5, C=-374.5
-  ✅ solvent_42: A=-0.025, B=2.9, C=-508.3
-  ✅ solvent_43: A=0.372, B=-51.0, C=-583.9
-  ✅ solvent_44: A=0.158, B=-26.6, C=-618.6
-  ✅ solvent_45: A=19.859, B=34524.4, C=1301.7
-  ✅ solvent_46: A=5.873, B=2555.2, C=63.6
-  ✅ solvent_47: A=-0.072, B=-0.4, C=-433.7
-  ✅ solvent_48: A=-0.379, B=21.8, C=-535.4
-  ✅ solvent_49: A=4.098, B=1178.3, C=-179.4
-  ✅ solvent_50: A=6.047, B=2988.0, C=78.9
-  ✅ solvent_51: A=12.994, B=16209.3, C=730.4
-  ✅ solvent_52: A=15.982, B=24413.6, C=1213.4
-  ✅ solvent_53: A=10.378, B=10019.9, C=509.3
-  ✅ solvent_54: A=-0.065, B=6.0, C=-496.6
-  ✅ solvent_55: A=-0.783, B=124.5, C=-614.6
-  ✅ solvent_56: A=106.574, B=1145491.5, C=10279.0
-  ✅ solvent_57: A=-1.371, B=295.1, C=-690.3
-  ✅ solvent_58: A=4.700, B=1321.5, C=-75.2
-  ✅ solvent_59: A=2.672, B=260.2, C=-292.6
-  ✅ solvent_60: A=7.553, B=4662.8, C=204.1
-  ✅ solvent_61: A=1.957, B=104.6, C=-382.6
-  ✅ solvent_62: A=0.514, B=-62.1, C=-576.6
-  ✅ solvent_63: A=3.718, B=992.5, C=-204.4
-  ✅ solvent_64: A=2.898, B=462.7, C=-290.0
-  ✅ solvent_65: A=-28.020, B=98096.4, C=-3900.1
-  ✅ solvent_66: A=3.511, B=871.3, C=-186.8
-  ✅ solvent_67: A=-0.089, B=7.4, C=-481.6
-  ✅ solvent_68: A=-0.350, B=39.6, C=-539.9
-  ✅ solvent_69: A=3.620, B=808.0, C=-145.3
-  ✅ solvent_70: A=-0.978, B=285.1, C=-712.7
-  ✅ solvent_71: A=-2.327, B=1031.7, C=-824.8
-  ✅ solvent_72: A=2.835, B=481.6, C=-263.4
-  ✅ solvent_73: A=2.594, B=298.8, C=-328.2
-  ✅ solvent_74: A=6.417, B=3367.3, C=178.8
-  ✅ solvent_75: A=3.575, B=903.6, C=-229.6
-  ✅ solvent_76: A=3.201, B=632.4, C=-180.5
-  ✅ solvent_77: A=16.968, B=31406.5, C=1402.9
-  ✅ solvent_78: A=2.454, B=290.1, C=-339.5
-  ✅ solvent_79: A=3.663, B=929.8, C=-247.9
-  ✅ solvent_80: A=2.939, B=530.6, C=-245.7
-  ✅ solvent_81: A=0.449, B=-59.1, C=-588.6
-  ✅ solvent_82: A=3.183, B=633.0, C=-199.1
-  ✅ solvent_83: A=4.528, B=1706.0, C=-87.1
-  ✅ solvent_84: A=2.554, B=361.1, C=-331.2
-  ✅ solvent_85: A=-8.643, B=10084.2, C=-1569.4
-  ✅ solvent_86: A=-0.816, B=155.2, C=-650.0
-  ✅ solvent_87: A=9.557, B=8911.9, C=573.1
-  ✅ solvent_88: A=-1.609, B=422.0, C=-738.7
-  ✅ solvent_89: A=-0.511, B=87.1, C=-636.1
-  ✅ solvent_90: A=-1.389, B=352.6, C=-728.7
-  ✅ solvent_91: A=-4.059, B=2199.3, C=-1057.7
-  ✅ solvent_92: A=28.323, B=71890.7, C=2085.3
-  ✅ solvent_93: A=4.015, B=998.6, C=-179.3
-  ✅ solvent_94: A=-1.617, B=613.7, C=-797.3
-  ✅ solvent_95: A=20.297, B=44172.5, C=1817.4
-  ✅ solvent_96: A=2.145, B=153.7, C=-366.8
-  ✅ solvent_97: A=2.807, B=455.5, C=-293.9
-  ✅ solvent_98: A=-10.948, B=16159.9, C=-1860.7
-  ✅ solvent_99: A=31.515, B=113360.0, C=3152.2
-  ✅ solvent_100: A=1.968, B=80.1, C=-393.1
-  ✅ solvent_101: A=0.095, B=-6.4, C=-463.4
-  ✅ solvent_102: A=-0.449, B=62.4, C=-577.8
-  ✅ solvent_103: A=0.523, B=-39.7, C=-496.9
-  ✅ solvent_104: A=0.037, B=-3.9, C=-589.1
-  ✅ solvent_105: A=0.134, B=-9.6, C=-472.9
-  ✅ solvent_106: A=-0.080, B=8.8, C=-525.7
-  ✅ solvent_107: A=0.265, B=-12.8, C=-418.7
-  ✅ solvent_108: A=0.311, B=-29.8, C=-540.8
-  ✅ solvent_109: A=39.601, B=165682.5, C=3727.6
-  ✅ solvent_110: A=3.770, B=952.7, C=-212.7
-  ✅ solvent_111: A=4.869, B=1775.1, C=-143.5
-  ✅ solvent_112: A=31.498, B=112854.8, C=3193.9
-  ✅ solvent_113: A=2.898, B=496.9, C=-287.8
-  ✅ solvent_114: A=-0.927, B=279.6, C=-748.4
-  ✅ solvent_115: A=2.529, B=318.9, C=-331.7
-  ✅ solvent_116: A=3.993, B=1164.9, C=-210.0
-  ✅ solvent_117: A=2.571, B=285.2, C=-325.5
-  ✅ solvent_118: A=0.217, B=-17.8, C=-486.0
-  ✅ solvent_119: A=3.812, B=1016.6, C=-190.8
-  ✅ solvent_120: A=-18.817, B=43212.5, C=-2758.2
-  ✅ solvent_121: A=-2.137, B=905.2, C=-831.8
-  ✅ solvent_122: A=2.558, B=291.1, C=-315.8
-  ✅ solvent_123: A=3.454, B=782.2, C=-227.9
-  ✅ solvent_124: A=3.459, B=832.2, C=-230.4
-  ✅ solvent_125: A=3.637, B=945.8, C=-213.7
-  ✅ solvent_126: A=3.570, B=824.7, C=-234.3
-  ✅ solvent_127: A=4.497, B=1460.2, C=-183.3
-  ✅ solvent_128: A=3.043, B=612.8, C=-274.0
-  ✅ solvent_129: A=1.059, B=-52.4, C=-461.9
-  ✅ solvent_130: A=5.843, B=3118.3, C=68.4
-  ✅ solvent_131: A=0.896, B=-72.1, C=-536.2
-  ✅ solvent_132: A=2.987, B=521.6, C=-223.4
-  ✅ solvent_133: A=2.850, B=506.7, C=-296.3
-  ✅ solvent_134: A=7.843, B=6183.0, C=324.6
-  ✅ solvent_135: A=-0.365, B=43.3, C=-552.4
-  ✅ solvent_136: A=-0.994, B=182.3, C=-643.9
-  ✅ solvent_137: A=-0.568, B=96.7, C=-622.2
-  ✅ solvent_138: A=-1.268, B=295.5, C=-702.3
-  ✅ solvent_139: A=-0.291, B=44.7, C=-610.6
-  ✅ solvent_140: A=-1.048, B=234.5, C=-691.5
-  ✅ solvent_141: A=0.733, B=-71.7, C=-538.2
-  ✅ solvent_142: A=5.592, B=2436.0, C=-1.2
-  ✅ solvent_143: A=-1.416, B=484.6, C=-801.3
-  ✅ solvent_144: A=1.842, B=32.7, C=-398.6
-  ✅ solvent_145: A=0.254, B=-34.6, C=-533.6
-  ✅ solvent_146: A=87.004, B=790028.6, C=8661.3
-  ✅ solvent_147: A=3.026, B=395.0, C=-233.7
-  ✅ solvent_148: A=1.683, B=31.7, C=-424.3
-  ✅ solvent_149: A=1.362, B=-21.1, C=-468.4
-  ✅ solvent_150: A=-2.100, B=971.1, C=-959.0
-  ✅ solvent_151: A=0.365, B=-49.7, C=-548.1
-  ✅ solvent_152: A=2.256, B=223.0, C=-331.3
-  ✅ solvent_153: A=2.804, B=437.1, C=-261.6
-  ✅ solvent_154: A=1.557, B=18.0, C=-417.1
-  ✅ solvent_155: A=3.200, B=666.9, C=-258.2
-  ✅ solvent_156: A=3.201, B=707.9, C=-261.1
-  ✅ solvent_157: A=2.639, B=375.9, C=-278.7
-  ✅ solvent_158: A=5.502, B=2698.0, C=17.9
-  ✅ solvent_159: A=-0.021, B=5.1, C=-651.8
-  ✅ solvent_160: A=2.339, B=226.8, C=-311.1
-  ✅ solvent_161: A=3.038, B=613.1, C=-279.1
-  ✅ solvent_162: A=9.960, B=8297.6, C=414.5
-  ✅ solvent_163: A=5.268, B=2099.1, C=-63.7
-  ✅ solvent_164: A=4.729, B=1686.9, C=-124.2
-  ✅ solvent_165: A=6.219, B=2979.2, C=37.5
-  ✅ solvent_166: A=2.028, B=48.8, C=-381.6
-  ✅ solvent_167: A=4.514, B=1304.7, C=-127.9
-  ✅ solvent_168: A=-5.767, B=4537.2, C=-1237.9
-  ✅ solvent_169: A=4.829, B=1715.5, C=-105.5
-  ✅ solvent_170: A=26.512, B=72068.7, C=2247.3
-  ✅ solvent_171: A=4.501, B=1504.7, C=-145.2
-  ✅ solvent_172: A=-0.066, B=13.7, C=-601.7
-  ✅ solvent_173: A=3.389, B=795.6, C=-279.1
-  ✅ solvent_174: A=4.276, B=1390.8, C=-222.9
-  ✅ solvent_175: A=3.403, B=750.2, C=-243.3
-  ✅ solvent_176: A=3.144, B=418.4, C=-264.1
-  ✅ solvent_177: A=7.620, B=4771.8, C=181.4
-  ✅ solvent_178: A=-83.045, B=714874.2, C=-9030.4
-  ✅ solvent_179: A=5.795, B=2634.3, C=-10.5
-  ✅ solvent_180: A=2.974, B=472.5, C=-267.4
-  ✅ solvent_181: A=9.741, B=7815.5, C=329.8
-  ✅ solvent_182: A=1.630, B=28.1, C=-392.4
-  ✅ solvent_183: A=-1.023, B=273.9, C=-653.4
-  ✅ solvent_184: A=-1.443, B=481.9, C=-768.3
-  ✅ solvent_185: A=3.491, B=729.3, C=-236.3
-  ✅ solvent_186: A=5.491, B=2288.3, C=-75.0
-  ✅ solvent_187: A=4.084, B=1196.9, C=-76.1
-  ✅ solvent_188: A=2.022, B=130.2, C=-388.9
-  ✅ solvent_189: A=1.473, B=-16.2, C=-455.0
-  ✅ solvent_190: A=-3743.727, B=1661284093.5, C=-444241.6
-  ✅ solvent_191: A=2.179, B=159.3, C=-324.5
-  ✅ solvent_192: A=5.222, B=2193.3, C=-114.9
-  ✅ solvent_193: A=-67.630, B=570389.2, C=-8816.5
-  ✅ solvent_194: A=3.608, B=896.6, C=-249.6
-  ✅ solvent_195: A=2.449, B=278.0, C=-267.8
-  ✅ solvent_196: A=2.854, B=435.6, C=-201.6
-  ✅ solvent_197: A=1.726, B=57.4, C=-375.4
-  ✅ solvent_198: A=4.041, B=1052.1, C=-57.6
-  ✅ solvent_199: A=4.480, B=1450.6, C=-154.2
-  ✅ solvent_200: A=2.659, B=304.5, C=-302.5
-  ✅ solvent_201: A=2.704, B=291.6, C=-295.7
-  ✅ solvent_202: A=16.853, B=30614.2, C=1356.0
-  ✅ solvent_203: A=2.451, B=291.1, C=-336.0
-  ✅ solvent_204: A=3.617, B=903.9, C=-249.5
-  ✅ solvent_205: A=3.056, B=557.8, C=-228.7
-  ✅ solvent_206: A=3.459, B=872.4, C=-236.7
-  ✅ solvent_207: A=-0.126, B=13.3, C=-518.6
-  ✅ solvent_208: A=3.819, B=879.5, C=-164.7
-  ✅ solvent_209: A=2.530, B=274.5, C=-324.6
-  ✅ solvent_210: A=0.625, B=-70.5, C=-557.5
-  ✅ solvent_211: A=-14.413, B=27332.5, C=-2359.7
-  ✅ solvent_212: A=2.632, B=287.1, C=-311.6
-  ✅ solvent_213: A=-15.808, B=31608.5, C=-2406.2
-  ✅ solvent_214: A=5.003, B=1978.0, C=-102.4
-  ✅ solvent_215: A=2.968, B=503.3, C=-283.3
-  ✅ solvent_216: A=4.497, B=1576.9, C=-163.1
-  ✅ solvent_217: A=3.438, B=816.2, C=-235.0
-  ✅ solvent_218: A=7.850, B=5957.5, C=252.2
-  ✅ solvent_219: A=-2.507, B=1252.5, C=-908.7
-  ✅ solvent_220: A=4.600, B=1664.0, C=-186.5
-  ✅ solvent_221: A=3.599, B=932.3, C=-254.9
-  ✅ solvent_222: A=1.676, B=34.3, C=-398.7
-  ✅ solvent_223: A=2.744, B=435.7, C=-279.8
-  ✅ solvent_224: A=-0.083, B=16.9, C=-617.8
-  ✅ solvent_225: A=2.201, B=204.0, C=-344.3
-  ✅ solvent_226: A=-3.166, B=1443.5, C=-966.1
-  ✅ solvent_227: A=22.565, B=52605.0, C=1993.6
-  ✅ solvent_228: A=2.723, B=389.1, C=-300.4
-  ✅ solvent_229: A=1.510, B=-12.8, C=-433.0
-  ✅ solvent_230: A=-0.331, B=47.0, C=-580.3
-  ✅ solvent_231: A=2535.076, B=728772208.6, C=287109.4
-  ✅ solvent_232: A=-0.893, B=168.9, C=-646.0
-  ✅ solvent_233: A=-0.328, B=15.7, C=-519.0
-  ✅ solvent_234: A=0.702, B=-71.5, C=-534.6
-  ✅ solvent_235: A=-0.107, B=14.5, C=-575.3
-  ✅ solvent_236: A=5.826, B=3009.0, C=9.7
-  ✅ solvent_237: A=-1.410, B=468.7, C=-720.0
-  ✅ solvent_238: A=-140.702, B=2251838.1, C=-16416.8
-  ✅ solvent_239: A=23.887, B=50994.1, C=1885.0
-  ✅ solvent_240: A=44.546, B=205707.6, C=4288.4
-  ✅ solvent_241: A=1.059, B=-49.1, C=-440.5
-  ✅ solvent_242: A=3.181, B=612.5, C=-174.9
-  ✅ solvent_243: A=1.726, B=54.5, C=-390.5
-  ✅ solvent_244: A=6.521, B=3596.4, C=213.2
-  ✅ solvent_245: A=4.659, B=1708.7, C=-4.7
-  ✅ solvent_246: A=3.085, B=593.8, C=-286.0
-  ✅ solvent_247: A=0.221, B=-32.1, C=-563.0
-  ✅ solvent_248: A=2.226, B=214.0, C=-328.4
-  ✅ solvent_249: A=3.171, B=649.1, C=-270.7
-  ✅ solvent_250: A=3.581, B=921.0, C=-257.9
-  ✅ solvent_251: A=6.191, B=3592.6, C=109.3
-  ✅ solvent_252: A=3.643, B=965.9, C=-255.5
-  ✅ solvent_253: A=1.577, B=23.0, C=-397.4
-  ✅ solvent_254: A=4.485, B=1650.6, C=-97.2
-  ✅ solvent_255: A=2.752, B=458.7, C=-307.3
-  ✅ solvent_256: A=3.406, B=808.3, C=-277.7
-  ✅ solvent_257: A=-0.047, B=5.9, C=-538.7
-  ✅ solvent_258: A=-0.203, B=5.8, C=-487.5
-  ✅ solvent_259: A=5.160, B=1929.2, C=-66.1
-  ✅ solvent_260: A=6.299, B=3163.4, C=-2.0
-  ✅ solvent_261: A=5.323, B=2201.2, C=-106.1
-  ✅ solvent_262: A=8.795, B=6555.0, C=257.8
-  ✅ solvent_263: A=-0.417, B=63.1, C=-597.9
-  ✅ solvent_264: A=-0.934, B=189.2, C=-669.8
-  ✅ solvent_265: A=6.641, B=4158.7, C=146.7
-  ✅ solvent_266: A=4.811, B=1458.4, C=-48.4
-  ✅ solvent_267: A=5.857, B=2650.3, C=37.4
-  ✅ solvent_268: A=4.797, B=1504.7, C=-99.4
-  ✅ solvent_269: A=4.858, B=1722.0, C=-103.2
-  ✅ solvent_270: A=4.700, B=1510.1, C=-111.8
-  ✅ solvent_271: A=4.304, B=1336.4, C=-163.5
-  ✅ solvent_272: A=-0.686, B=101.9, C=-596.1
-  ✅ solvent_273: A=-1.238, B=249.7, C=-669.5
-  ✅ solvent_274: A=0.811, B=-75.1, C=-514.4
-  ✅ solvent_275: A=-0.708, B=130.1, C=-639.0
-  ✅ solvent_276: A=1.995, B=74.2, C=-391.1
-  ✅ solvent_277: A=3.272, B=676.6, C=-244.5
-  ✅ solvent_278: A=0.189, B=-28.7, C=-586.8
-  ✅ solvent_279: A=0.803, B=-83.9, C=-573.7
-  ✅ solvent_280: A=-0.333, B=78.1, C=-656.9
-  ✅ solvent_281: A=3.431, B=696.8, C=-212.0
-  ✅ solvent_282: A=2.978, B=546.8, C=-284.5
-  ✅ solvent_283: A=-10.910, B=16380.6, C=-1960.4
-  ✅ solvent_284: A=3.213, B=717.9, C=-262.9
-  ✅ solvent_285: A=4.664, B=1613.2, C=-130.8
-  ✅ solvent_286: A=1.457, B=-21.1, C=-442.7
-  ✅ solvent_287: A=-0.874, B=250.1, C=-724.8
-  ✅ solvent_288: A=3.223, B=687.3, C=-256.3
-  ✅ solvent_289: A=3.329, B=790.1, C=-250.3
-  ✅ solvent_290: A=2.797, B=423.5, C=-298.4
-  ✅ solvent_291: A=4.083, B=1243.9, C=-206.7
-  ✅ solvent_292: A=4.297, B=1360.8, C=-178.7
-  ✅ solvent_293: A=3.881, B=1137.1, C=-233.2
-  ✅ solvent_294: A=0.889, B=-74.0, C=-515.3
-  ✅ solvent_295: A=-33.321, B=138776.2, C=-4620.7
-  ✅ solvent_296: A=2.926, B=513.8, C=-289.6
-  ✅ solvent_297: A=4.071, B=1227.1, C=-206.4
-  ✅ solvent_298: A=1.100, B=-64.9, C=-509.7
-  ✅ solvent_299: A=-0.433, B=104.1, C=-707.2
-  ✅ solvent_300: A=6.107, B=3089.5, C=25.2
-  ✅ solvent_301: A=4.262, B=1265.8, C=-176.8
-  ✅ solvent_302: A=3.629, B=809.9, C=-188.0
-  ✅ solvent_303: A=-1.469, B=517.0, C=-744.1
-  ✅ solvent_304: A=2.353, B=225.0, C=-326.0
-  ✅ solvent_305: A=-0.065, B=14.0, C=-619.5
-  ✅ solvent_306: A=3.313, B=731.7, C=-264.3
-  ✅ solvent_307: A=1.245, B=-47.7, C=-475.5
-  ✅ solvent_308: A=4.045, B=1153.1, C=-199.9
-  ✅ solvent_309: A=-24.712, B=72973.7, C=-3316.7
-  ✅ solvent_310: A=12.256, B=14496.8, C=858.7
-  ✅ solvent_311: A=2.359, B=186.4, C=-340.2
-  ✅ solvent_312: A=-2.216, B=777.9, C=-851.3
-  ✅ solvent_313: A=-0.365, B=47.1, C=-559.1
-  ✅ solvent_314: A=0.105, B=-11.8, C=-574.1
-  ✅ solvent_315: A=2.878, B=523.6, C=-297.6
-  ✅ solvent_316: A=0.917, B=-62.9, C=-488.6
-  ✅ solvent_317: A=9.871, B=8546.4, C=567.0
-  ✅ solvent_318: A=2.452, B=279.7, C=-282.5
-  ✅ solvent_319: A=4.135, B=1146.2, C=-169.6
-  ✅ solvent_320: A=11.877, B=13291.3, C=773.2
-  ✅ solvent_321: A=5.108, B=1896.2, C=44.5
-  ✅ solvent_322: A=-0.128, B=14.8, C=-533.2
-  ✅ solvent_323: A=0.375, B=-29.8, C=-490.5
-  ✅ solvent_324: A=-1.016, B=205.4, C=-666.7
-  ✅ solvent_325: A=-0.181, B=25.4, C=-591.2
-  ✅ solvent_326: A=-0.609, B=110.1, C=-653.6
-  ✅ solvent_327: A=5.211, B=2027.3, C=35.2
-  ✅ solvent_328: A=6.719, B=4171.5, C=108.3
-  ✅ solvent_329: A=2.370, B=261.3, C=-282.4
-  ✅ solvent_330: A=2.816, B=413.8, C=-304.9
-  ✅ solvent_331: A=1.018, B=-69.0, C=-496.2
-  ✅ solvent_332: A=1.467, B=-9.8, C=-451.2
-  ✅ solvent_333: A=-1.096, B=358.9, C=-787.8
-  ✅ solvent_334: A=17.018, B=30230.8, C=1405.5
-  ✅ solvent_335: A=2.774, B=408.0, C=-299.5
-  ✅ solvent_336: A=15.958, B=25099.6, C=1109.1
-  ✅ solvent_337: A=38.461, B=141773.2, C=3287.0
-  ✅ solvent_338: A=-0.550, B=103.1, C=-658.5
-  ✅ solvent_339: A=-2.034, B=865.4, C=-858.0
-  ✅ solvent_340: A=-2.406, B=889.5, C=-876.0
-  ✅ solvent_341: A=3.652, B=909.7, C=-225.0
-  ✅ solvent_342: A=-4.369, B=2502.0, C=-1094.3
-  ✅ solvent_343: A=3.727, B=1007.3, C=-221.5
-  ✅ solvent_344: A=2.992, B=479.1, C=-294.7
-  ✅ solvent_345: A=1.919, B=48.8, C=-431.7
-  ✅ solvent_346: A=3.528, B=708.0, C=-230.8
-  ✅ solvent_347: A=4.022, B=1131.4, C=-191.2
-  ✅ solvent_348: A=6.827, B=3691.2, C=59.8
-  ✅ solvent_349: A=4.295, B=1201.3, C=-124.0
-  ✅ solvent_350: A=4.902, B=1805.8, C=-145.5
-  ✅ solvent_351: A=4.473, B=1411.8, C=-112.6
-  ✅ solvent_352: A=5.537, B=2334.9, C=-76.3
-  ✅ solvent_353: A=1.143, B=-60.5, C=-484.2
-  ✅ solvent_354: A=5.207, B=1948.3, C=-62.4
-  ✅ solvent_355: A=17.319, B=30828.9, C=1436.9
-  ✅ solvent_356: A=0.034, B=-3.0, C=-529.2
-  ✅ solvent_357: A=-12.223, B=19338.4, C=-1950.3
-  ✅ solvent_358: A=-0.823, B=161.1, C=-658.7
-  ✅ solvent_359: A=1.618, B=22.7, C=-409.0
-  ✅ solvent_360: A=-1.552, B=420.2, C=-752.6
-  ✅ solvent_361: A=2.769, B=449.7, C=-282.8
-  ✅ solvent_362: A=5.494, B=2470.7, C=-95.4
-  ✅ solvent_363: A=4.411, B=1458.1, C=-163.6
-  ✅ solvent_364: A=4.791, B=1835.5, C=-174.7
-  ✅ solvent_365: A=6.937, B=4137.9, C=64.9
-  ✅ solvent_366: A=2.204, B=175.2, C=-368.8
-  ✅ solvent_367: A=3.744, B=948.4, C=-235.6
-  ✅ solvent_368: A=2.186, B=172.3, C=-363.0
-  ✅ solvent_369: A=1.920, B=99.0, C=-363.9
-  ✅ solvent_370: A=1.274, B=-35.9, C=-469.5
-  ✅ solvent_371: A=2.778, B=385.2, C=-252.9
-  ✅ solvent_372: A=3.766, B=901.4, C=-122.3
-  ✅ solvent_373: A=1.719, B=39.3, C=-394.9
-  ✅ solvent_374: A=4.711, B=1636.6, C=-1.6
-  ✅ solvent_375: A=1.509, B=-7.2, C=-445.1
-  ✅ solvent_376: A=3.148, B=574.6, C=-247.3
-  ✅ solvent_377: A=4.158, B=1305.5, C=-196.3
-  ✅ solvent_378: A=3.935, B=1179.0, C=-225.6
-  ✅ solvent_379: A=8.280, B=6906.7, C=356.1
-  ✅ solvent_380: A=-0.496, B=74.3, C=-593.6
-  ✅ solvent_381: A=-6.503, B=5644.2, C=-1311.1
-  ✅ solvent_382: A=-6.971, B=6597.7, C=-1316.9
-  ✅ solvent_383: A=2.720, B=360.1, C=-269.9
-  ✅ solvent_384: A=2.682, B=378.2, C=-283.5
-  ✅ solvent_385: A=0.808, B=-69.2, C=-535.6
-  ✅ solvent_386: A=3.254, B=715.9, C=-226.8
-  ✅ solvent_387: A=-1.710, B=689.7, C=-871.3
-  ✅ solvent_388: A=4.532, B=1605.3, C=-198.8
-  ✅ solvent_389: A=3.660, B=977.6, C=-252.5
-  ✅ solvent_390: A=314.859, B=10677968.0, C=33570.8
-  ✅ solvent_391: A=3.376, B=666.1, C=-181.3
-  ✅ solvent_392: A=-0.906, B=258.9, C=-687.8
-  ✅ solvent_393: A=1.982, B=98.5, C=-380.9
-  ✅ solvent_394: A=2.630, B=351.0, C=-294.6
-  ✅ solvent_395: A=1.083, B=-58.8, C=-507.1
-  ✅ solvent_396: A=2.677, B=334.7, C=-281.2
-  ✅ solvent_397: A=2.682, B=312.5, C=-271.3
-  ✅ solvent_398: A=1.738, B=34.6, C=-417.9
-  ✅ solvent_399: A=2.209, B=153.2, C=-345.0
-  ✅ solvent_400: A=1.190, B=-49.2, C=-500.5
-  ✅ solvent_401: A=1.677, B=14.1, C=-430.3
-  ✅ solvent_402: A=-1.785, B=501.2, C=-764.0
-  ✅ solvent_403: A=2.293, B=196.7, C=-325.9
-  ✅ solvent_404: A=-1.449, B=514.5, C=-789.2
-  ✅ solvent_405: A=3.773, B=923.7, C=-139.9
-  ✅ solvent_406: A=1.398, B=-21.8, C=-466.8
-  ✅ solvent_407: A=0.552, B=-65.1, C=-579.6
-  ✅ solvent_408: A=-7.393, B=8314.3, C=-1627.9
-  ✅ solvent_409: A=3.088, B=607.1, C=-267.1
-  ✅ solvent_410: A=-1.933, B=781.4, C=-799.0
-  ✅ solvent_411: A=1.673, B=12.7, C=-427.6
-  ✅ solvent_412: A=8.685, B=7401.4, C=399.4
-  ✅ solvent_413: A=2.802, B=455.4, C=-299.7
-  ✅ solvent_414: A=1.462, B=-25.0, C=-459.4
-  ✅ solvent_415: A=3.471, B=763.3, C=-160.7
-  ✅ solvent_416: A=3.734, B=987.3, C=-241.1
-  ✅ solvent_417: A=5.237, B=2273.8, C=-25.2
-  ✅ solvent_418: A=1.004, B=-76.4, C=-553.0
-  ✅ solvent_419: A=4.631, B=1743.3, C=-101.9
-  ✅ solvent_420: A=4.731, B=1699.6, C=-79.3
-  ✅ solvent_421: A=-0.323, B=47.4, C=-587.8
-  ✅ solvent_422: A=11.686, B=12575.1, C=666.4
-  ✅ solvent_423: A=2.030, B=84.3, C=-341.5
-  ✅ solvent_424: A=-1.984, B=827.3, C=-813.6
-  ✅ solvent_425: A=44.514, B=229685.9, C=4756.5
-  ✅ solvent_426: A=2.611, B=364.3, C=-288.8
-  ✅ solvent_427: A=12.869, B=16978.9, C=943.8
-  ✅ solvent_428: A=3.625, B=877.6, C=-159.6
-  ✅ solvent_429: A=-1.286, B=331.1, C=-747.2
-  ✅ solvent_430: A=1.941, B=87.5, C=-384.1
-  ✅ solvent_431: A=4.475, B=1470.5, C=25.1
-  ✅ solvent_432: A=2.653, B=359.7, C=-239.2
-  ✅ solvent_433: A=1.566, B=15.4, C=-437.2
-  ✅ solvent_434: A=2.090, B=155.4, C=-328.6
-  ✅ solvent_435: A=1.891, B=85.2, C=-379.5
-  ✅ solvent_436: A=3.349, B=700.5, C=-133.0
-  ✅ solvent_437: A=149.280, B=2590652.5, C=16990.5
-  ✅ solvent_438: A=0.873, B=-66.1, C=-490.0
-  ✅ solvent_439: A=-0.126, B=24.4, C=-568.7
-  ✅ solvent_440: A=-77.841, B=726411.7, C=-9761.7
-  ✅ solvent_441: A=2.100, B=165.9, C=-333.7
-  ✅ solvent_442: A=3.010, B=543.6, C=-182.4
-  ✅ solvent_443: A=1.690, B=44.3, C=-412.5
-  ✅ solvent_444: A=2.986, B=492.7, C=-235.2
-  ✅ solvent_445: A=1.467, B=-9.7, C=-454.4
-  ✅ solvent_446: A=2.294, B=205.1, C=-335.9
-  ✅ solvent_447: A=0.064, B=-10.5, C=-649.3
-  ✅ solvent_448: A=21.865, B=51863.7, C=1869.2
-  ✅ solvent_449: A=-4.094, B=2710.7, C=-1148.0
-  ✅ solvent_450: A=7.679, B=5623.9, C=214.0
-  ✅ solvent_451: A=1.922, B=86.4, C=-382.2
-  ✅ solvent_452: A=-0.189, B=38.6, C=-604.0
-  ✅ solvent_453: A=4.093, B=1296.2, C=-113.2
-  ✅ solvent_454: A=10.292, B=10168.4, C=610.2
-  ✅ solvent_455: A=0.643, B=-64.8, C=-501.6
-  ✅ solvent_456: A=6.967, B=4299.2, C=234.7
-  ✅ solvent_457: A=5.708, B=2812.7, C=83.4
-  ✅ solvent_458: A=9.286, B=7881.5, C=497.7
-  ✅ solvent_459: A=-0.986, B=290.4, C=-745.6
-  ✅ solvent_460: A=4.011, B=1069.0, C=-186.6
-  ✅ solvent_461: A=5.078, B=2049.6, C=-136.5
-  ✅ solvent_462: A=-11.923, B=19357.7, C=-2016.6
-  ✅ solvent_463: A=2.487, B=307.2, C=-337.3
-  ✅ solvent_464: A=3.738, B=989.8, C=-239.5
-  ✅ solvent_465: A=0.138, B=-13.8, C=-538.3
-  ✅ solvent_466: A=-36.111, B=164827.8, C=-5015.7
-  ✅ solvent_467: A=-0.766, B=222.3, C=-782.1
-  ✅ solvent_468: A=-7.990, B=9526.8, C=-1701.6
-  ✅ solvent_469: A=4.541, B=1458.1, C=-133.5
-  ✅ solvent_470: A=2.168, B=161.1, C=-370.7
-  ✅ solvent_471: A=4.243, B=1309.2, C=-182.9
-  ✅ solvent_472: A=-33.697, B=133302.4, C=-4331.1
-  ✅ solvent_473: A=6.104, B=3081.5, C=-21.4
-  ✅ solvent_474: A=2.992, B=512.7, C=-295.6
-  ✅ solvent_475: A=-0.321, B=76.9, C=-722.7
-  ✅ solvent_476: A=14.194, B=21039.7, C=985.6
-  ✅ solvent_477: A=3.692, B=912.2, C=-240.6
-  ✅ solvent_478: A=1.872, B=83.9, C=-394.6
-  ✅ solvent_479: A=-3.865, B=2474.5, C=-1119.3
+Filtering compounds based on Tb/Tc ratio...
+Eliminated 328 compounds where Tb > 0.7*Tc
+Retained 151 compounds for further screening
 
-✅ Antoine parameters calculated for 479 out of 479 solvents
+Eliminated compounds (Tb > 0.7*Tc):
+  solvent_5: CH3:2, CH2:1, C:1, CH3CO:2
+    Tb (473.0K) > 0.7*Tc (462.2K), Ratio: 0.716
+  solvent_7: CH3:4, CHO:2
+    Tb (361.7K) > 0.7*Tc (358.1K), Ratio: 0.707
+  solvent_8: CH3:2, CH2COO:1
+    Tb (335.9K) > 0.7*Tc (249.7K), Ratio: 0.942
+  solvent_9: CH3:3, CH:2, COOH:1
+    Tb (464.5K) > 0.7*Tc (457.3K), Ratio: 0.711
+  solvent_10: CH3:3, CH:1, CH2COO:1
+    Tb (387.7K) > 0.7*Tc (324.0K), Ratio: 0.838
+  solvent_11: CH3:4, C:1, CH2COO:1
+    Tb (404.6K) > 0.7*Tc (346.7K), Ratio: 0.817
+  solvent_12: CH3:2, CH:2, OH:2
+    Tb (458.3K) > 0.7*Tc (434.9K), Ratio: 0.738
+  solvent_13: CH2:1, OH:2
+    Tb (407.7K) > 0.7*Tc (397.3K), Ratio: 0.718
+  solvent_14: CH3:3, CH2:1, C:1, COOH:1
+    Tb (464.6K) > 0.7*Tc (458.4K), Ratio: 0.709
+  solvent_15: CH3:1, CH:1, OH:2
+    Tb (423.0K) > 0.7*Tc (409.0K), Ratio: 0.724
+  solvent_16: CH3:3, CH:2, OH:1
+    Tb (400.3K) > 0.7*Tc (396.6K), Ratio: 0.706
+  solvent_18: CH3:2, CH:2, HCO:2
+    Tb (441.9K) > 0.7*Tc (438.7K), Ratio: 0.705
+  solvent_22: CH3:3, C:1, OH:1, CH2O:1
+    Tb (419.7K) > 0.7*Tc (411.7K), Ratio: 0.714
+  solvent_23: CH2:2, OH:2
+    Tb (431.9K) > 0.7*Tc (415.2K), Ratio: 0.728
+  solvent_24: CH3:3, CH2:1, C:1, OH:1
+    Tb (400.4K) > 0.7*Tc (398.3K), Ratio: 0.704
+  solvent_25: CH3:2, CH2:1, C:1, HCO:2
+    Tb (442.0K) > 0.7*Tc (439.9K), Ratio: 0.703
+  solvent_26: CH3:2, CH2:1, C:1, OH:1, HCO:1
+    Tb (450.3K) > 0.7*Tc (438.1K), Ratio: 0.720
+  solvent_27: CH3:1, CH2:1, CH:1, OH:2
+    Tb (445.5K) > 0.7*Tc (425.4K), Ratio: 0.733
+  solvent_28: CH3:2, CH:2, OH:1, HCO:1
+    Tb (450.2K) > 0.7*Tc (436.8K), Ratio: 0.721
+  solvent_29: CH3:2, CH:2, OH:1, CH3COO:1
+    Tb (467.2K) > 0.7*Tc (446.2K), Ratio: 0.733
+  solvent_31: CH3:2, OH:1, CHO:1
+    Tb (371.2K) > 0.7*Tc (367.5K), Ratio: 0.707
+  solvent_32: CH3:2, CH2:2, OH:1, CHO:1
+    Tb (424.8K) > 0.7*Tc (408.8K), Ratio: 0.727
+  solvent_33: CH3:1, CH2:2, CH:1, OH:2
+    Tb (465.8K) > 0.7*Tc (440.0K), Ratio: 0.741
+  solvent_34: CH3:2, CH2:1, C:1, OH:2
+    Tb (458.3K) > 0.7*Tc (436.2K), Ratio: 0.736
+  solvent_36: CH3:2, CH2:2, CHO:1, HCO:1
+    Tb (415.3K) > 0.7*Tc (411.2K), Ratio: 0.707
+  solvent_39: CH3:2, CH:2, CH3COO:2
+    Tb (475.7K) > 0.7*Tc (456.5K), Ratio: 0.730
+  solvent_40: CH3:2, CH:2, HCO:1, CH3COO:1
+    Tb (459.5K) > 0.7*Tc (447.9K), Ratio: 0.718
+  solvent_41: CH3:3, CH:1, CHO:1, HCO:1
+    Tb (405.7K) > 0.7*Tc (404.7K), Ratio: 0.702
+  solvent_42: CH3:3, CH2:1, CH:1, CH2COO:1
+    Tb (414.2K) > 0.7*Tc (354.4K), Ratio: 0.818
+  solvent_43: CH3:3, C:1, OH:1, COO:1
+    Tb (444.8K) > 0.7*Tc (438.4K), Ratio: 0.710
+  solvent_45: CH3:2, C:1, OH:2
+    Tb (437.3K) > 0.7*Tc (421.1K), Ratio: 0.727
+  solvent_47: CH3:2, CH2COO:2
+    Tb (439.0K) > 0.7*Tc (303.8K), Ratio: 1.012
+  solvent_48: CH3:2, CH2:2, CH2COO:2
+    Tb (478.9K) > 0.7*Tc (366.2K), Ratio: 0.915
+  solvent_49: CH3:2, CH2:1, C:1, OH:1, CH3COO:1
+    Tb (467.3K) > 0.7*Tc (447.3K), Ratio: 0.731
+  solvent_51: CH2:1, COOH:2
+    Tb (517.6K) > 0.7*Tc (498.5K), Ratio: 0.727
+  solvent_53: CH3:2, CH:2, OH:1, HCOO:1
+    Tb (456.7K) > 0.7*Tc (442.4K), Ratio: 0.723
+  solvent_54: CH3:1, OH:1, CH2COO:1
+    Tb (411.8K) > 0.7*Tc (345.2K), Ratio: 0.835
+  solvent_55: CH3:1, CH2:2, OH:1, CH2COO:1
+    Tb (456.7K) > 0.7*Tc (393.1K), Ratio: 0.813
+  solvent_56: CH2:1, OH:1, COOH:1
+    Tb (470.0K) > 0.7*Tc (457.8K), Ratio: 0.719
+  solvent_57: CH3:1, CH2:3, OH:1, CH2COO:1
+    Tb (475.9K) > 0.7*Tc (411.6K), Ratio: 0.809
+  solvent_60: CH3:1, CH2:2, OH:1, CH2O:1
+    Tb (413.8K) > 0.7*Tc (405.4K), Ratio: 0.715
+  solvent_62: CH3:3, C:1, CH3COO:1, COO:1
+    Tb (454.3K) > 0.7*Tc (449.4K), Ratio: 0.708
+  solvent_63: CH3:2, CH2:2, CH:1, COOH:1
+    Tb (471.8K) > 0.7*Tc (461.6K), Ratio: 0.715
+  solvent_64: CH3:1, CH2:2, CH:1, HCO:2
+    Tb (450.0K) > 0.7*Tc (443.7K), Ratio: 0.710
+  solvent_66: CH3:2, CH2:2, CHO:1, CH3COO:1
+    Tb (435.3K) > 0.7*Tc (422.5K), Ratio: 0.721
+  solvent_67: CH3:3, CHO:1, CH2COO:1
+    Tb (404.0K) > 0.7*Tc (333.8K), Ratio: 0.847
+  solvent_68: CH3:3, CH2:1, CHO:1, CH2COO:1
+    Tb (428.5K) > 0.7*Tc (362.2K), Ratio: 0.828
+  solvent_70: CH3:2, CH2:2, CHO:1, HCOO:1
+    Tb (423.0K) > 0.7*Tc (417.9K), Ratio: 0.709
+  solvent_72: CH3:2, CH2:2, CHO:1, CH3CO:1
+    Tb (433.6K) > 0.7*Tc (425.6K), Ratio: 0.713
+  solvent_73: CH3:2, CHO:1, COOH:1
+    Tb (443.7K) > 0.7*Tc (440.1K), Ratio: 0.706
+  solvent_75: CH3:2, CH2:2, CHO:1, COOH:1
+    Tb (482.7K) > 0.7*Tc (465.0K), Ratio: 0.727
+  solvent_76: CH3:3, CH2:1, CHO:1, CH2O:1
+    Tb (378.4K) > 0.7*Tc (377.7K), Ratio: 0.701
+  solvent_77: CH3:2, CH:2, HCO:1, HCOO:1
+    Tb (448.7K) > 0.7*Tc (444.2K), Ratio: 0.707
+  solvent_78: CH3:2, CH:2, HCO:1, CH3CO:1
+    Tb (458.0K) > 0.7*Tc (450.5K), Ratio: 0.712
+  solvent_79: CH3:2, CH:2, HCO:1, COOH:1
+    Tb (502.1K) > 0.7*Tc (483.7K), Ratio: 0.727
+  solvent_80: CH3:3, CH:1, CHO:1, CH3COO:1
+    Tb (426.6K) > 0.7*Tc (416.6K), Ratio: 0.717
+  solvent_81: CH3:2, CH:2, HCOO:2
+    Tb (455.2K) > 0.7*Tc (449.4K), Ratio: 0.709
+  solvent_83: CH3:2, CH:2, HCOO:1, CH3CO:1
+    Tb (464.3K) > 0.7*Tc (455.5K), Ratio: 0.714
+  solvent_84: CH3:2, CH:2, CH3CO:2
+    Tb (473.0K) > 0.7*Tc (461.2K), Ratio: 0.718
+  solvent_86: CH3:2, CH2:1, CH:1, HCO:1, CH2COO:1
+    Tb (461.2K) > 0.7*Tc (407.6K), Ratio: 0.792
+  solvent_88: CH3:2, CH2:1, CH:1, CH3COO:1, CH2COO:1
+    Tb (477.3K) > 0.7*Tc (419.2K), Ratio: 0.797
+  solvent_89: CH3:2, CH2:1, CH:1, CH2COO:1, HCOO:1
+    Tb (467.4K) > 0.7*Tc (414.5K), Ratio: 0.789
+  solvent_90: CH3:2, CH2:1, CH:1, CH2COO:1, CH3CO:1
+    Tb (475.9K) > 0.7*Tc (422.4K), Ratio: 0.789
+  solvent_91: CH3:2, CH2:1, CH:1, CH2COO:1, COOH:1
+    Tb (516.7K) > 0.7*Tc (462.7K), Ratio: 0.782
+  solvent_92: CH2:3, OH:2
+    Tb (453.5K) > 0.7*Tc (431.0K), Ratio: 0.737
+  solvent_93: CH3:2, C:1, OH:1, HCO:1
+    Tb (428.4K) > 0.7*Tc (423.2K), Ratio: 0.708
+  solvent_96: CH3:2, C:1, HCO:1, CH3COO:1
+    Tb (438.7K) > 0.7*Tc (435.5K), Ratio: 0.705
+  solvent_97: CH3:2, C:1, CH3COO:2
+    Tb (456.6K) > 0.7*Tc (445.0K), Ratio: 0.718
+  solvent_99: CH3:2, C:1, CH3COO:1, HCOO:1
+    Tb (445.6K) > 0.7*Tc (441.2K), Ratio: 0.707
+  solvent_101: CH3:2, CH2COO:1, CH2O:1
+    Tb (391.7K) > 0.7*Tc (327.5K), Ratio: 0.837
+  solvent_102: CH3:2, CH2:2, CH2COO:1, CH2O:1
+    Tb (440.8K) > 0.7*Tc (381.2K), Ratio: 0.809
+  solvent_103: CH3:2, CH2COO:1, COO:1
+    Tb (420.3K) > 0.7*Tc (375.2K), Ratio: 0.784
+  solvent_104: CH3:2, CH2:2, CH2COO:1, COO:1
+    Tb (463.6K) > 0.7*Tc (414.4K), Ratio: 0.783
+  solvent_105: CH3:2, CH2:2, CH2COO:1
+    Tb (398.2K) > 0.7*Tc (336.0K), Ratio: 0.830
+  solvent_106: CH3:2, CH2:3, CH2COO:1
+    Tb (423.5K) > 0.7*Tc (363.9K), Ratio: 0.814
+  solvent_107: CH3:2, CH2:1, CH2COO:1
+    Tb (369.4K) > 0.7*Tc (300.0K), Ratio: 0.862
+  solvent_108: CH3:2, CH2:1, CH2COO:1, COO:1
+    Tb (443.1K) > 0.7*Tc (396.3K), Ratio: 0.783
+  solvent_109: CH3:2, CH2:1, C:1, OH:1, HCOO:1
+    Tb (456.8K) > 0.7*Tc (443.6K), Ratio: 0.721
+  solvent_110: CH3:2, CH2:1, C:1, OH:1, CH3CO:1
+    Tb (465.8K) > 0.7*Tc (449.9K), Ratio: 0.725
+  solvent_111: CH3:2, CH2:1, C:1, OH:1, COOH:1
+    Tb (508.5K) > 0.7*Tc (483.3K), Ratio: 0.736
+  solvent_113: CH3:2, CH2:1, C:1, HCO:1, CH3COO:1
+    Tb (459.6K) > 0.7*Tc (449.1K), Ratio: 0.716
+  solvent_114: CH3:2, CH2:1, C:1, HCO:1, HCOO:1
+    Tb (448.7K) > 0.7*Tc (445.4K), Ratio: 0.705
+  solvent_115: CH3:2, CH2:1, C:1, HCO:1, CH3CO:1
+    Tb (458.1K) > 0.7*Tc (451.6K), Ratio: 0.710
+  solvent_116: CH3:2, CH2:1, C:1, HCO:1, COOH:1
+    Tb (502.2K) > 0.7*Tc (484.6K), Ratio: 0.725
+  solvent_117: CH2:3, HCO:2
+    Tb (436.7K) > 0.7*Tc (434.9K), Ratio: 0.703
+  solvent_118: CH3:1, HCO:1, CH2COO:1
+    Tb (401.6K) > 0.7*Tc (349.0K), Ratio: 0.805
+  solvent_119: CH2:4, HCO:2
+    Tb (457.8K) > 0.7*Tc (448.5K), Ratio: 0.715
+  solvent_120: CH2:1, HCO:1, COOH:1
+    Tb (462.4K) > 0.7*Tc (459.4K), Ratio: 0.705
+  solvent_122: CH2:1, CH3COO:2
+    Tb (429.9K) > 0.7*Tc (425.6K), Ratio: 0.707
+  solvent_123: CH2:3, HCO:1, CH3COO:1
+    Tb (454.8K) > 0.7*Tc (444.4K), Ratio: 0.716
+  solvent_124: CH2:3, CH3COO:2
+    Tb (471.4K) > 0.7*Tc (453.2K), Ratio: 0.728
+  solvent_125: CH2:4, HCO:1, CH3COO:1
+    Tb (474.2K) > 0.7*Tc (457.0K), Ratio: 0.726
+  solvent_126: CH3:2, CH:2, OH:1, CH3CO:1
+    Tb (465.7K) > 0.7*Tc (448.7K), Ratio: 0.727
+  solvent_127: CH3:2, CH:2, OH:1, COOH:1
+    Tb (508.4K) > 0.7*Tc (482.4K), Ratio: 0.738
+  solvent_128: CH3:2, CH2:1, C:1, CH3COO:2
+    Tb (475.8K) > 0.7*Tc (457.6K), Ratio: 0.728
+  solvent_130: CH3:2, CH2:1, C:1, CH3COO:1, HCOO:1
+    Tb (465.8K) > 0.7*Tc (454.1K), Ratio: 0.718
+  solvent_131: CH3:2, CH2:1, C:1, HCOO:2
+    Tb (455.3K) > 0.7*Tc (450.6K), Ratio: 0.707
+  solvent_133: CH3:2, CH2:1, C:1, CH3COO:1, CH3CO:1
+    Tb (474.4K) > 0.7*Tc (459.9K), Ratio: 0.722
+  solvent_134: CH3:2, CH2:1, C:1, HCOO:1, CH3CO:1
+    Tb (464.4K) > 0.7*Tc (456.5K), Ratio: 0.712
+  solvent_135: CH3:1, CH2:1, OH:1, CH2COO:1
+    Tb (435.5K) > 0.7*Tc (371.4K), Ratio: 0.821
+  solvent_136: CH3:3, C:1, OH:1, CH2COO:1
+    Tb (461.5K) > 0.7*Tc (400.0K), Ratio: 0.808
+  solvent_137: CH3:3, C:1, HCO:1, CH2COO:1
+    Tb (453.6K) > 0.7*Tc (402.6K), Ratio: 0.789
+  solvent_138: CH3:3, C:1, CH3COO:1, CH2COO:1
+    Tb (470.3K) > 0.7*Tc (414.7K), Ratio: 0.794
+  solvent_139: CH3:3, C:1, CH2COO:1, HCOO:1
+    Tb (460.0K) > 0.7*Tc (409.8K), Ratio: 0.786
+  solvent_140: CH3:3, C:1, CH2COO:1, CH3CO:1
+    Tb (468.9K) > 0.7*Tc (418.0K), Ratio: 0.785
+  solvent_141: CH3:1, CH2:2, OH:1, COO:1
+    Tb (439.6K) > 0.7*Tc (433.3K), Ratio: 0.710
+  solvent_142: CH3:1, CH2:3, OH:1, CH2O:1
+    Tb (437.3K) > 0.7*Tc (422.3K), Ratio: 0.725
+  solvent_143: CH3:1, CH2:3, OH:1, COO:1
+    Tb (460.4K) > 0.7*Tc (447.1K), Ratio: 0.721
+  solvent_145: CH3:1, CH2:3, OH:1
+    Tb (393.9K) > 0.7*Tc (391.2K), Ratio: 0.705
+  solvent_146: CH3:1, CH2:4, OH:1
+    Tb (419.6K) > 0.7*Tc (410.0K), Ratio: 0.716
+  solvent_149: CH3:3, C:1, CH3CO:1, COO:1
+    Tb (452.8K) > 0.7*Tc (451.9K), Ratio: 0.701
+  solvent_150: CH3:3, C:1, COOH:1, COO:1
+    Tb (497.9K) > 0.7*Tc (484.8K), Ratio: 0.719
+  solvent_152: CH3:3, C:1, CH3COO:1, CH2O:1
+    Tb (430.4K) > 0.7*Tc (425.1K), Ratio: 0.709
+  solvent_154: CH3:3, C:1, CH3CO:1, CH2O:1
+    Tb (428.7K) > 0.7*Tc (428.1K), Ratio: 0.701
+  solvent_155: CH3:1, CH2:2, CH:1, HCO:1, CH3COO:1
+    Tb (467.0K) > 0.7*Tc (452.5K), Ratio: 0.722
+  solvent_156: CH3:1, CH2:2, CH:1, CH3COO:2
+    Tb (482.6K) > 0.7*Tc (460.8K), Ratio: 0.733
+  solvent_157: CH3:2, CH2:2, CH:1, CH3COO:1
+    Tb (421.4K) > 0.7*Tc (417.7K), Ratio: 0.706
+  solvent_158: CH3:1, CH2:2, CH:1, CH3COO:1, HCOO:1
+    Tb (473.0K) > 0.7*Tc (457.5K), Ratio: 0.724
+  solvent_159: CH3:1, CH2:2, CH:1, HCOO:2
+    Tb (462.8K) > 0.7*Tc (454.0K), Ratio: 0.714
+  solvent_161: CH3:1, CH2:2, CH:1, CH3COO:1, CH3CO:1
+    Tb (481.3K) > 0.7*Tc (463.1K), Ratio: 0.727
+  solvent_162: CH2:1, OH:1, CH3COO:1
+    Tb (419.1K) > 0.7*Tc (412.2K), Ratio: 0.712
+  solvent_163: CH2:3, OH:1, CH3COO:1
+    Tb (462.6K) > 0.7*Tc (442.6K), Ratio: 0.732
+  solvent_164: CH2:4, OH:1, CH3COO:1
+    Tb (481.3K) > 0.7*Tc (455.4K), Ratio: 0.740
+  solvent_165: CH2:2, OH:1, CH3COO:1
+    Tb (442.0K) > 0.7*Tc (428.3K), Ratio: 0.722
+  solvent_167: CH2:1, OH:1, CH3CO:1
+    Tb (417.3K) > 0.7*Tc (415.6K), Ratio: 0.703
+  solvent_168: CH2:3, OH:1, HCOO:1
+    Tb (451.9K) > 0.7*Tc (438.7K), Ratio: 0.721
+  solvent_169: CH2:3, OH:1, CH3CO:1
+    Tb (461.1K) > 0.7*Tc (445.2K), Ratio: 0.725
+  solvent_170: CH2:4, OH:1, HCOO:1
+    Tb (471.6K) > 0.7*Tc (451.9K), Ratio: 0.731
+  solvent_171: CH2:4, OH:1, CH3CO:1
+    Tb (480.0K) > 0.7*Tc (457.8K), Ratio: 0.734
+  solvent_173: CH3:2, CH:2, CH3CO:1, COOH:1
+    Tb (514.3K) > 0.7*Tc (492.1K), Ratio: 0.732
+  solvent_174: CH3:2, CH:2, COOH:2
+    Tb (548.6K) > 0.7*Tc (516.9K), Ratio: 0.743
+  solvent_175: CH3:2, CH2:1, CHO:1, COOH:1
+    Tb (464.1K) > 0.7*Tc (453.2K), Ratio: 0.717
+  solvent_177: CH2:3, OH:1, HCO:1
+    Tb (445.2K) > 0.7*Tc (432.9K), Ratio: 0.720
+  solvent_178: CH2:2, OH:1, HCO:1
+    Tb (422.7K) > 0.7*Tc (417.5K), Ratio: 0.709
+  solvent_179: CH2:4, OH:1, HCO:1
+    Tb (465.5K) > 0.7*Tc (446.7K), Ratio: 0.730
+  solvent_181: CH2:4, OH:2
+    Tb (473.0K) > 0.7*Tc (444.9K), Ratio: 0.744
+  solvent_182: CH3:2, CH2:1, CHO:1, CH3CO:1
+    Tb (409.7K) > 0.7*Tc (409.2K), Ratio: 0.701
+  solvent_183: CH3:1, CH2:1, OH:1, CH2O:1
+    Tb (387.2K) > 0.7*Tc (385.8K), Ratio: 0.703
+  solvent_184: CH3:2, C:1, OH:1, HCOO:1
+    Tb (435.6K) > 0.7*Tc (429.4K), Ratio: 0.710
+  solvent_185: CH3:2, C:1, OH:1, CH3CO:1
+    Tb (445.6K) > 0.7*Tc (436.4K), Ratio: 0.715
+  solvent_186: CH3:2, C:1, OH:1, COOH:1
+    Tb (492.2K) > 0.7*Tc (473.1K), Ratio: 0.728
+  solvent_188: CH3:2, C:1, CH3CO:2
+    Tb (453.5K) > 0.7*Tc (450.1K), Ratio: 0.705
+  solvent_189: CH3:2, C:1, HCOO:1, CH3CO:1
+    Tb (443.9K) > 0.7*Tc (443.8K), Ratio: 0.700
+  solvent_190: CH3:2, C:1, HCOO:1, COOH:1
+    Tb (490.9K) > 0.7*Tc (478.6K), Ratio: 0.718
+  solvent_192: CH3:2, C:1, COOH:2
+    Tb (535.4K) > 0.7*Tc (509.8K), Ratio: 0.735
+  solvent_194: CH3:2, C:1, CH3CO:1, COOH:1
+    Tb (498.5K) > 0.7*Tc (483.5K), Ratio: 0.722
+  solvent_199: CH2:1, CH3COO:1, COOH:1
+    Tb (478.4K) > 0.7*Tc (467.2K), Ratio: 0.717
+  solvent_202: CH2:3, CH3COO:1, HCOO:1
+    Tb (461.1K) > 0.7*Tc (449.6K), Ratio: 0.718
+  solvent_203: CH3:2, C:1, CH3COO:1, CH3CO:1
+    Tb (455.0K) > 0.7*Tc (447.6K), Ratio: 0.712
+  solvent_204: CH3:2, C:1, CH3COO:1, COOH:1
+    Tb (499.8K) > 0.7*Tc (481.5K), Ratio: 0.727
+  solvent_205: CH3:2, CH2:1, CHO:1, CH3COO:1
+    Tb (411.6K) > 0.7*Tc (405.6K), Ratio: 0.710
+  solvent_206: CH2:4, CH3COO:2
+    Tb (489.3K) > 0.7*Tc (465.0K), Ratio: 0.737
+  solvent_207: CH3:2, CH2:1, CH2COO:1, CH2O:1
+    Tb (417.7K) > 0.7*Tc (357.2K), Ratio: 0.819
+  solvent_209: CH2:2, HCO:1, CH3COO:1
+    Tb (433.3K) > 0.7*Tc (430.3K), Ratio: 0.705
+  solvent_210: CH2:3, HCO:1, HCOO:1
+    Tb (443.6K) > 0.7*Tc (440.5K), Ratio: 0.705
+  solvent_211: CH2:4, HCO:1, HCOO:1
+    Tb (464.1K) > 0.7*Tc (453.5K), Ratio: 0.716
+  solvent_214: CH2:3, HCO:1, COOH:1
+    Tb (498.3K) > 0.7*Tc (481.0K), Ratio: 0.725
+  solvent_215: CH2:3, HCO:1, CH3CO:1
+    Tb (453.2K) > 0.7*Tc (447.0K), Ratio: 0.710
+  solvent_216: CH2:4, HCO:1, COOH:1
+    Tb (514.1K) > 0.7*Tc (490.6K), Ratio: 0.734
+  solvent_217: CH2:4, HCO:1, CH3CO:1
+    Tb (472.8K) > 0.7*Tc (459.4K), Ratio: 0.720
+  solvent_218: CH3:2, CH2:1, C:1, HCOO:1, COOH:1
+    Tb (507.3K) > 0.7*Tc (488.4K), Ratio: 0.727
+  solvent_220: CH3:2, CH2:1, C:1, COOH:2
+    Tb (548.7K) > 0.7*Tc (517.5K), Ratio: 0.742
+  solvent_221: CH3:2, CH2:1, C:1, CH3CO:1, COOH:1
+    Tb (514.3K) > 0.7*Tc (492.9K), Ratio: 0.730
+  solvent_222: CH3:2, CH2:1, CH:1, HCO:1, CH2O:1
+    Tb (419.3K) > 0.7*Tc (418.6K), Ratio: 0.701
+  solvent_223: CH3:2, CH2:1, CH:1, CH3COO:1, CH2O:1
+    Tb (438.9K) > 0.7*Tc (429.3K), Ratio: 0.716
+  solvent_224: CH3:2, CH2:1, CH:1, HCOO:1, CH2O:1
+    Tb (426.9K) > 0.7*Tc (425.0K), Ratio: 0.703
+  solvent_225: CH3:2, CH2:1, CH:1, CH3CO:1, CH2O:1
+    Tb (437.3K) > 0.7*Tc (432.3K), Ratio: 0.708
+  solvent_226: CH3:3, C:1, CH2COO:1, COOH:1
+    Tb (510.9K) > 0.7*Tc (459.5K), Ratio: 0.778
+  solvent_228: CH3:1, CH:1, CH3COO:2
+    Tb (443.6K) > 0.7*Tc (435.0K), Ratio: 0.714
+  solvent_230: CH3:2, CH:1, HCO:1, CH2COO:1
+    Tb (440.4K) > 0.7*Tc (388.4K), Ratio: 0.794
+  solvent_232: CH3:2, CH:1, CH3COO:1, CH2COO:1
+    Tb (458.2K) > 0.7*Tc (401.9K), Ratio: 0.798
+  solvent_233: CH3:3, CH:1, CH2COO:2
+    Tb (471.8K) > 0.7*Tc (356.9K), Ratio: 0.925
+  solvent_234: CH3:1, CH:1, CH3COO:1, HCOO:1
+    Tb (431.8K) > 0.7*Tc (430.9K), Ratio: 0.702
+  solvent_235: CH3:2, CH:1, CH2COO:1, HCOO:1
+    Tb (447.3K) > 0.7*Tc (396.5K), Ratio: 0.790
+  solvent_236: CH3:2, CH:2, HCOO:1, COOH:1
+    Tb (507.2K) > 0.7*Tc (487.6K), Ratio: 0.728
+  solvent_246: CH3:3, C:1, CH2O:1, COOH:1
+    Tb (478.9K) > 0.7*Tc (466.9K), Ratio: 0.718
+  solvent_247: CH3:3, CH:1, CHO:1, HCOO:1
+    Tb (413.7K) > 0.7*Tc (411.8K), Ratio: 0.703
+  solvent_248: CH3:3, CH:1, CHO:1, CH3CO:1
+    Tb (424.8K) > 0.7*Tc (419.8K), Ratio: 0.708
+  solvent_249: CH3:3, CH:1, CHO:1, COOH:1
+    Tb (475.8K) > 0.7*Tc (460.9K), Ratio: 0.723
+  solvent_250: CH3:2, CH2:1, C:1, CH3COO:1, COOH:1
+    Tb (515.5K) > 0.7*Tc (491.1K), Ratio: 0.735
+  solvent_251: CH3:1, CH2:2, CH:1, HCOO:1, CH3CO:1
+    Tb (471.6K) > 0.7*Tc (459.8K), Ratio: 0.718
+  solvent_252: CH3:1, CH2:2, CH:1, CH3COO:1, COOH:1
+    Tb (521.1K) > 0.7*Tc (493.6K), Ratio: 0.739
+  solvent_253: CH3:3, CH:2, CH3COO:1
+    Tb (412.1K) > 0.7*Tc (411.6K), Ratio: 0.701
+  solvent_254: CH3:2, CH:2, CH3COO:1, HCOO:1
+    Tb (465.7K) > 0.7*Tc (453.0K), Ratio: 0.720
+  solvent_255: CH3:2, CH:2, CH3COO:1, CH3CO:1
+    Tb (474.4K) > 0.7*Tc (458.9K), Ratio: 0.724
+  solvent_256: CH3:2, CH:2, CH3COO:1, COOH:1
+    Tb (515.4K) > 0.7*Tc (490.2K), Ratio: 0.736
+  solvent_257: CH3:1, CH2:1, HCO:1, CH2COO:1
+    Tb (426.5K) > 0.7*Tc (374.5K), Ratio: 0.797
+  solvent_258: CH3:2, CH2:1, CH2COO:2
+    Tb (459.9K) > 0.7*Tc (338.8K), Ratio: 0.950
+  solvent_259: CH2:2, OH:1, CH3CO:1
+    Tb (440.4K) > 0.7*Tc (431.2K), Ratio: 0.715
+  solvent_260: CH2:3, OH:1, COOH:1
+    Tb (504.7K) > 0.7*Tc (479.7K), Ratio: 0.736
+  solvent_261: CH2:4, OH:1, COOH:1
+    Tb (520.0K) > 0.7*Tc (489.4K), Ratio: 0.744
+  solvent_262: CH2:2, OH:1, COOH:1
+    Tb (488.1K) > 0.7*Tc (469.2K), Ratio: 0.728
+  solvent_263: CH3:1, CH2:2, HCO:1, CH2COO:1
+    Tb (448.6K) > 0.7*Tc (395.7K), Ratio: 0.794
+  solvent_264: CH3:1, CH2:3, HCO:1, CH2COO:1
+    Tb (468.6K) > 0.7*Tc (413.9K), Ratio: 0.793
+  solvent_265: CH2:4, CH3COO:1, HCOO:1
+    Tb (480.0K) > 0.7*Tc (461.8K), Ratio: 0.728
+  solvent_267: CH3:3, CH:1, OH:1, CHO:1
+    Tb (415.6K) > 0.7*Tc (402.2K), Ratio: 0.723
+  solvent_268: CH3:1, CH:1, OH:1, HCO:1
+    Tb (413.4K) > 0.7*Tc (411.3K), Ratio: 0.704
+  solvent_269: CH3:1, CH2:2, CH:1, OH:1, HCO:1
+    Tb (458.0K) > 0.7*Tc (441.9K), Ratio: 0.726
+  solvent_270: CH3:1, CH:1, OH:1, CH3COO:1
+    Tb (433.6K) > 0.7*Tc (422.7K), Ratio: 0.718
+  solvent_271: CH3:1, CH2:2, CH:1, OH:1, CH3COO:1
+    Tb (474.4K) > 0.7*Tc (450.9K), Ratio: 0.737
+  solvent_272: CH3:2, CH:1, OH:1, CH2COO:1
+    Tb (448.9K) > 0.7*Tc (385.6K), Ratio: 0.815
+  solvent_273: CH3:2, CH2:1, CH:1, OH:1, CH2COO:1
+    Tb (468.8K) > 0.7*Tc (405.2K), Ratio: 0.810
+  solvent_274: CH3:1, CH:1, OH:1, HCOO:1
+    Tb (421.2K) > 0.7*Tc (418.1K), Ratio: 0.705
+  solvent_275: CH3:2, CH:1, CH2COO:1, CH3CO:1
+    Tb (456.7K) > 0.7*Tc (405.5K), Ratio: 0.788
+  solvent_277: CH2:2, CH3COO:2
+    Tb (451.7K) > 0.7*Tc (440.1K), Ratio: 0.718
+  solvent_278: CH2:2, OH:1, HCOO:1
+    Tb (430.2K) > 0.7*Tc (423.9K), Ratio: 0.710
+  solvent_279: CH2:1, HCOO:1, COOH:1
+    Tb (468.5K) > 0.7*Tc (464.0K), Ratio: 0.707
+  solvent_282: CH2:3, CH3CO:2
+    Tb (468.5K) > 0.7*Tc (458.0K), Ratio: 0.716
+  solvent_283: CH2:3, HCOO:1, CH3CO:1
+    Tb (459.6K) > 0.7*Tc (452.1K), Ratio: 0.712
+  solvent_284: CH2:4, CH3CO:2
+    Tb (486.7K) > 0.7*Tc (469.4K), Ratio: 0.726
+  solvent_285: CH2:1, CH3CO:1, COOH:1
+    Tb (477.1K) > 0.7*Tc (469.4K), Ratio: 0.711
+  solvent_287: CH2:2, CH3COO:1, HCOO:1
+    Tb (440.4K) > 0.7*Tc (436.2K), Ratio: 0.707
+  solvent_288: CH2:3, CH3COO:1, CH3CO:1
+    Tb (469.9K) > 0.7*Tc (455.6K), Ratio: 0.722
+  solvent_289: CH2:4, CH3COO:1, CH3CO:1
+    Tb (488.0K) > 0.7*Tc (467.2K), Ratio: 0.731
+  solvent_290: CH2:2, CH3COO:1, CH3CO:1
+    Tb (450.1K) > 0.7*Tc (442.8K), Ratio: 0.712
+  solvent_291: CH2:3, CH3COO:1, COOH:1
+    Tb (511.8K) > 0.7*Tc (487.7K), Ratio: 0.735
+  solvent_292: CH2:2, CH3COO:1, COOH:1
+    Tb (495.8K) > 0.7*Tc (477.9K), Ratio: 0.726
+  solvent_293: CH2:4, CH3COO:1, COOH:1
+    Tb (526.7K) > 0.7*Tc (496.8K), Ratio: 0.742
+  solvent_295: CH3:1, CH2:2, CH:1, HCO:1, HCOO:1
+    Tb (456.5K) > 0.7*Tc (449.0K), Ratio: 0.712
+  solvent_296: CH3:1, CH2:2, CH:1, HCO:1, CH3CO:1
+    Tb (465.5K) > 0.7*Tc (455.0K), Ratio: 0.716
+  solvent_297: CH3:1, CH2:2, CH:1, HCO:1, COOH:1
+    Tb (508.2K) > 0.7*Tc (487.2K), Ratio: 0.730
+  solvent_298: CH2:3, HCOO:2
+    Tb (450.4K) > 0.7*Tc (445.9K), Ratio: 0.707
+  solvent_299: CH2:4, HCOO:2
+    Tb (470.2K) > 0.7*Tc (458.4K), Ratio: 0.718
+  solvent_300: CH2:2, HCO:1, COOH:1
+    Tb (481.1K) > 0.7*Tc (470.7K), Ratio: 0.716
+  solvent_301: CH3:1, CH:1, HCO:1, COOH:1
+    Tb (474.2K) > 0.7*Tc (466.7K), Ratio: 0.711
+  solvent_306: CH3:2, CH2:1, CH:1, CH2O:1, COOH:1
+    Tb (485.6K) > 0.7*Tc (470.0K), Ratio: 0.723
+  solvent_308: CH3:2, C:1, HCO:1, COOH:1
+    Tb (485.4K) > 0.7*Tc (474.5K), Ratio: 0.716
+  solvent_312: CH3:2, CH:1, CH2COO:1, COOH:1
+    Tb (501.1K) > 0.7*Tc (450.6K), Ratio: 0.778
+  solvent_313: CH3:3, CH:1, CH2COO:1, CH2O:1
+    Tb (432.3K) > 0.7*Tc (373.0K), Ratio: 0.811
+  solvent_314: CH3:3, CH:1, CH2COO:1, COO:1
+    Tb (456.0K) > 0.7*Tc (408.1K), Ratio: 0.782
+  solvent_315: CH3:1, CH2:2, CH:1, CH3CO:2
+    Tb (480.0K) > 0.7*Tc (465.4K), Ratio: 0.722
+  solvent_319: CH3:2, C:1, OH:1, CH3COO:1
+    Tb (447.1K) > 0.7*Tc (433.6K), Ratio: 0.722
+  solvent_322: CH3:1, CH3COO:1, CH2COO:1
+    Tb (422.9K) > 0.7*Tc (367.1K), Ratio: 0.806
+  solvent_323: CH3:1, CH2COO:1, HCOO:1
+    Tb (409.9K) > 0.7*Tc (359.9K), Ratio: 0.797
+  solvent_324: CH3:1, CH2:2, CH3COO:1, CH2COO:1
+    Tb (465.7K) > 0.7*Tc (408.5K), Ratio: 0.798
+  solvent_325: CH3:1, CH2:2, CH2COO:1, HCOO:1
+    Tb (455.2K) > 0.7*Tc (403.4K), Ratio: 0.790
+  solvent_326: CH3:1, CH2:3, CH2COO:1, HCOO:1
+    Tb (474.6K) > 0.7*Tc (420.5K), Ratio: 0.790
+  solvent_328: CH3:1, CH2:2, CH:1, HCOO:1, COOH:1
+    Tb (513.1K) > 0.7*Tc (491.0K), Ratio: 0.732
+  solvent_330: CH3:2, CH2:1, CH:1, COOH:1
+    Tb (452.1K) > 0.7*Tc (449.5K), Ratio: 0.704
+  solvent_332: CH3:2, CH2:1, CH:1, HCO:1, COO:1
+    Tb (444.5K) > 0.7*Tc (444.0K), Ratio: 0.701
+  solvent_333: CH3:2, CH2:1, CH:1, CH3COO:1, COO:1
+    Tb (461.9K) > 0.7*Tc (452.9K), Ratio: 0.714
+  solvent_335: CH3:1, CH2:1, CH:1, HCO:1, CH3COO:1
+    Tb (446.8K) > 0.7*Tc (439.4K), Ratio: 0.712
+  solvent_336: CH3:1, CH2:2, CH:1, OH:1, HCOO:1
+    Tb (464.3K) > 0.7*Tc (447.2K), Ratio: 0.727
+  solvent_337: CH3:2, CH2:1, OH:1, CHO:1
+    Tb (399.8K) > 0.7*Tc (389.8K), Ratio: 0.718
+  solvent_338: CH3:1, CH2COO:1, COOH:1
+    Tb (473.0K) > 0.7*Tc (428.0K), Ratio: 0.773
+  solvent_340: CH3:1, CH2:2, CH2COO:1, COOH:1
+    Tb (507.2K) > 0.7*Tc (455.2K), Ratio: 0.780
+  solvent_341: CH3:1, CH2:2, CH2O:1, COOH:1
+    Tb (474.5K) > 0.7*Tc (462.8K), Ratio: 0.718
+  solvent_342: CH3:1, CH2:3, CH2COO:1, COOH:1
+    Tb (522.4K) > 0.7*Tc (466.8K), Ratio: 0.783
+  solvent_343: CH3:1, CH2:3, CH2O:1, COOH:1
+    Tb (492.2K) > 0.7*Tc (473.9K), Ratio: 0.727
+  solvent_344: CH3:1, CH2:1, CH2O:1, COOH:1
+    Tb (455.1K) > 0.7*Tc (450.8K), Ratio: 0.707
+  solvent_346: CH3:1, CH:1, OH:1, CH3CO:1
+    Tb (431.9K) > 0.7*Tc (425.8K), Ratio: 0.710
+  solvent_347: CH3:1, CH2:2, CH:1, OH:1, CH3CO:1
+    Tb (473.0K) > 0.7*Tc (453.3K), Ratio: 0.730
+  solvent_348: CH3:1, CH:1, OH:1, COOH:1
+    Tb (481.3K) > 0.7*Tc (465.1K), Ratio: 0.724
+  solvent_349: CH3:2, CH:1, OH:1, CH2O:1
+    Tb (404.1K) > 0.7*Tc (398.6K), Ratio: 0.710
+  solvent_350: CH3:1, CH2:2, CH:1, OH:1, COOH:1
+    Tb (514.3K) > 0.7*Tc (485.9K), Ratio: 0.741
+  solvent_351: CH3:2, CH2:1, CH:1, OH:1, CH2O:1
+    Tb (428.6K) > 0.7*Tc (416.4K), Ratio: 0.721
+  solvent_352: CH3:1, CH2:1, CH:1, OH:1, COOH:1
+    Tb (498.5K) > 0.7*Tc (476.0K), Ratio: 0.733
+  solvent_353: CH3:2, CH:1, OH:1, COO:1
+    Tb (431.0K) > 0.7*Tc (427.9K), Ratio: 0.705
+  solvent_354: CH3:1, CH2:1, CH:1, OH:1, HCO:1
+    Tb (436.9K) > 0.7*Tc (427.5K), Ratio: 0.715
+  solvent_356: CH3:1, CH2COO:1, CH3CO:1
+    Tb (421.1K) > 0.7*Tc (371.8K), Ratio: 0.793
+  solvent_358: CH3:1, CH2:2, CH2COO:1, CH3CO:1
+    Tb (464.3K) > 0.7*Tc (411.9K), Ratio: 0.789
+  solvent_359: CH3:1, CH2:2, CH3CO:1, CH2O:1
+    Tb (423.1K) > 0.7*Tc (422.6K), Ratio: 0.701
+  solvent_360: CH3:1, CH2:3, CH2COO:1, CH3CO:1
+    Tb (482.8K) > 0.7*Tc (428.0K), Ratio: 0.790
+  solvent_361: CH3:1, CH2:3, CH3CO:1, CH2O:1
+    Tb (445.6K) > 0.7*Tc (437.5K), Ratio: 0.713
+  solvent_362: CH2:3, COOH:2
+    Tb (545.6K) > 0.7*Tc (514.8K), Ratio: 0.742
+  solvent_363: CH2:2, CH3CO:1, COOH:1
+    Tb (494.5K) > 0.7*Tc (479.9K), Ratio: 0.721
+  solvent_364: CH2:4, COOH:2
+    Tb (558.2K) > 0.7*Tc (522.2K), Ratio: 0.748
+  solvent_365: CH2:2, COOH:2
+    Tb (532.1K) > 0.7*Tc (506.9K), Ratio: 0.735
+  solvent_366: CH2:2, CH3CO:2
+    Tb (448.5K) > 0.7*Tc (445.5K), Ratio: 0.705
+  solvent_367: CH3:1, CH:1, CH3COO:1, COOH:1
+    Tb (489.3K) > 0.7*Tc (474.1K), Ratio: 0.722
+  solvent_368: CH3:1, CH:1, CH3COO:1, CH3CO:1
+    Tb (442.0K) > 0.7*Tc (437.8K), Ratio: 0.707
+  solvent_369: CH3:2, CH:1, CH3COO:1, CH2O:1
+    Tb (415.6K) > 0.7*Tc (413.4K), Ratio: 0.704
+  solvent_370: CH3:2, CH:1, CH3COO:1, COO:1
+    Tb (441.2K) > 0.7*Tc (439.8K), Ratio: 0.702
+  solvent_377: CH2:3, CH3CO:1, COOH:1
+    Tb (510.7K) > 0.7*Tc (489.6K), Ratio: 0.730
+  solvent_378: CH2:4, CH3CO:1, COOH:1
+    Tb (525.6K) > 0.7*Tc (498.6K), Ratio: 0.738
+  solvent_379: CH2:4, HCOO:1, CH3CO:1
+    Tb (478.6K) > 0.7*Tc (464.1K), Ratio: 0.722
+  solvent_380: CH3:1, CH2:1, CH3COO:1, CH2COO:1
+    Tb (445.4K) > 0.7*Tc (389.5K), Ratio: 0.801
+  solvent_381: CH3:1, CH2:1, CH:1, OH:1, HCOO:1
+    Tb (443.9K) > 0.7*Tc (433.5K), Ratio: 0.717
+  solvent_384: CH3:1, CH2:2, CH3COO:1, CH2O:1
+    Tb (424.8K) > 0.7*Tc (419.4K), Ratio: 0.709
+  solvent_385: CH3:1, CH2:2, CH3COO:1, COO:1
+    Tb (449.4K) > 0.7*Tc (444.7K), Ratio: 0.707
+  solvent_386: CH3:1, CH2:3, CH3COO:1, CH2O:1
+    Tb (447.1K) > 0.7*Tc (434.7K), Ratio: 0.720
+  solvent_387: CH3:1, CH2:3, CH3COO:1, COO:1
+    Tb (469.3K) > 0.7*Tc (457.3K), Ratio: 0.718
+  solvent_388: CH3:1, CH2:2, CH:1, COOH:2
+    Tb (553.5K) > 0.7*Tc (519.6K), Ratio: 0.746
+  solvent_389: CH3:1, CH2:2, CH:1, CH3CO:1, COOH:1
+    Tb (520.0K) > 0.7*Tc (495.4K), Ratio: 0.735
+  solvent_394: CH3:1, CH2:3, HCO:1, CH2O:1
+    Tb (428.4K) > 0.7*Tc (424.4K), Ratio: 0.707
+  solvent_395: CH3:1, CH2:3, HCO:1, COO:1
+    Tb (452.5K) > 0.7*Tc (448.8K), Ratio: 0.706
+  solvent_400: CH3:1, CH2:3, HCOO:1, COO:1
+    Tb (458.9K) > 0.7*Tc (453.9K), Ratio: 0.708
+  solvent_402: CH3:1, CH2:3, CH3COO:1, CH2COO:1
+    Tb (484.2K) > 0.7*Tc (425.0K), Ratio: 0.797
+  solvent_404: CH3:1, CH2:3, HCOO:1, CH2O:1
+    Tb (435.6K) > 0.7*Tc (430.5K), Ratio: 0.708
+  solvent_406: CH3:2, CH2:1, CH:1, HCOO:1, COO:1
+    Tb (451.2K) > 0.7*Tc (449.3K), Ratio: 0.703
+  solvent_407: CH3:2, CH2:1, CH:1, CH3CO:1, COO:1
+    Tb (460.4K) > 0.7*Tc (455.3K), Ratio: 0.708
+  solvent_408: CH3:2, CH2:1, CH:1, COOH:1, COO:1
+    Tb (504.1K) > 0.7*Tc (487.5K), Ratio: 0.724
+  solvent_409: CH3:1, CH2:1, CH:1, CH3COO:2
+    Tb (464.1K) > 0.7*Tc (448.6K), Ratio: 0.724
+  solvent_412: CH3:1, CH2:1, CH:1, CH3COO:1, HCOO:1
+    Tb (453.4K) > 0.7*Tc (444.9K), Ratio: 0.714
+  solvent_413: CH3:1, CH2:1, CH:1, CH3COO:1, CH3CO:1
+    Tb (462.6K) > 0.7*Tc (451.1K), Ratio: 0.718
+  solvent_414: CH3:1, CH2:1, CH:1, HCOO:2
+    Tb (442.3K) > 0.7*Tc (441.1K), Ratio: 0.702
+  solvent_416: CH3:1, CH2:1, CH:1, CH3COO:1, COOH:1
+    Tb (505.8K) > 0.7*Tc (484.2K), Ratio: 0.731
+  solvent_417: CH3:1, CH2:3, COOH:1
+    Tb (459.9K) > 0.7*Tc (454.0K), Ratio: 0.709
+  solvent_418: CH3:1, CH2:1, COOH:1, COO:1
+    Tb (476.4K) > 0.7*Tc (471.0K), Ratio: 0.708
+  solvent_419: CH3:1, CH2:4, COOH:1
+    Tb (478.8K) > 0.7*Tc (465.8K), Ratio: 0.720
+  solvent_421: CH3:1, CH2:1, CH2COO:1, CH3CO:1
+    Tb (443.8K) > 0.7*Tc (393.5K), Ratio: 0.790
+  solvent_422: CH3:2, CH2:2, CH:1, OH:1
+    Tb (410.2K) > 0.7*Tc (403.5K), Ratio: 0.712
+  solvent_426: CH3:1, CH2:4, CH3CO:1
+    Tb (428.7K) > 0.7*Tc (426.7K), Ratio: 0.703
+  solvent_429: CH3:1, CH2:1, CH2COO:1, COOH:1
+    Tb (490.8K) > 0.7*Tc (442.3K), Ratio: 0.777
+  solvent_445: CH3:1, CH2:2, CH3CO:1, COO:1
+    Tb (447.8K) > 0.7*Tc (447.3K), Ratio: 0.701
+  solvent_447: CH3:1, CH2:3, CH3CO:1, COO:1
+    Tb (467.8K) > 0.7*Tc (459.7K), Ratio: 0.712
+  solvent_448: CH2:3, HCOO:1, COOH:1
+    Tb (503.5K) > 0.7*Tc (485.0K), Ratio: 0.727
+  solvent_449: CH2:2, HCOO:1, COOH:1
+    Tb (486.7K) > 0.7*Tc (474.9K), Ratio: 0.717
+  solvent_450: CH2:4, HCOO:1, COOH:1
+    Tb (518.9K) > 0.7*Tc (494.3K), Ratio: 0.735
+  solvent_453: CH3:1, CH2:4, CH3COO:1
+    Tb (430.4K) > 0.7*Tc (423.6K), Ratio: 0.711
+  solvent_459: CH3:2, CH2:1, CH:1, OH:1, COO:1
+    Tb (452.7K) > 0.7*Tc (442.2K), Ratio: 0.717
+  solvent_460: CH3:1, CH2:1, CH:1, OH:1, CH3CO:1
+    Tb (453.5K) > 0.7*Tc (440.3K), Ratio: 0.721
+  solvent_461: CH3:1, CH2:1, CH:1, COOH:2
+    Tb (540.5K) > 0.7*Tc (512.0K), Ratio: 0.739
+  solvent_463: CH3:1, CH2:1, CH:1, CH3CO:2
+    Tb (461.1K) > 0.7*Tc (453.6K), Ratio: 0.712
+  solvent_464: CH3:1, CH2:1, CH:1, CH3CO:1, COOH:1
+    Tb (504.7K) > 0.7*Tc (486.1K), Ratio: 0.727
+  solvent_465: CH3:1, CH2:1, CH2COO:1, HCOO:1
+    Tb (433.8K) > 0.7*Tc (383.5K), Ratio: 0.792
+  solvent_466: CH3:1, CH2:1, CH:1, HCOO:1, CH3CO:1
+    Tb (451.9K) > 0.7*Tc (447.5K), Ratio: 0.707
+  solvent_467: CH3:1, CH2:2, COOH:1, COO:1
+    Tb (493.9K) > 0.7*Tc (481.3K), Ratio: 0.718
+  solvent_468: CH3:1, CH2:3, COOH:1, COO:1
+    Tb (510.1K) > 0.7*Tc (490.9K), Ratio: 0.727
+  solvent_469: CH3:1, CH2:1, CH:1, OH:1, CH3COO:1
+    Tb (455.0K) > 0.7*Tc (437.5K), Ratio: 0.728
+  solvent_470: CH3:1, CH2:1, CH:1, HCO:1, CH3CO:1
+    Tb (445.2K) > 0.7*Tc (442.1K), Ratio: 0.705
+  solvent_471: CH3:1, CH2:1, CH:1, HCO:1, COOH:1
+    Tb (491.9K) > 0.7*Tc (477.4K), Ratio: 0.721
+  solvent_473: CH3:1, CH:1, COOH:2
+    Tb (526.7K) > 0.7*Tc (503.9K), Ratio: 0.732
+  solvent_474: CH3:2, CH:1, CH2O:1, COOH:1
+    Tb (467.3K) > 0.7*Tc (458.6K), Ratio: 0.713
+  solvent_475: CH3:2, CH:1, COOH:1, COO:1
+    Tb (487.4K) > 0.7*Tc (477.6K), Ratio: 0.714
+  solvent_476: CH3:1, CH2:1, CH:1, HCOO:1, COOH:1
+    Tb (497.2K) > 0.7*Tc (481.4K), Ratio: 0.723
+  solvent_477: CH3:1, CH:1, CH3CO:1, COOH:1
+    Tb (488.0K) > 0.7*Tc (476.2K), Ratio: 0.717
+  solvent_479: CH3:1, CH:1, HCOO:1, COOH:1
+    Tb (480.0K) > 0.7*Tc (471.1K), Ratio: 0.713
+
+Calculating Antoine parameters for solvent candidates...
+Characteristic points (T [K], P [bar]): (373.1499999999999, 1.01325), (452.89999999999986, 9.972940978725989), (646.9999999999999, 220.6400000000002)
+  ✅ solvent_1: A=5.276, B=1810.3, C=-29.7
+Characteristic points (T [K], P [bar]): (463.1000000000001, 1.01325), (510.29999999999995, 2.961402562326686), (729.0, 56.49999999999995)
+  ✅ solvent_2: A=4.300, B=1666.1, C=-75.1
+Characteristic points (T [K], P [bar]): (470.44999999999993, 1.01325), (503.7900000000001, 2.783082948466879), (719.7000000000002, 85.38000000000001)
+  ✅ solvent_3: A=4.044, B=1104.7, C=-196.9
+Characteristic points (T [K], P [bar]): (386.4955601106607, 1.01325), (402.35747326311014, 1.4717557862676232), (574.7963903758716, 53.1574565808213)
+  ✅ solvent_4: A=14.813, B=21216.3, C=1046.4
+Characteristic points (T [K], P [bar]): (399.63987345137, 1.01325), (420.5404406848459, 2.9216096131187186), (600.7720581212085, 39.186313868594084)
+  ✅ solvent_6: A=2.224, B=177.2, C=-319.7
+Characteristic points (T [K], P [bar]): (274.1007684538745, 1.01325), (293.21297320714865, 1.928662489529958), (418.8756760102124, 36.058630870532085)
+  ✅ solvent_17: A=5.041, B=1637.4, C=51.1
+Characteristic points (T [K], P [bar]): (341.44996567149803, 1.01325), (350.03441004870086, 1.320677363680568), (500.04915721242986, 28.779733179715787)
+  ✅ solvent_19: A=4.350, B=1370.7, C=-26.0
+Characteristic points (T [K], P [bar]): (347.2740864575067, 1.01325), (364.1015032012295, 1.4658157673943903), (520.145004573185, 30.726163021439312)
+  ✅ solvent_20: A=13.309, B=18346.0, C=1031.8
+Characteristic points (T [K], P [bar]): (382.2049805145908, 1.01325), (401.3658983729275, 2.050806998844245), (573.379854818468, 31.98722455339549)
+  ✅ solvent_21: A=2.655, B=388.3, C=-235.6
+Characteristic points (T [K], P [bar]): (330.0077572633771, 1.01325), (342.4985509473117, 1.652416109509122), (489.2836442104453, 55.571662160722596)
+  ✅ solvent_30: A=4.484, B=1123.5, C=-79.1
+Characteristic points (T [K], P [bar]): (358.7790573584275, 1.01325), (370.77023724761557, 1.308252299516796), (529.6717674965937, 38.561634264828946)
+  ✅ solvent_35: A=2068.361, B=462236445.0, C=223121.4
+Characteristic points (T [K], P [bar]): (384.72419613870085, 1.01325), (386.1284446066484, 0.9856313043294492), (551.6120637237834, 32.613666509266324)
+  ✅ solvent_37: A=0.733, B=-62.8, C=-471.2
+Characteristic points (T [K], P [bar]): (389.5468245430879, 1.01325), (399.185156289129, 1.1837702661328644), (570.26450898447, 33.41532952803107)
+  ✅ solvent_38: A=-7.228, B=7535.5, C=-1431.3
+Characteristic points (T [K], P [bar]): (444.1907540387821, 1.01325), (445.8914398685856, 1.0097572544118927), (636.9877712408367, 39.93249063026728)
+  ✅ solvent_44: A=0.158, B=-26.6, C=-618.6
+Characteristic points (T [K], P [bar]): (371.9115766259939, 1.01325), (377.56213153027903, 1.2046589811133788), (539.3744736146843, 43.168368476032946)
+  ✅ solvent_46: A=5.873, B=2555.2, C=63.6
+Characteristic points (T [K], P [bar]): (415.6928378543561, 1.01325), (426.6290479372112, 1.368958733126997), (609.4700684817303, 50.83208169627608)
+  ✅ solvent_50: A=6.047, B=2988.0, C=78.9
+Characteristic points (T [K], P [bar]): (314.70890512587465, 1.01325), (346.43140479235035, 2.141073513671468), (494.9020068462148, 49.08219571428789)
+  ✅ solvent_52: A=15.982, B=24413.6, C=1213.4
+Characteristic points (T [K], P [bar]): (356.7348469922222, 1.01325), (362.74941815114136, 1.270304292688185), (518.2134545016305, 52.095549530701604)
+  ✅ solvent_58: A=4.700, B=1321.5, C=-75.2
+Characteristic points (T [K], P [bar]): (390.20797499436105, 1.01325), (400.3594985579651, 1.8067801084529715), (571.942140797093, 54.98901992892149)
+  ✅ solvent_59: A=2.672, B=260.2, C=-292.6
+Characteristic points (T [K], P [bar]): (436.2134955321736, 1.01325), (440.302130234215, 1.3930574707822885), (629.0030431917357, 34.05605192356342)
+  ✅ solvent_61: A=1.957, B=104.6, C=-382.6
+Characteristic points (T [K], P [bar]): (399.977879041689, 1.01325), (405.9295128552145, 1.130975158224521), (579.8993040788779, 33.452730606913185)
+  ✅ solvent_65: A=-28.020, B=98096.4, C=-3900.1
+Characteristic points (T [K], P [bar]): (368.8823988941967, 1.01325), (380.0063440901471, 1.50332396803649), (542.8662058430673, 38.695357133387425)
+  ✅ solvent_69: A=3.620, B=808.0, C=-145.3
+Characteristic points (T [K], P [bar]): (382.5604887827972, 1.01325), (390.2418692346569, 1.1141558214600207), (557.4883846209385, 34.03924033813266)
+  ✅ solvent_71: A=-2.327, B=1031.7, C=-824.8
+Characteristic points (T [K], P [bar]): (346.4693087417134, 1.01325), (352.8981851454545, 1.2112628435745656), (504.14026449350644, 30.612928873503392)
+  ✅ solvent_74: A=6.417, B=3367.3, C=178.8
+Characteristic points (T [K], P [bar]): (398.2676791371195, 1.01325), (406.62009589199124, 1.3601038600498705), (580.8858512742733, 33.522259513908466)
+  ✅ solvent_82: A=3.183, B=633.0, C=-199.1
+Characteristic points (T [K], P [bar]): (403.3616109944547, 1.01325), (413.6197873842854, 1.2091414922669832), (590.8854105489792, 46.04039111966558)
+  ✅ solvent_85: A=-8.643, B=10084.2, C=-1569.4
+Characteristic points (T [K], P [bar]): (359.8989319857973, 1.01325), (370.84171076954846, 1.3075013938759765), (529.7738725279264, 29.985616823675333)
+  ✅ solvent_87: A=9.557, B=8911.9, C=573.1
+Characteristic points (T [K], P [bar]): (419.03849689295794, 1.01325), (425.33526303493596, 1.079386427689542), (607.6218043356229, 41.52673403506094)
+  ✅ solvent_94: A=-1.617, B=613.7, C=-797.3
+Characteristic points (T [K], P [bar]): (359.53687681476845, 1.01325), (380.55590952157684, 1.5840034859160503), (543.6512993165384, 38.724105857003195)
+  ✅ solvent_95: A=20.297, B=44172.5, C=1817.4
+Characteristic points (T [K], P [bar]): (385.3918082804088, 1.01325), (394.8351588899224, 1.1920275131136144), (564.0502269856034, 32.73873048372377)
+  ✅ solvent_98: A=-10.948, B=16159.9, C=-1860.7
+Characteristic points (T [K], P [bar]): (433.90872518947054, 1.01325), (437.22072456632225, 1.4218682763018058), (624.6010350947461, 41.827666754631785)
+  ✅ solvent_100: A=1.968, B=80.1, C=-393.1
+Characteristic points (T [K], P [bar]): (389.6591889698887, 1.01325), (400.85188179329947, 1.2699128510283952), (572.6455454189993, 34.33286680460807)
+  ✅ solvent_112: A=31.498, B=112854.8, C=3193.9
+Characteristic points (T [K], P [bar]): (409.32676018871126, 1.01325), (414.4851331390574, 1.0769541798686966), (592.121618770082, 43.59697657736588)
+  ✅ solvent_121: A=-2.137, B=905.2, C=-831.8
+Characteristic points (T [K], P [bar]): (412.1582790089442, 1.01325), (413.11762464594034, 0.9660816469690905), (590.1680352084862, 29.333861882918765)
+  ✅ solvent_129: A=1.059, B=-52.4, C=-461.9
+Characteristic points (T [K], P [bar]): (398.3753506122235, 1.01325), (408.192481202051, 1.4592536336155297), (583.13211600293, 34.4444260544411)
+  ✅ solvent_132: A=2.987, B=521.6, C=-223.4
+Characteristic points (T [K], P [bar]): (416.38927587700323, 1.01325), (417.91399126654153, 1.4144740560303692), (597.0199875236308, 47.56954009615503)
+  ✅ solvent_144: A=1.842, B=32.7, C=-398.6
+Characteristic points (T [K], P [bar]): (364.4383073555746, 1.01325), (369.19581221853116, 1.2934286870230562), (527.422588883616, 48.03526093756086)
+  ✅ solvent_147: A=3.026, B=395.0, C=-233.7
+Characteristic points (T [K], P [bar]): (443.18388520073444, 1.01325), (445.7211477789091, 1.6005185937812851), (636.744496827013, 34.166207655777264)
+  ✅ solvent_148: A=1.683, B=31.7, C=-424.3
+Characteristic points (T [K], P [bar]): (409.9435023137134, 1.01325), (414.00382373126683, 0.9881584849336741), (591.4340339018098, 32.666473280100895)
+  ✅ solvent_151: A=0.365, B=-49.7, C=-548.1
+Characteristic points (T [K], P [bar]): (417.8517857265209, 1.01325), (420.6397256093285, 1.1344359037476963), (600.9138937276122, 32.76967394299611)
+  ✅ solvent_153: A=2.804, B=437.1, C=-261.6
+Characteristic points (T [K], P [bar]): (408.2734535772965, 1.01325), (412.9898204061253, 1.2992513633847769), (589.9854577230362, 33.559848008495194)
+  ✅ solvent_160: A=2.339, B=226.8, C=-311.1
+Characteristic points (T [K], P [bar]): (405.7803895401382, 1.01325), (407.23903373252745, 1.321106256206509), (581.7700481893249, 60.7950679167867)
+  ✅ solvent_166: A=2.028, B=48.8, C=-381.6
+Characteristic points (T [K], P [bar]): (410.166063246226, 1.01325), (414.97999759323244, 1.0175615179822173), (592.8285679903321, 29.774028638815302)
+  ✅ solvent_172: A=-0.066, B=13.7, C=-601.7
+Characteristic points (T [K], P [bar]): (397.38087257814243, 1.01325), (399.8413773251828, 1.1550339584153528), (571.2019676074041, 60.52662501960316)
+  ✅ solvent_176: A=3.144, B=418.4, C=-264.1
+Characteristic points (T [K], P [bar]): (426.6088356480563, 1.01325), (431.4172131282178, 1.238120490958417), (616.3103044688826, 41.67677912162523)
+  ✅ solvent_180: A=2.974, B=472.5, C=-267.4
+Characteristic points (T [K], P [bar]): (369.6037278816187, 1.01325), (389.12864362377263, 1.8203390698202802), (555.8980623196752, 38.858706737338345)
+  ✅ solvent_187: A=4.084, B=1196.9, C=-76.1
+Characteristic points (T [K], P [bar]): (397.748897632584, 1.01325), (400.38375888685175, 1.2054024207353031), (571.9767984097882, 34.309034691602555)
+  ✅ solvent_191: A=2.179, B=159.3, C=-324.5
+Characteristic points (T [K], P [bar]): (383.23519528706316, 1.01325), (398.67968865281057, 1.3483756527370827), (569.542412361158, 34.17296996718026)
+  ✅ solvent_193: A=-67.630, B=570389.2, C=-8816.5
+Characteristic points (T [K], P [bar]): (381.5268584276801, 1.01325), (393.1108520428, 1.7044452329750766), (561.5869314897143, 31.866623542756304)
+  ✅ solvent_195: A=2.449, B=278.0, C=-267.8
+Characteristic points (T [K], P [bar]): (354.5618626990513, 1.01325), (359.85138652347496, 1.2615710143127958), (514.07340931925, 28.809317660084844)
+  ✅ solvent_196: A=2.854, B=435.6, C=-201.6
+Characteristic points (T [K], P [bar]): (408.77175536848614, 1.01325), (411.6262276182449, 1.3845929686861171), (588.0374680260642, 28.598964027378635)
+  ✅ solvent_197: A=1.726, B=57.4, C=-375.4
+Characteristic points (T [K], P [bar]): (318.26593466681896, 1.01325), (330.86069775928826, 1.5548691227140616), (472.6581396561261, 32.116042124623775)
+  ✅ solvent_198: A=4.041, B=1052.1, C=-57.6
+Characteristic points (T [K], P [bar]): (417.25848840482564, 1.01325), (421.0965363131424, 1.2348012012915948), (601.5664804473463, 43.75878478265207)
+  ✅ solvent_200: A=2.659, B=304.5, C=-302.5
+Characteristic points (T [K], P [bar]): (403.8267015492048, 1.01325), (416.4773240566584, 1.9427327380051655), (594.9676057952263, 53.59852022605543)
+  ✅ solvent_201: A=2.704, B=291.6, C=-295.7
+Characteristic points (T [K], P [bar]): (395.34480177954583, 1.01325), (409.6138533047238, 1.6900741915755424), (585.1626475781769, 53.37728704630649)
+  ✅ solvent_208: A=3.819, B=879.5, C=-164.7
+Characteristic points (T [K], P [bar]): (420.915200289718, 1.01325), (426.0091324451137, 1.3263583336942566), (608.5844749215911, 46.278389521211444)
+  ✅ solvent_212: A=2.632, B=287.1, C=-311.6
+Characteristic points (T [K], P [bar]): (407.40962516347815, 1.01325), (417.78482475695125, 1.225270879631507), (596.8354639385018, 45.84933475991209)
+  ✅ solvent_213: A=-15.808, B=31608.5, C=-2406.2
+Characteristic points (T [K], P [bar]): (410.26764629112705, 1.01325), (416.45263169080846, 1.0896672360405897), (594.9323309868693, 30.53874819740143)
+  ✅ solvent_219: A=-2.507, B=1252.5, C=-908.7
+Characteristic points (T [K], P [bar]): (338.2774014858484, 1.01325), (363.53183590980586, 1.7677185555373642), (519.3311941568655, 42.76169386049109)
+  ✅ solvent_227: A=22.565, B=52605.0, C=1993.6
+Characteristic points (T [K], P [bar]): (424.4743456828965, 1.01325), (424.76057856311473, 0.8979539098100159), (606.8008265187353, 38.302619042191345)
+  ✅ solvent_229: A=1.510, B=-12.8, C=-433.0
+Characteristic points (T [K], P [bar]): (366.7777283593109, 1.01325), (379.73700968253786, 1.3182297991344094), (542.4814424036256, 35.825276863943245)
+  ✅ solvent_231: A=2535.076, B=728772208.6, C=287109.4
+Characteristic points (T [K], P [bar]): (389.0053953062362, 1.01325), (392.5621803140296, 1.049782641038903), (560.803114734328, 34.19815918333533)
+  ✅ solvent_237: A=-1.410, B=468.7, C=-720.0
+Characteristic points (T [K], P [bar]): (413.1268518921843, 1.01325), (419.6554002685086, 1.156485489709311), (599.507714669298, 46.101956731216916)
+  ✅ solvent_238: A=-140.702, B=2251838.1, C=-16416.8
+Characteristic points (T [K], P [bar]): (250.3117931883605, 1.01325), (284.4825189140589, 2.409136836831629), (406.40359844865566, 42.90640373431338)
+  ✅ solvent_239: A=23.887, B=50994.1, C=1885.0
+Characteristic points (T [K], P [bar]): (330.0687253714698, 1.01325), (347.51655410795036, 1.4905572737934114), (496.4522201542148, 35.8515835486749)
+  ✅ solvent_240: A=44.546, B=205707.6, C=4288.4
+Characteristic points (T [K], P [bar]): (393.9403892234054, 1.01325), (394.67567828513495, 0.9745946776897603), (563.8223975501928, 28.663583400156508)
+  ✅ solvent_241: A=1.059, B=-49.1, C=-440.5
+Characteristic points (T [K], P [bar]): (367.8006771570692, 1.01325), (389.21462423794753, 2.103398624405184), (556.0208917684965, 37.46124720404812)
+  ✅ solvent_242: A=3.181, B=612.5, C=-174.9
+Characteristic points (T [K], P [bar]): (422.2086159997377, 1.01325), (424.8259442282557, 1.3707499261328842), (606.8942060403654, 29.792808631856936)
+  ✅ solvent_243: A=1.726, B=54.5, C=-390.5
+Characteristic points (T [K], P [bar]): (338.8232220594788, 1.01325), (354.7627831352542, 1.5436827880160071), (506.803975907506, 33.55144874703704)
+  ✅ solvent_244: A=6.521, B=3596.4, C=213.2
+Characteristic points (T [K], P [bar]): (371.91157662599403, 1.01325), (379.22082627207686, 1.2489368912334413), (541.7440375315384, 30.017175556113383)
+  ✅ solvent_245: A=4.659, B=1708.7, C=-4.7
+Characteristic points (T [K], P [bar]): (351.9643051551699, 1.01325), (360.1019779847521, 1.3526294820053855), (514.4313971210745, 47.969662632870765)
+  ✅ solvent_266: A=4.811, B=1458.4, C=-48.4
+Characteristic points (T [K], P [bar]): (428.4175909118231, 1.01325), (432.05960066134065, 1.52310112247905), (617.2280009447724, 46.45586822047542)
+  ✅ solvent_276: A=1.995, B=74.2, C=-391.1
+Characteristic points (T [K], P [bar]): (426.3806601783548, 1.01325), (431.537013005381, 1.0315117480367144), (616.4814471505443, 39.985706523382866)
+  ✅ solvent_280: A=-0.333, B=78.1, C=-656.9
+Characteristic points (T [K], P [bar]): (415.41466734912655, 1.01325), (424.2306303128775, 1.4061211161383282), (606.0437575898251, 46.024273587094875)
+  ✅ solvent_281: A=3.431, B=696.8, C=-212.0
+Characteristic points (T [K], P [bar]): (428.12855949623065, 1.01325), (428.5804818544618, 0.9101428203548828), (612.2578312206598, 38.15894708892664)
+  ✅ solvent_286: A=1.457, B=-21.1, C=-442.7
+Characteristic points (T [K], P [bar]): (431.59744781560426, 1.01325), (433.21658082241436, 0.9733981330306472), (618.8808297463063, 40.18999903436496)
+  ✅ solvent_294: A=0.889, B=-74.0, C=-515.3
+Characteristic points (T [K], P [bar]): (411.52364436654364, 1.01325), (420.27530016083733, 1.3873903237883367), (600.3932859440533, 46.21645942992638)
+  ✅ solvent_302: A=3.629, B=809.9, C=-188.0
+Characteristic points (T [K], P [bar]): (393.5237307619994, 1.01325), (401.13567937176583, 1.0925539375057634), (573.0509705310941, 35.74210350866746)
+  ✅ solvent_303: A=-1.469, B=517.0, C=-744.1
+Characteristic points (T [K], P [bar]): (421.8458315822841, 1.01325), (429.9459542030022, 1.543758179127176), (614.2085060042889, 37.34401861861892)
+  ✅ solvent_304: A=2.353, B=225.0, C=-326.0
+Characteristic points (T [K], P [bar]): (422.69477275779565, 1.01325), (427.80646146825165, 1.017677148545066), (611.1520878117881, 40.14022255142306)
+  ✅ solvent_305: A=-0.065, B=14.0, C=-619.5
+Characteristic points (T [K], P [bar]): (437.00491231424127, 1.01325), (438.33175573453076, 0.9151779784454452), (626.1882224779011, 36.4712879447904)
+  ✅ solvent_307: A=1.245, B=-47.7, C=-475.5
+Characteristic points (T [K], P [bar]): (364.48982340112207, 1.01325), (373.2761847017941, 1.2008859733237705), (533.2516924311344, 31.943225529757285)
+  ✅ solvent_309: A=-24.712, B=72973.7, C=-3316.7
+Characteristic points (T [K], P [bar]): (324.6243207953187, 1.01325), (344.52713327346726, 1.6156811219131162), (492.1816189620961, 33.5138749593112)
+  ✅ solvent_310: A=12.256, B=14496.8, C=858.7
+Characteristic points (T [K], P [bar]): (419.3721700513048, 1.01325), (426.59880352884613, 1.5937484272239264), (609.426862184066, 46.39357076672024)
+  ✅ solvent_311: A=2.359, B=186.4, C=-340.2
+Characteristic points (T [K], P [bar]): (419.61879035032615, 1.01325), (420.9526992603042, 0.9721798857546444), (601.3609989432917, 29.805237892355414)
+  ✅ solvent_316: A=0.917, B=-62.9, C=-488.6
+Characteristic points (T [K], P [bar]): (299.32249349516036, 1.01325), (324.4311553390865, 1.9213330762312282), (463.4730790558379, 37.782531474177965)
+  ✅ solvent_317: A=9.871, B=8546.4, C=567.0
+Characteristic points (T [K], P [bar]): (396.8100002125812, 1.01325), (408.26646241078754, 1.6925921452372854), (583.2378034439822, 33.284398624842)
+  ✅ solvent_318: A=2.452, B=279.7, C=-282.5
+Characteristic points (T [K], P [bar]): (346.4355511636544, 1.01325), (364.81428866018416, 1.5755935801587564), (521.1632695145488, 40.57891533681261)
+  ✅ solvent_320: A=11.877, B=13291.3, C=773.2
+Characteristic points (T [K], P [bar]): (327.1710125581527, 1.01325), (357.5387313873973, 2.460840814458754), (510.7696162677105, 49.27657012909502)
+  ✅ solvent_321: A=5.108, B=1896.2, C=44.5
+Characteristic points (T [K], P [bar]): (354.2479942276822, 1.01325), (375.6785503375965, 1.893334748638422), (536.6836433394236, 46.379677320845424)
+  ✅ solvent_327: A=5.211, B=2027.3, C=35.2
+Characteristic points (T [K], P [bar]): (392.89714590237566, 1.01325), (406.42339025097107, 1.8348827246686021), (580.604843215673, 31.198769286744803)
+  ✅ solvent_329: A=2.370, B=261.3, C=-282.4
+Characteristic points (T [K], P [bar]): (428.0052826746266, 1.01325), (429.5358411865057, 0.960444457555909), (613.6226302664368, 40.34574410982783)
+  ✅ solvent_331: A=1.018, B=-69.0, C=-496.2
+Characteristic points (T [K], P [bar]): (371.4474406099942, 1.01325), (386.4946694415427, 1.4078817481795565), (552.1352420593468, 37.6637353211731)
+  ✅ solvent_334: A=17.018, B=30230.8, C=1405.5
+Characteristic points (T [K], P [bar]): (433.6542916939789, 1.01325), (437.4615780774639, 1.0572501588677699), (624.9451115392342, 47.795197647675735)
+  ✅ solvent_339: A=-2.034, B=865.4, C=-858.0
+Characteristic points (T [K], P [bar]): (457.20576985084824, 1.01325), (459.68349503424764, 1.4966204323192132), (656.6907071917824, 50.323983145881776)
+  ✅ solvent_345: A=1.919, B=48.8, C=-431.7
+Characteristic points (T [K], P [bar]): (343.82312706325445, 1.01325), (369.66648702243856, 1.792212441704956), (528.0949814606265, 42.591261041165566)
+  ✅ solvent_355: A=17.319, B=30828.9, C=1436.9
+Characteristic points (T [K], P [bar]): (368.9059241665986, 1.01325), (386.25505635781985, 1.3847484120876892), (551.7929376540284, 40.27139379807712)
+  ✅ solvent_357: A=-12.223, B=19338.4, C=-1950.3
+Characteristic points (T [K], P [bar]): (391.82451860664565, 1.01325), (401.66882860853565, 1.5458160701776278), (573.8126122979081, 37.837963841354046)
+  ✅ solvent_371: A=2.778, B=385.2, C=-252.9
+Characteristic points (T [K], P [bar]): (362.04399452089444, 1.01325), (381.5141436822016, 1.9414676698176034), (545.0202052602881, 42.97394439282826)
+  ✅ solvent_372: A=3.766, B=901.4, C=-122.3
+Characteristic points (T [K], P [bar]): (417.8121097600228, 1.01325), (419.0547887362814, 1.2411572241953215), (598.6496981946877, 33.59750245847417)
+  ✅ solvent_373: A=1.719, B=39.3, C=-394.9
+Characteristic points (T [K], P [bar]): (349.41834920397633, 1.01325), (373.2902028266225, 2.0317760709978976), (533.2717183237464, 42.91872030774301)
+  ✅ solvent_374: A=4.711, B=1636.6, C=-1.6
+Characteristic points (T [K], P [bar]): (440.3559767720015, 1.01325), (440.5643022415883, 0.864944992836441), (629.3775746308404, 35.336261980359616)
+  ✅ solvent_375: A=1.509, B=-7.2, C=-445.1
+Characteristic points (T [K], P [bar]): (430.13328521777055, 1.01325), (433.77373804935166, 1.1669630400972804), (619.676768641931, 40.28255704831809)
+  ✅ solvent_376: A=3.148, B=574.6, C=-247.3
+Characteristic points (T [K], P [bar]): (371.21829947690725, 1.01325), (382.0080077284807, 1.2196703960691104), (545.7257253264011, 38.42456840298066)
+  ✅ solvent_382: A=-6.971, B=6597.7, C=-1316.9
+Characteristic points (T [K], P [bar]): (402.56794967075746, 1.01325), (414.94684238497274, 1.7270543820653412), (592.7812034071039, 40.22000781016993)
+  ✅ solvent_383: A=2.720, B=360.1, C=-269.9
+Characteristic points (T [K], P [bar]): (343.37430388552616, 1.01325), (366.1093319522454, 1.6468091166641166), (523.0133313603505, 46.20264787794314)
+  ✅ solvent_390: A=314.859, B=10677968.0, C=33570.8
+Characteristic points (T [K], P [bar]): (378.92287579728065, 1.01325), (402.8654342736528, 2.343967650658071), (575.5220489623612, 48.60075472713922)
+  ✅ solvent_391: A=3.376, B=666.1, C=-181.3
+Characteristic points (T [K], P [bar]): (403.7587055967676, 1.01325), (407.7797260147417, 1.04424910762117), (582.5424657353453, 35.7836524946782)
+  ✅ solvent_392: A=-0.906, B=258.9, C=-687.8
+Characteristic points (T [K], P [bar]): (430.7847678891249, 1.01325), (435.26742043215165, 1.4747873258775197), (621.8106006173596, 37.3885067522507)
+  ✅ solvent_393: A=1.982, B=98.5, C=-380.9
+Characteristic points (T [K], P [bar]): (406.4946041548747, 1.01325), (420.0986927156348, 1.8507423550935609), (600.1409895937641, 42.42661352325838)
+  ✅ solvent_396: A=2.677, B=334.7, C=-281.2
+Characteristic points (T [K], P [bar]): (388.09879352806905, 1.01325), (410.0936125064266, 2.691041483296296), (585.8480178663237, 48.79219157965826)
+  ✅ solvent_397: A=2.682, B=312.5, C=-271.3
+Characteristic points (T [K], P [bar]): (437.939557624832, 1.01325), (440.9011453688937, 1.6948874420216733), (629.8587790984196, 37.5159472484984)
+  ✅ solvent_398: A=1.738, B=34.6, C=-417.9
+Characteristic points (T [K], P [bar]): (414.53487190195614, 1.01325), (426.4307938555535, 2.1265049854278746), (609.1868483650765, 42.58173524619229)
+  ✅ solvent_399: A=2.209, B=153.2, C=-345.0
+Characteristic points (T [K], P [bar]): (438.72433083702936, 1.01325), (438.94013010430706, 1.1156467968118353), (627.0573287204387, 40.33260798615383)
+  ✅ solvent_401: A=1.677, B=14.1, C=-430.3
+Characteristic points (T [K], P [bar]): (411.90520618553444, 1.01325), (414.74050872703464, 1.19871019986291), (592.4864410386209, 35.90266392574688)
+  ✅ solvent_403: A=2.293, B=196.7, C=-325.9
+Characteristic points (T [K], P [bar]): (385.10329483939313, 1.01325), (396.7079174686898, 1.4995219945666667), (566.7255963838426, 40.62216081262189)
+  ✅ solvent_405: A=3.773, B=923.7, C=-139.9
+Characteristic points (T [K], P [bar]): (395.9227205002426, 1.01325), (400.15444823812766, 1.0623910274746922), (571.6492117687538, 31.92126157663886)
+  ✅ solvent_410: A=-1.933, B=781.4, C=-799.0
+Characteristic points (T [K], P [bar]): (435.2563314703858, 1.01325), (435.4241263544986, 1.100597369691147), (622.0344662207123, 40.48921294106455)
+  ✅ solvent_411: A=1.673, B=12.7, C=-427.6
+Characteristic points (T [K], P [bar]): (380.9573926206818, 1.01325), (394.6875194279066, 1.6180831981805315), (563.839313468438, 37.79264064686098)
+  ✅ solvent_415: A=3.471, B=763.3, C=-160.7
+Characteristic points (T [K], P [bar]): (438.9725334157421, 1.01325), (441.07803126743084, 1.0794998667614322), (630.1114732391869, 44.23074224841477)
+  ✅ solvent_420: A=4.731, B=1699.6, C=-79.3
+Characteristic points (T [K], P [bar]): (383.14118381529954, 1.01325), (383.63943951468127, 1.0706972898711762), (548.0563421638304, 41.91478529675018)
+  ✅ solvent_423: A=2.030, B=84.3, C=-341.5
+Characteristic points (T [K], P [bar]): (397.7693240489077, 1.01325), (405.7239797932091, 1.1079363052457134), (579.6056854188702, 35.61309745497168)
+  ✅ solvent_424: A=-1.984, B=827.3, C=-813.6
+Characteristic points (T [K], P [bar]): (404.0928014067225, 1.01325), (410.35050445222845, 1.147154564669375), (586.2150063603264, 33.33638535146868)
+  ✅ solvent_425: A=44.514, B=229685.9, C=4756.5
+Characteristic points (T [K], P [bar]): (376.17180434856454, 1.01325), (391.6333694284646, 1.427761027442722), (559.4762420406638, 37.523771691068255)
+  ✅ solvent_427: A=12.869, B=16978.9, C=943.8
+Characteristic points (T [K], P [bar]): (402.0799841665162, 1.01325), (408.46033149944435, 1.2545806715491445), (583.5147592849205, 35.86089928478983)
+  ✅ solvent_428: A=3.625, B=877.6, C=-159.6
+Characteristic points (T [K], P [bar]): (429.31475008999564, 1.01325), (435.8156573564812, 1.7738910531666183), (622.5937962235446, 37.47122286457155)
+  ✅ solvent_430: A=1.941, B=87.5, C=-384.1
+Characteristic points (T [K], P [bar]): (303.86316095369045, 1.01325), (347.22010803517827, 3.3581744465332846), (496.0287257645404, 45.04177330758194)
+  ✅ solvent_431: A=4.475, B=1470.5, C=25.1
+Characteristic points (T [K], P [bar]): (375.10526437683393, 1.01325), (394.4713855090263, 2.167826584649461), (563.5305507271804, 35.001055876978846)
+  ✅ solvent_432: A=2.653, B=359.7, C=-239.2
+Characteristic points (T [K], P [bar]): (447.0375369780787, 1.01325), (449.16612192346236, 1.9196201979303484), (641.6658884620891, 30.99359251616604)
+  ✅ solvent_433: A=1.566, B=15.4, C=-437.2
+Characteristic points (T [K], P [bar]): (403.1627739666478, 1.01325), (412.80275995443213, 1.7549584370100588), (589.7182285063317, 31.232356647864755)
+  ✅ solvent_434: A=2.090, B=155.4, C=-328.6
+Characteristic points (T [K], P [bar]): (424.7097735004169, 1.01325), (435.6594348992367, 2.3637403882121193), (622.3706212846239, 34.7157995430526)
+  ✅ solvent_435: A=1.891, B=85.2, C=-379.5
+Characteristic points (T [K], P [bar]): (342.57310447976937, 1.01325), (373.0342949795784, 2.691596607141492), (532.9061356851121, 39.53096064621596)
+  ✅ solvent_436: A=3.349, B=700.5, C=-133.0
+Characteristic points (T [K], P [bar]): (364.41426208933683, 1.01325), (384.059521113423, 1.4945137548719787), (548.6564587334615, 37.47903278854905)
+  ✅ solvent_437: A=149.280, B=2590652.5, C=16990.5
+Characteristic points (T [K], P [bar]): (413.7646297703244, 1.01325), (416.70360493199246, 0.9353484179507603), (595.2908641885607, 31.709601102968936)
+  ✅ solvent_438: A=0.873, B=-66.1, C=-490.0
+Characteristic points (T [K], P [bar]): (383.18819495720504, 1.01325), (387.2867378914142, 1.0201963940252268), (553.266768416306, 28.634234239026803)
+  ✅ solvent_439: A=-0.126, B=24.4, C=-568.7
+Characteristic points (T [K], P [bar]): (430.3921376626783, 1.01325), (435.9997770422446, 1.1285639131574436), (622.8568243460637, 44.1729978253656)
+  ✅ solvent_440: A=-77.841, B=726411.7, C=-9761.7
+Characteristic points (T [K], P [bar]): (412.8776864139042, 1.01325), (419.03710791980933, 1.434787453882151), (598.6244398854419, 29.761619833533402)
+  ✅ solvent_441: A=2.100, B=165.9, C=-333.7
+Characteristic points (T [K], P [bar]): (363.2843855996624, 1.01325), (387.07017528178955, 2.2639002992888058), (552.9573932596994, 34.96091569769266)
+  ✅ solvent_442: A=3.010, B=543.6, C=-182.4
+Characteristic points (T [K], P [bar]): (438.7959586768131, 1.01325), (444.4076665049187, 2.004846652909161), (634.8680950070268, 30.960407064382366)
+  ✅ solvent_443: A=1.690, B=44.3, C=-412.5
+Characteristic points (T [K], P [bar]): (400.5860350421505, 1.01325), (418.2346940745459, 1.9637621811817652), (597.4781343922085, 42.204438323212756)
+  ✅ solvent_444: A=2.986, B=492.7, C=-235.2
+Characteristic points (T [K], P [bar]): (425.5469245293542, 1.01325), (433.6149777059248, 1.5655999085973396), (619.4499681513212, 37.20589860968704)
+  ✅ solvent_446: A=2.294, B=205.1, C=-335.9
+Characteristic points (T [K], P [bar]): (427.3019388276733, 1.01325), (430.7070618710057, 1.3811334789492118), (615.2958026728653, 35.570656809524735)
+  ✅ solvent_451: A=1.922, B=86.4, C=-382.2
+Characteristic points (T [K], P [bar]): (406.04115707114744, 1.01325), (406.8487738719946, 1.0151141810522293), (581.2125341028494, 31.956076967622575)
+  ✅ solvent_452: A=-0.189, B=38.6, C=-604.0
+Characteristic points (T [K], P [bar]): (378.40384819210806, 1.01325), (387.5655703377652, 1.2594153923952711), (553.6651004825218, 35.866976798932264)
+  ✅ solvent_454: A=10.292, B=10168.4, C=610.2
+Characteristic points (T [K], P [bar]): (399.77861004868765, 1.01325), (402.0902294699937, 0.9793020269420473), (574.4146135285624, 34.084474303884186)
+  ✅ solvent_455: A=0.643, B=-64.8, C=-501.6
+Characteristic points (T [K], P [bar]): (382.8180815552438, 1.01325), (393.9285824559397, 1.3450826390969017), (562.7551177941996, 37.70881804224402)
+  ✅ solvent_456: A=6.967, B=4299.2, C=234.7
+Characteristic points (T [K], P [bar]): (409.9022607138962, 1.01325), (412.3331619588727, 1.080638705552246), (589.0473742269611, 33.49019720295454)
+  ✅ solvent_457: A=5.708, B=2812.7, C=83.4
+Characteristic points (T [K], P [bar]): (351.58790282421165, 1.01325), (372.39124808284777, 1.6888983267305313), (531.9874972612112, 42.81660506897627)
+  ✅ solvent_458: A=9.286, B=7881.5, C=497.7
+Characteristic points (T [K], P [bar]): (393.87497055424, 1.01325), (403.84329764776174, 1.2007447727421128), (576.9189966396597, 33.29918747983566)
+  ✅ solvent_462: A=-11.923, B=19357.7, C=-2016.6
+Characteristic points (T [K], P [bar]): (375.7887508156059, 1.01325), (388.6487918999148, 1.3051283079409433), (555.2125598570211, 40.47796064984314)
+  ✅ solvent_472: A=-33.697, B=133302.4, C=-4331.1
+Characteristic points (T [K], P [bar]): (439.5774563122284, 1.01325), (442.50054676968585, 1.3173140803559422), (632.1436382424084, 33.035264780622185)
+  ✅ solvent_478: A=1.872, B=83.9, C=-394.6
+
+✅ Antoine parameters calculated for 151 out of 151 solvents
 
 Step 9: Screening solvents based on pure component properties...
-✅ 343 solvents passed property screening out of 479
+✅ 115 solvents passed property screening out of 151
 
 Screened solvent candidates:
   solvent_1: H2O:1
@@ -596,318 +1083,103 @@ Screened solvent candidates:
     Tb=470.4K, Tm=260.2K, Hv=66.3kJ/mol
   solvent_4: CH2:1, HCO:2
     Tb=386.5K, Tm=230.7K, Hv=37.3kJ/mol
-  solvent_5: CH3:2, CH2:1, C:1, CH3CO:2
-    Tb=473.0K, Tm=264.7K, Hv=59.0kJ/mol
+  solvent_6: CH3:2, COO:2
+    Tb=399.6K, Tm=210.6K, Hv=44.8kJ/mol
 
 Step 10: Checking UNIFAC parameters for screened solvents...
-Screening 343 solvents for UNIFAC parameter availability...
+Screening 115 solvents for UNIFAC parameter availability...
 ✅ solvent_1: H2O:1
 ✅ solvent_2: DMSO:1
 ✅ solvent_3: DOH:1
 ✅ solvent_4: CH2:1, HCO:2
-✅ solvent_5: CH3:2, CH2:1, C:1, CH3CO:2
 ✅ solvent_6: CH3:2, COO:2
-✅ solvent_10: CH3:3, CH:1, CH2COO:1
-✅ solvent_11: CH3:4, C:1, CH2COO:1
-✅ solvent_13: CH2:1, OH:2
-✅ solvent_15: CH3:1, CH:1, OH:2
-✅ solvent_16: CH3:3, CH:2, OH:1
-✅ solvent_18: CH3:2, CH:2, HCO:2
 ✅ solvent_21: CH3:4, C:1, COO:1
-✅ solvent_22: CH3:3, C:1, OH:1, CH2O:1
-✅ solvent_23: CH2:2, OH:2
-✅ solvent_24: CH3:3, CH2:1, C:1, OH:1
-✅ solvent_25: CH3:2, CH2:1, C:1, HCO:2
-✅ solvent_26: CH3:2, CH2:1, C:1, OH:1, HCO:1
-✅ solvent_28: CH3:2, CH:2, OH:1, HCO:1
-✅ solvent_31: CH3:2, OH:1, CHO:1
-✅ solvent_32: CH3:2, CH2:2, OH:1, CHO:1
-✅ solvent_36: CH3:2, CH2:2, CHO:1, HCO:1
 ✅ solvent_37: CH3:2, CHO:1, CH3COO:1
 ✅ solvent_38: CH3:3, CH:2, HCO:1
-✅ solvent_39: CH3:2, CH:2, CH3COO:2
-✅ solvent_40: CH3:2, CH:2, HCO:1, CH3COO:1
-✅ solvent_41: CH3:3, CH:1, CHO:1, HCO:1
-✅ solvent_42: CH3:3, CH2:1, CH:1, CH2COO:1
-✅ solvent_43: CH3:3, C:1, OH:1, COO:1
 ✅ solvent_44: CH3:3, C:1, COOH:1
-✅ solvent_45: CH3:2, C:1, OH:2
 ✅ solvent_46: CH3:3, C:1, OH:1
-✅ solvent_47: CH3:2, CH2COO:2
-✅ solvent_48: CH3:2, CH2:2, CH2COO:2
 ✅ solvent_50: CH3:1, CH2:1, COOH:1
-✅ solvent_53: CH3:2, CH:2, OH:1, HCOO:1
-✅ solvent_54: CH3:1, OH:1, CH2COO:1
-✅ solvent_55: CH3:1, CH2:2, OH:1, CH2COO:1
 ✅ solvent_59: CH3:1, OH:1, COO:1
-✅ solvent_60: CH3:1, CH2:2, OH:1, CH2O:1
 ✅ solvent_61: CH3:3, C:1, HCO:1, COO:1
-✅ solvent_62: CH3:3, C:1, CH3COO:1, COO:1
-✅ solvent_64: CH3:1, CH2:2, CH:1, HCO:2
 ✅ solvent_65: CH3:2, CH2:2, CH:1, HCO:1
-✅ solvent_66: CH3:2, CH2:2, CHO:1, CH3COO:1
-✅ solvent_67: CH3:3, CHO:1, CH2COO:1
-✅ solvent_68: CH3:3, CH2:1, CHO:1, CH2COO:1
 ✅ solvent_69: CH3:2, CHO:1, HCOO:1
-✅ solvent_70: CH3:2, CH2:2, CHO:1, HCOO:1
 ✅ solvent_71: CH3:2, CHO:1, CH3CO:1
-✅ solvent_72: CH3:2, CH2:2, CHO:1, CH3CO:1
-✅ solvent_73: CH3:2, CHO:1, COOH:1
-✅ solvent_76: CH3:3, CH2:1, CHO:1, CH2O:1
-✅ solvent_77: CH3:2, CH:2, HCO:1, HCOO:1
-✅ solvent_78: CH3:2, CH:2, HCO:1, CH3CO:1
-✅ solvent_80: CH3:3, CH:1, CHO:1, CH3COO:1
-✅ solvent_81: CH3:2, CH:2, HCOO:2
 ✅ solvent_82: CH3:3, CH:2, HCOO:1
-✅ solvent_83: CH3:2, CH:2, HCOO:1, CH3CO:1
-✅ solvent_84: CH3:2, CH:2, CH3CO:2
 ✅ solvent_85: CH3:1, CH:1, HCO:2
-✅ solvent_86: CH3:2, CH2:1, CH:1, HCO:1, CH2COO:1
-✅ solvent_88: CH3:2, CH2:1, CH:1, CH3COO:1, CH2COO:1
-✅ solvent_89: CH3:2, CH2:1, CH:1, CH2COO:1, HCOO:1
-✅ solvent_90: CH3:2, CH2:1, CH:1, CH2COO:1, CH3CO:1
-✅ solvent_93: CH3:2, C:1, OH:1, HCO:1
 ✅ solvent_94: CH3:2, C:1, HCO:2
-✅ solvent_96: CH3:2, C:1, HCO:1, CH3COO:1
-✅ solvent_97: CH3:2, C:1, CH3COO:2
 ✅ solvent_98: CH3:3, C:1, CH3COO:1
-✅ solvent_99: CH3:2, C:1, CH3COO:1, HCOO:1
 ✅ solvent_100: CH3:2, C:1, HCOO:2
-✅ solvent_101: CH3:2, CH2COO:1, CH2O:1
-✅ solvent_102: CH3:2, CH2:2, CH2COO:1, CH2O:1
-✅ solvent_103: CH3:2, CH2COO:1, COO:1
-✅ solvent_104: CH3:2, CH2:2, CH2COO:1, COO:1
-✅ solvent_105: CH3:2, CH2:2, CH2COO:1
-✅ solvent_106: CH3:2, CH2:3, CH2COO:1
-✅ solvent_107: CH3:2, CH2:1, CH2COO:1
-✅ solvent_108: CH3:2, CH2:1, CH2COO:1, COO:1
-✅ solvent_109: CH3:2, CH2:1, C:1, OH:1, HCOO:1
-✅ solvent_110: CH3:2, CH2:1, C:1, OH:1, CH3CO:1
 ✅ solvent_112: CH3:3, CH2:1, C:1, HCO:1
-✅ solvent_113: CH3:2, CH2:1, C:1, HCO:1, CH3COO:1
-✅ solvent_114: CH3:2, CH2:1, C:1, HCO:1, HCOO:1
-✅ solvent_115: CH3:2, CH2:1, C:1, HCO:1, CH3CO:1
-✅ solvent_117: CH2:3, HCO:2
-✅ solvent_118: CH3:1, HCO:1, CH2COO:1
-✅ solvent_119: CH2:4, HCO:2
 ✅ solvent_121: CH2:1, HCO:1, CH3COO:1
-✅ solvent_122: CH2:1, CH3COO:2
-✅ solvent_123: CH2:3, HCO:1, CH3COO:1
-✅ solvent_124: CH2:3, CH3COO:2
-✅ solvent_125: CH2:4, HCO:1, CH3COO:1
-✅ solvent_126: CH3:2, CH:2, OH:1, CH3CO:1
-✅ solvent_128: CH3:2, CH2:1, C:1, CH3COO:2
 ✅ solvent_129: CH3:3, CH2:1, C:1, CH3COO:1
-✅ solvent_130: CH3:2, CH2:1, C:1, CH3COO:1, HCOO:1
-✅ solvent_131: CH3:2, CH2:1, C:1, HCOO:2
 ✅ solvent_132: CH3:3, CH2:1, C:1, HCOO:1
-✅ solvent_133: CH3:2, CH2:1, C:1, CH3COO:1, CH3CO:1
-✅ solvent_134: CH3:2, CH2:1, C:1, HCOO:1, CH3CO:1
-✅ solvent_135: CH3:1, CH2:1, OH:1, CH2COO:1
-✅ solvent_136: CH3:3, C:1, OH:1, CH2COO:1
-✅ solvent_137: CH3:3, C:1, HCO:1, CH2COO:1
-✅ solvent_138: CH3:3, C:1, CH3COO:1, CH2COO:1
-✅ solvent_139: CH3:3, C:1, CH2COO:1, HCOO:1
-✅ solvent_140: CH3:3, C:1, CH2COO:1, CH3CO:1
-✅ solvent_141: CH3:1, CH2:2, OH:1, COO:1
-✅ solvent_142: CH3:1, CH2:3, OH:1, CH2O:1
-✅ solvent_143: CH3:1, CH2:3, OH:1, COO:1
 ✅ solvent_144: CH3:1, CH2:1, OH:1, COO:1
-✅ solvent_145: CH3:1, CH2:3, OH:1
-✅ solvent_146: CH3:1, CH2:4, OH:1
 ✅ solvent_148: CH3:3, C:1, HCOO:1, COO:1
-✅ solvent_149: CH3:3, C:1, CH3CO:1, COO:1
 ✅ solvent_151: CH3:3, C:1, HCO:1, CH2O:1
-✅ solvent_152: CH3:3, C:1, CH3COO:1, CH2O:1
 ✅ solvent_153: CH3:3, C:1, HCOO:1, CH2O:1
-✅ solvent_154: CH3:3, C:1, CH3CO:1, CH2O:1
-✅ solvent_155: CH3:1, CH2:2, CH:1, HCO:1, CH3COO:1
-✅ solvent_157: CH3:2, CH2:2, CH:1, CH3COO:1
-✅ solvent_158: CH3:1, CH2:2, CH:1, CH3COO:1, HCOO:1
-✅ solvent_159: CH3:1, CH2:2, CH:1, HCOO:2
 ✅ solvent_160: CH3:2, CH2:2, CH:1, HCOO:1
-✅ solvent_161: CH3:1, CH2:2, CH:1, CH3COO:1, CH3CO:1
-✅ solvent_162: CH2:1, OH:1, CH3COO:1
-✅ solvent_165: CH2:2, OH:1, CH3COO:1
 ✅ solvent_166: CH2:1, OH:1, HCOO:1
-✅ solvent_167: CH2:1, OH:1, CH3CO:1
-✅ solvent_168: CH2:3, OH:1, HCOO:1
-✅ solvent_169: CH2:3, OH:1, CH3CO:1
-✅ solvent_170: CH2:4, OH:1, HCOO:1
 ✅ solvent_172: CH3:3, CH:2, CH3CO:1
 ✅ solvent_176: CH2:1, OH:1, HCO:1
-✅ solvent_177: CH2:3, OH:1, HCO:1
-✅ solvent_178: CH2:2, OH:1, HCO:1
-✅ solvent_179: CH2:4, OH:1, HCO:1
 ✅ solvent_180: CH3:2, C:1, HCO:1, HCOO:1
-✅ solvent_182: CH3:2, CH2:1, CHO:1, CH3CO:1
-✅ solvent_183: CH3:1, CH2:1, OH:1, CH2O:1
-✅ solvent_184: CH3:2, C:1, OH:1, HCOO:1
-✅ solvent_185: CH3:2, C:1, OH:1, CH3CO:1
 ✅ solvent_187: CH3:3, C:1, HCOO:1
-✅ solvent_188: CH3:2, C:1, CH3CO:2
-✅ solvent_189: CH3:2, C:1, HCOO:1, CH3CO:1
 ✅ solvent_191: CH3:2, CH2:1, CHO:1, HCOO:1
 ✅ solvent_193: CH3:3, C:1, CH3CO:1
 ✅ solvent_195: CH3:3, CHO:1, COO:1
 ✅ solvent_197: CH3:3, CH2:1, CHO:1, COO:1
 ✅ solvent_200: CH2:1, CH3COO:1, HCOO:1
 ✅ solvent_201: CH2:1, HCOO:2
-✅ solvent_202: CH2:3, CH3COO:1, HCOO:1
-✅ solvent_203: CH3:2, C:1, CH3COO:1, CH3CO:1
-✅ solvent_205: CH3:2, CH2:1, CHO:1, CH3COO:1
-✅ solvent_207: CH3:2, CH2:1, CH2COO:1, CH2O:1
 ✅ solvent_208: CH2:1, HCO:1, HCOO:1
-✅ solvent_209: CH2:2, HCO:1, CH3COO:1
-✅ solvent_210: CH2:3, HCO:1, HCOO:1
-✅ solvent_211: CH2:4, HCO:1, HCOO:1
 ✅ solvent_212: CH2:2, HCO:1, HCOO:1
 ✅ solvent_213: CH2:1, HCO:1, CH3CO:1
-✅ solvent_215: CH2:3, HCO:1, CH3CO:1
-✅ solvent_217: CH2:4, HCO:1, CH3CO:1
 ✅ solvent_219: CH3:3, CH2:1, C:1, CH3CO:1
-✅ solvent_222: CH3:2, CH2:1, CH:1, HCO:1, CH2O:1
-✅ solvent_223: CH3:2, CH2:1, CH:1, CH3COO:1, CH2O:1
-✅ solvent_224: CH3:2, CH2:1, CH:1, HCOO:1, CH2O:1
-✅ solvent_225: CH3:2, CH2:1, CH:1, CH3CO:1, CH2O:1
-✅ solvent_228: CH3:1, CH:1, CH3COO:2
 ✅ solvent_229: CH3:1, CH:1, HCO:1, CH3COO:1
-✅ solvent_230: CH3:2, CH:1, HCO:1, CH2COO:1
-✅ solvent_232: CH3:2, CH:1, CH3COO:1, CH2COO:1
-✅ solvent_233: CH3:3, CH:1, CH2COO:2
-✅ solvent_234: CH3:1, CH:1, CH3COO:1, HCOO:1
-✅ solvent_235: CH3:2, CH:1, CH2COO:1, HCOO:1
 ✅ solvent_237: CH3:2, CH2:1, CHO:1, HCO:1
 ✅ solvent_238: CH2:2, HCO:2
 ✅ solvent_241: CH3:2, CH2:2, CH2O:2
 ✅ solvent_243: CH3:2, CH2:2, CH2O:1, COO:1
 ✅ solvent_245: CH3:2, CH2:3, CH2O:1
-✅ solvent_247: CH3:3, CH:1, CHO:1, HCOO:1
-✅ solvent_248: CH3:3, CH:1, CHO:1, CH3CO:1
-✅ solvent_251: CH3:1, CH2:2, CH:1, HCOO:1, CH3CO:1
-✅ solvent_253: CH3:3, CH:2, CH3COO:1
-✅ solvent_254: CH3:2, CH:2, CH3COO:1, HCOO:1
-✅ solvent_255: CH3:2, CH:2, CH3COO:1, CH3CO:1
-✅ solvent_257: CH3:1, CH2:1, HCO:1, CH2COO:1
-✅ solvent_258: CH3:2, CH2:1, CH2COO:2
-✅ solvent_259: CH2:2, OH:1, CH3CO:1
-✅ solvent_263: CH3:1, CH2:2, HCO:1, CH2COO:1
-✅ solvent_264: CH3:1, CH2:3, HCO:1, CH2COO:1
-✅ solvent_265: CH2:4, CH3COO:1, HCOO:1
-✅ solvent_267: CH3:3, CH:1, OH:1, CHO:1
-✅ solvent_268: CH3:1, CH:1, OH:1, HCO:1
-✅ solvent_269: CH3:1, CH2:2, CH:1, OH:1, HCO:1
-✅ solvent_270: CH3:1, CH:1, OH:1, CH3COO:1
-✅ solvent_272: CH3:2, CH:1, OH:1, CH2COO:1
-✅ solvent_273: CH3:2, CH2:1, CH:1, OH:1, CH2COO:1
-✅ solvent_274: CH3:1, CH:1, OH:1, HCOO:1
-✅ solvent_275: CH3:2, CH:1, CH2COO:1, CH3CO:1
 ✅ solvent_276: CH2:2, HCOO:2
-✅ solvent_277: CH2:2, CH3COO:2
-✅ solvent_278: CH2:2, OH:1, HCOO:1
-✅ solvent_279: CH2:1, HCOO:1, COOH:1
 ✅ solvent_280: CH2:1, CH3CO:2
 ✅ solvent_281: CH2:1, HCOO:1, CH3CO:1
-✅ solvent_282: CH2:3, CH3CO:2
-✅ solvent_283: CH2:3, HCOO:1, CH3CO:1
-✅ solvent_284: CH2:4, CH3CO:2
 ✅ solvent_286: CH2:1, CH3COO:1, CH3CO:1
-✅ solvent_287: CH2:2, CH3COO:1, HCOO:1
-✅ solvent_288: CH2:3, CH3COO:1, CH3CO:1
-✅ solvent_290: CH2:2, CH3COO:1, CH3CO:1
 ✅ solvent_294: CH2:2, HCO:1, CH3CO:1
-✅ solvent_295: CH3:1, CH2:2, CH:1, HCO:1, HCOO:1
-✅ solvent_296: CH3:1, CH2:2, CH:1, HCO:1, CH3CO:1
-✅ solvent_298: CH2:3, HCOO:2
-✅ solvent_299: CH2:4, HCOO:2
 ✅ solvent_302: CH3:1, CH:1, HCO:1, HCOO:1
 ✅ solvent_303: CH3:2, CH:1, HCO:1, CH2O:1
 ✅ solvent_304: CH3:2, CH:1, HCO:1, COO:1
 ✅ solvent_305: CH3:1, CH:1, HCO:1, CH3CO:1
 ✅ solvent_307: CH3:2, C:1, HCO:1, CH3CO:1
 ✅ solvent_311: CH3:1, CH:1, HCOO:2
-✅ solvent_313: CH3:3, CH:1, CH2COO:1, CH2O:1
-✅ solvent_314: CH3:3, CH:1, CH2COO:1, COO:1
-✅ solvent_315: CH3:1, CH2:2, CH:1, CH3CO:2
 ✅ solvent_316: CH3:2, CH2:2, CH:1, CH3CO:1
 ✅ solvent_318: CH3:2, CH2:1, CH2O:1, COO:1
-✅ solvent_319: CH3:2, C:1, OH:1, CH3COO:1
-✅ solvent_322: CH3:1, CH3COO:1, CH2COO:1
-✅ solvent_323: CH3:1, CH2COO:1, HCOO:1
-✅ solvent_324: CH3:1, CH2:2, CH3COO:1, CH2COO:1
-✅ solvent_325: CH3:1, CH2:2, CH2COO:1, HCOO:1
-✅ solvent_326: CH3:1, CH2:3, CH2COO:1, HCOO:1
 ✅ solvent_329: CH3:3, CH2:1, CH:1, COO:1
-✅ solvent_330: CH3:2, CH2:1, CH:1, COOH:1
 ✅ solvent_331: CH3:1, CH2:1, CH:1, HCO:2
-✅ solvent_332: CH3:2, CH2:1, CH:1, HCO:1, COO:1
-✅ solvent_333: CH3:2, CH2:1, CH:1, CH3COO:1, COO:1
 ✅ solvent_334: CH3:2, CH2:1, CH:1, HCO:1
-✅ solvent_335: CH3:1, CH2:1, CH:1, HCO:1, CH3COO:1
-✅ solvent_336: CH3:1, CH2:2, CH:1, OH:1, HCOO:1
-✅ solvent_337: CH3:2, CH2:1, OH:1, CHO:1
 ✅ solvent_339: CH3:1, CH2O:1, COOH:1
-✅ solvent_344: CH3:1, CH2:1, CH2O:1, COOH:1
-✅ solvent_346: CH3:1, CH:1, OH:1, CH3CO:1
-✅ solvent_347: CH3:1, CH2:2, CH:1, OH:1, CH3CO:1
-✅ solvent_349: CH3:2, CH:1, OH:1, CH2O:1
-✅ solvent_351: CH3:2, CH2:1, CH:1, OH:1, CH2O:1
-✅ solvent_353: CH3:2, CH:1, OH:1, COO:1
-✅ solvent_354: CH3:1, CH2:1, CH:1, OH:1, HCO:1
-✅ solvent_356: CH3:1, CH2COO:1, CH3CO:1
 ✅ solvent_357: CH3:1, CH3CO:1, CH2O:1
-✅ solvent_358: CH3:1, CH2:2, CH2COO:1, CH3CO:1
-✅ solvent_359: CH3:1, CH2:2, CH3CO:1, CH2O:1
-✅ solvent_360: CH3:1, CH2:3, CH2COO:1, CH3CO:1
-✅ solvent_361: CH3:1, CH2:3, CH3CO:1, CH2O:1
-✅ solvent_366: CH2:2, CH3CO:2
-✅ solvent_368: CH3:1, CH:1, CH3COO:1, CH3CO:1
-✅ solvent_369: CH3:2, CH:1, CH3COO:1, CH2O:1
-✅ solvent_370: CH3:2, CH:1, CH3COO:1, COO:1
 ✅ solvent_371: CH3:1, CH2:3, HCOO:1
 ✅ solvent_373: CH3:1, CH2:4, HCOO:1
 ✅ solvent_375: CH3:1, CH:1, CH3CO:2
 ✅ solvent_376: CH3:1, CH:1, HCOO:1, CH3CO:1
-✅ solvent_379: CH2:4, HCOO:1, CH3CO:1
-✅ solvent_380: CH3:1, CH2:1, CH3COO:1, CH2COO:1
-✅ solvent_381: CH3:1, CH2:1, CH:1, OH:1, HCOO:1
 ✅ solvent_382: CH3:1, CH3COO:1, CH2O:1
 ✅ solvent_383: CH3:1, CH3COO:1, COO:1
-✅ solvent_384: CH3:1, CH2:2, CH3COO:1, CH2O:1
-✅ solvent_385: CH3:1, CH2:2, CH3COO:1, COO:1
-✅ solvent_386: CH3:1, CH2:3, CH3COO:1, CH2O:1
-✅ solvent_387: CH3:1, CH2:3, CH3COO:1, COO:1
 ✅ solvent_391: CH3:1, HCO:1, COO:1
 ✅ solvent_392: CH3:1, CH2:2, HCO:1, CH2O:1
 ✅ solvent_393: CH3:1, CH2:2, HCO:1, COO:1
-✅ solvent_394: CH3:1, CH2:3, HCO:1, CH2O:1
-✅ solvent_395: CH3:1, CH2:3, HCO:1, COO:1
 ✅ solvent_396: CH3:1, CH2:1, HCO:1, COO:1
 ✅ solvent_397: CH3:1, HCOO:1, COO:1
 ✅ solvent_398: CH3:1, CH2:2, HCOO:1, COO:1
 ✅ solvent_399: CH3:1, CH2:1, HCOO:1, COO:1
-✅ solvent_400: CH3:1, CH2:3, HCOO:1, COO:1
 ✅ solvent_401: CH2:2, HCOO:1, CH3CO:1
-✅ solvent_402: CH3:1, CH2:3, CH3COO:1, CH2COO:1
 ✅ solvent_403: CH3:1, CH2:2, HCOO:1, CH2O:1
-✅ solvent_404: CH3:1, CH2:3, HCOO:1, CH2O:1
 ✅ solvent_405: CH3:1, CH2:1, HCOO:1, CH2O:1
-✅ solvent_406: CH3:2, CH2:1, CH:1, HCOO:1, COO:1
-✅ solvent_407: CH3:2, CH2:1, CH:1, CH3CO:1, COO:1
-✅ solvent_409: CH3:1, CH2:1, CH:1, CH3COO:2
 ✅ solvent_410: CH3:2, CH2:1, CH:1, CH3COO:1
 ✅ solvent_411: CH3:1, CH2:1, CH:1, HCO:1, HCOO:1
-✅ solvent_412: CH3:1, CH2:1, CH:1, CH3COO:1, HCOO:1
-✅ solvent_413: CH3:1, CH2:1, CH:1, CH3COO:1, CH3CO:1
-✅ solvent_414: CH3:1, CH2:1, CH:1, HCOO:2
 ✅ solvent_415: CH3:2, CH2:1, CH:1, HCOO:1
 ✅ solvent_420: CH3:1, CH2:2, COOH:1
-✅ solvent_421: CH3:1, CH2:1, CH2COO:1, CH3CO:1
-✅ solvent_422: CH3:2, CH2:2, CH:1, OH:1
 ✅ solvent_423: CH3:2, CH2:1, CH:1, OH:1
 ✅ solvent_424: CH3:1, CH2:1, CH3CO:1, CH2O:1
 ✅ solvent_425: CH3:1, CH2:3, CH3CO:1
-✅ solvent_426: CH3:1, CH2:4, CH3CO:1
 ✅ solvent_427: CH3:1, CH2:2, CH3CO:1
 ✅ solvent_428: CH3:2, CH:1, HCOO:1, CH2O:1
 ✅ solvent_430: CH3:2, CH:1, HCOO:1, COO:1
@@ -921,31 +1193,18 @@ Screening 343 solvents for UNIFAC parameter availability...
 ✅ solvent_441: CH3:3, CH:1, CH2O:1, COO:1
 ✅ solvent_443: CH3:3, CH:1, COO:2
 ✅ solvent_444: CH3:1, CH3CO:1, COO:1
-✅ solvent_445: CH3:1, CH2:2, CH3CO:1, COO:1
 ✅ solvent_446: CH3:1, CH2:1, CH3CO:1, COO:1
-✅ solvent_447: CH3:1, CH2:3, CH3CO:1, COO:1
-✅ solvent_449: CH2:2, HCOO:1, COOH:1
 ✅ solvent_451: CH3:1, CH2:1, CH3COO:1, COO:1
 ✅ solvent_452: CH3:1, CH2:3, CH3COO:1
-✅ solvent_453: CH3:1, CH2:4, CH3COO:1
 ✅ solvent_454: CH3:1, CH2:2, CH3COO:1
 ✅ solvent_455: CH3:1, CH2:1, CH3COO:1, CH2O:1
 ✅ solvent_456: CH3:1, CH2:3, HCO:1
 ✅ solvent_457: CH3:1, CH2:4, HCO:1
-✅ solvent_459: CH3:2, CH2:1, CH:1, OH:1, COO:1
-✅ solvent_460: CH3:1, CH2:1, CH:1, OH:1, CH3CO:1
 ✅ solvent_462: CH3:2, CH2:1, CH:1, CH3CO:1
-✅ solvent_463: CH3:1, CH2:1, CH:1, CH3CO:2
-✅ solvent_465: CH3:1, CH2:1, CH2COO:1, HCOO:1
-✅ solvent_466: CH3:1, CH2:1, CH:1, HCOO:1, CH3CO:1
-✅ solvent_469: CH3:1, CH2:1, CH:1, OH:1, CH3COO:1
-✅ solvent_470: CH3:1, CH2:1, CH:1, HCO:1, CH3CO:1
 ✅ solvent_472: CH3:1, CH2:1, HCO:1, CH2O:1
-✅ solvent_476: CH3:1, CH2:1, CH:1, HCOO:1, COOH:1
 ✅ solvent_478: CH3:2, CH:1, CH3CO:1, COO:1
-✅ solvent_479: CH3:1, CH:1, HCOO:1, COOH:1
 
-✅ 343 solvents have complete UNIFAC parameters
+✅ 115 solvents have complete UNIFAC parameters
 ❌ 0 solvents have missing parameters
 
 Compatible solvents ready for VLE calculations:
@@ -953,9 +1212,10 @@ Compatible solvents ready for VLE calculations:
   solvent_2: DMSO:1
   solvent_3: DOH:1
   solvent_4: CH2:1, HCO:2
-  solvent_5: CH3:2, CH2:1, C:1, CH3CO:2
+  solvent_6: CH3:2, COO:2
 
 Step 11: Performing VLE calculations for compatible solvents...
+DEBUG: Testing only first 115 solvents out of 115 total
 Calculating VLE for solvent_1 (H2O:1)...
   solvent_1: Solver succeeded
 Calculating VLE for solvent_2 (DMSO:1)...
@@ -964,34 +1224,80 @@ Calculating VLE for solvent_3 (DOH:1)...
   solvent_3: Solver succeeded
 Calculating VLE for solvent_4 (CH2:1, HCO:2)...
   solvent_4: Solver succeeded
-Calculating VLE for solvent_5 (CH3:2, CH2:1, C:1, CH3CO:2)...
-  solvent_5: Solver succeeded
 Calculating VLE for solvent_6 (CH3:2, COO:2)...
   solvent_6: Solver succeeded
-Calculating VLE for solvent_10 (CH3:3, CH:1, CH2COO:1)...
+Calculating VLE for solvent_21 (CH3:4, C:1, COO:1)...
+  solvent_21: Solver succeeded
+Calculating VLE for solvent_37 (CH3:2, CHO:1, CH3COO:1)...
 WARNING: Loading a SolverResults object with a warning status into
 model.name="vle";
     - termination condition: infeasible
     - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
       point. Problem may be infeasible.
-  solvent_10: Solver failed - Status: warning, Condition: infeasible
-  solvent_10: Solver failed
-Calculating VLE for solvent_11 (CH3:4, C:1, CH2COO:1)...
+  solvent_37: Solver failed - Status: warning, Condition: infeasible
+  solvent_37: Solver failed
+Calculating VLE for solvent_38 (CH3:3, CH:2, HCO:1)...
+  solvent_38: Solver succeeded
+Calculating VLE for solvent_44 (CH3:3, C:1, COOH:1)...
 WARNING: Loading a SolverResults object with a warning status into
 model.name="vle";
     - termination condition: infeasible
     - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
       point. Problem may be infeasible.
-  solvent_11: Solver failed - Status: warning, Condition: infeasible
-  solvent_11: Solver failed
-Calculating VLE for solvent_13 (CH2:1, OH:2)...
-  solvent_13: Solver succeeded
-Calculating VLE for solvent_15 (CH3:1, CH:1, OH:2)...
-  solvent_15: Solver succeeded
-Calculating VLE for solvent_16 (CH3:3, CH:2, OH:1)...
-  solvent_16: Solver succeeded
-Calculating VLE for solvent_18 (CH3:2, CH:2, HCO:2)...
-WARNING (W1001): Setting Var 'psat[31,2]' to a value `0.0` (float) not in
+  solvent_44: Solver failed - Status: warning, Condition: infeasible
+  solvent_44: Solver failed
+Calculating VLE for solvent_46 (CH3:3, C:1, OH:1)...
+  solvent_46: Solver succeeded
+Calculating VLE for solvent_50 (CH3:1, CH2:1, COOH:1)...
+  solvent_50: Solver succeeded
+Calculating VLE for solvent_59 (CH3:1, OH:1, COO:1)...
+  solvent_59: Solver succeeded
+Calculating VLE for solvent_61 (CH3:3, C:1, HCO:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_61: Solver failed - Status: warning, Condition: unbounded
+  solvent_61: Solver failed
+Calculating VLE for solvent_65 (CH3:2, CH2:2, CH:1, HCO:1)...
+  solvent_65: Solver succeeded
+Calculating VLE for solvent_69 (CH3:2, CHO:1, HCOO:1)...
+  solvent_69: Solver succeeded
+Calculating VLE for solvent_71 (CH3:2, CHO:1, CH3CO:1)...
+  solvent_71: Solver succeeded
+Calculating VLE for solvent_82 (CH3:3, CH:2, HCOO:1)...
+  solvent_82: Solver succeeded
+Calculating VLE for solvent_85 (CH3:1, CH:1, HCO:2)...
+  solvent_85: Solver succeeded
+Calculating VLE for solvent_94 (CH3:2, C:1, HCO:2)...
+  solvent_94: Solver succeeded
+Calculating VLE for solvent_98 (CH3:3, C:1, CH3COO:1)...
+  solvent_98: Solver succeeded
+Calculating VLE for solvent_100 (CH3:2, C:1, HCOO:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_100: Solver failed - Status: warning, Condition: unbounded
+  solvent_100: Solver failed
+Calculating VLE for solvent_112 (CH3:3, CH2:1, C:1, HCO:1)...
+  solvent_112: Solver succeeded
+Calculating VLE for solvent_121 (CH2:1, HCO:1, CH3COO:1)...
+  solvent_121: Solver succeeded
+Calculating VLE for solvent_129 (CH3:3, CH2:1, C:1, CH3COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_129: Solver failed - Status: warning, Condition: infeasible
+  solvent_129: Solver failed
+Calculating VLE for solvent_132 (CH3:3, CH2:1, C:1, HCOO:1)...
+  solvent_132: Solver succeeded
+Calculating VLE for solvent_144 (CH3:1, CH2:1, OH:1, COO:1)...
+WARNING (W1001): Setting Var 'psat[10,2]' to a value `0.0` (float) not in
 domain PositiveReals.
     See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
 WARNING: Loading a SolverResults object with a warning status into
@@ -999,10 +1305,530 @@ model.name="vle";
     - termination condition: unbounded
     - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
       be unbounded.
-  solvent_18: Solver failed - Status: warning, Condition: unbounded
-  solvent_18: Solver failed
-Calculating VLE for solvent_21 (CH3:4, C:1, COO:1)...
-  solvent_21: Solver succeeded
-Calculating VLE for solvent_22 (CH3:3, C:1, OH:1, CH2O:1)...
-  solvent_22: Solver succeeded
-Calculating VLE for solvent_23 (CH2:2, OH:2)...
+  solvent_144: Solver failed - Status: warning, Condition: unbounded
+  solvent_144: Solver failed
+Calculating VLE for solvent_148 (CH3:3, C:1, HCOO:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_148: Solver failed - Status: warning, Condition: unbounded
+  solvent_148: Solver failed
+Calculating VLE for solvent_151 (CH3:3, C:1, HCO:1, CH2O:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_151: Solver failed - Status: warning, Condition: infeasible
+  solvent_151: Solver failed
+Calculating VLE for solvent_153 (CH3:3, C:1, HCOO:1, CH2O:1)...
+  solvent_153: Solver succeeded
+Calculating VLE for solvent_160 (CH3:2, CH2:2, CH:1, HCOO:1)...
+  solvent_160: Solver succeeded
+Calculating VLE for solvent_166 (CH2:1, OH:1, HCOO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_166: Solver failed - Status: warning, Condition: unbounded
+  solvent_166: Solver failed
+Calculating VLE for solvent_172 (CH3:3, CH:2, CH3CO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_172: Solver failed - Status: warning, Condition: infeasible
+  solvent_172: Solver failed
+Calculating VLE for solvent_176 (CH2:1, OH:1, HCO:1)...
+  solvent_176: Solver succeeded
+Calculating VLE for solvent_180 (CH3:2, C:1, HCO:1, HCOO:1)...
+  solvent_180: Solver succeeded
+Calculating VLE for solvent_187 (CH3:3, C:1, HCOO:1)...
+  solvent_187: Solver succeeded
+Calculating VLE for solvent_191 (CH3:2, CH2:1, CHO:1, HCOO:1)...
+  solvent_191: Solver succeeded
+Calculating VLE for solvent_193 (CH3:3, C:1, CH3CO:1)...
+  solvent_193: Solver succeeded
+Calculating VLE for solvent_195 (CH3:3, CHO:1, COO:1)...
+  solvent_195: Solver succeeded
+Calculating VLE for solvent_197 (CH3:3, CH2:1, CHO:1, COO:1)...
+WARNING (W1001): Setting Var 'psat[73,2]' to a value `0.0` (float) not in
+domain PositiveReals.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_197: Solver failed - Status: warning, Condition: unbounded
+  solvent_197: Solver failed
+Calculating VLE for solvent_200 (CH2:1, CH3COO:1, HCOO:1)...
+  solvent_200: Solver succeeded
+Calculating VLE for solvent_201 (CH2:1, HCOO:2)...
+  solvent_201: Solver succeeded
+Calculating VLE for solvent_208 (CH2:1, HCO:1, HCOO:1)...
+  solvent_208: Solver succeeded
+Calculating VLE for solvent_212 (CH2:2, HCO:1, HCOO:1)...
+  solvent_212: Solver succeeded
+Calculating VLE for solvent_213 (CH2:1, HCO:1, CH3CO:1)...
+  solvent_213: Solver succeeded
+Calculating VLE for solvent_219 (CH3:3, CH2:1, C:1, CH3CO:1)...
+  solvent_219: Solver succeeded
+Calculating VLE for solvent_229 (CH3:1, CH:1, HCO:1, CH3COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_229: Solver failed - Status: warning, Condition: infeasible
+  solvent_229: Solver failed
+Calculating VLE for solvent_237 (CH3:2, CH2:1, CHO:1, HCO:1)...
+  solvent_237: Solver succeeded
+Calculating VLE for solvent_238 (CH2:2, HCO:2)...
+  solvent_238: Solver succeeded
+Calculating VLE for solvent_241 (CH3:2, CH2:2, CH2O:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_241: Solver failed - Status: warning, Condition: infeasible
+  solvent_241: Solver failed
+Calculating VLE for solvent_243 (CH3:2, CH2:2, CH2O:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_243: Solver failed - Status: warning, Condition: unbounded
+  solvent_243: Solver failed
+Calculating VLE for solvent_245 (CH3:2, CH2:3, CH2O:1)...
+  solvent_245: Solver succeeded
+Calculating VLE for solvent_276 (CH2:2, HCOO:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_276: Solver failed - Status: warning, Condition: unbounded
+  solvent_276: Solver failed
+Calculating VLE for solvent_280 (CH2:1, CH3CO:2)...
+  solvent_280: Solver succeeded
+Calculating VLE for solvent_281 (CH2:1, HCOO:1, CH3CO:1)...
+  solvent_281: Solver succeeded
+Calculating VLE for solvent_286 (CH2:1, CH3COO:1, CH3CO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_286: Solver failed - Status: warning, Condition: infeasible
+  solvent_286: Solver failed
+Calculating VLE for solvent_294 (CH2:2, HCO:1, CH3CO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_294: Solver failed - Status: warning, Condition: infeasible
+  solvent_294: Solver failed
+Calculating VLE for solvent_302 (CH3:1, CH:1, HCO:1, HCOO:1)...
+  solvent_302: Solver succeeded
+Calculating VLE for solvent_303 (CH3:2, CH:1, HCO:1, CH2O:1)...
+  solvent_303: Solver succeeded
+Calculating VLE for solvent_304 (CH3:2, CH:1, HCO:1, COO:1)...
+  solvent_304: Solver succeeded
+Calculating VLE for solvent_305 (CH3:1, CH:1, HCO:1, CH3CO:1)...
+  solvent_305: Solver succeeded
+Calculating VLE for solvent_307 (CH3:2, C:1, HCO:1, CH3CO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_307: Solver failed - Status: warning, Condition: infeasible
+  solvent_307: Solver failed
+Calculating VLE for solvent_311 (CH3:1, CH:1, HCOO:2)...
+WARNING (W1001): Setting Var 'psat[43,2]' to a value `0.0` (float) not in
+domain PositiveReals.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_311: Solver failed - Status: warning, Condition: unbounded
+  solvent_311: Solver failed
+Calculating VLE for solvent_316 (CH3:2, CH2:2, CH:1, CH3CO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_316: Solver failed - Status: warning, Condition: infeasible
+  solvent_316: Solver failed
+Calculating VLE for solvent_318 (CH3:2, CH2:1, CH2O:1, COO:1)...
+  solvent_318: Solver succeeded
+Calculating VLE for solvent_329 (CH3:3, CH2:1, CH:1, COO:1)...
+  solvent_329: Solver succeeded
+Calculating VLE for solvent_331 (CH3:1, CH2:1, CH:1, HCO:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_331: Solver failed - Status: warning, Condition: infeasible
+  solvent_331: Solver failed
+Calculating VLE for solvent_334 (CH3:2, CH2:1, CH:1, HCO:1)...
+  solvent_334: Solver succeeded
+Calculating VLE for solvent_339 (CH3:1, CH2O:1, COOH:1)...
+  solvent_339: Solver succeeded
+Calculating VLE for solvent_357 (CH3:1, CH3CO:1, CH2O:1)...
+  solvent_357: Solver succeeded
+Calculating VLE for solvent_371 (CH3:1, CH2:3, HCOO:1)...
+  solvent_371: Solver succeeded
+Calculating VLE for solvent_373 (CH3:1, CH2:4, HCOO:1)...
+WARNING (W1001): Setting Var 'psat[64,2]' to a value `0.0` (float) not in
+domain PositiveReals.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_373: Solver failed - Status: warning, Condition: unbounded
+  solvent_373: Solver failed
+Calculating VLE for solvent_375 (CH3:1, CH:1, CH3CO:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_375: Solver failed - Status: warning, Condition: infeasible
+  solvent_375: Solver failed
+Calculating VLE for solvent_376 (CH3:1, CH:1, HCOO:1, CH3CO:1)...
+  solvent_376: Solver succeeded
+Calculating VLE for solvent_382 (CH3:1, CH3COO:1, CH2O:1)...
+  solvent_382: Solver succeeded
+Calculating VLE for solvent_383 (CH3:1, CH3COO:1, COO:1)...
+  solvent_383: Solver succeeded
+Calculating VLE for solvent_391 (CH3:1, HCO:1, COO:1)...
+  solvent_391: Solver succeeded
+Calculating VLE for solvent_392 (CH3:1, CH2:2, HCO:1, CH2O:1)...
+  solvent_392: Solver succeeded
+Calculating VLE for solvent_393 (CH3:1, CH2:2, HCO:1, COO:1)...
+WARNING (W1001): Setting Var 'psat[24,2]' to a value `0.0` (float) not in
+domain PositiveReals.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_393: Solver failed - Status: warning, Condition: unbounded
+  solvent_393: Solver failed
+Calculating VLE for solvent_396 (CH3:1, CH2:1, HCO:1, COO:1)...
+  solvent_396: Solver succeeded
+Calculating VLE for solvent_397 (CH3:1, HCOO:1, COO:1)...
+  solvent_397: Solver succeeded
+Calculating VLE for solvent_398 (CH3:1, CH2:2, HCOO:1, COO:1)...
+WARNING (W1001): Setting Var 'psat[9,2]' to a value `0.0` (float) not in
+domain PositiveReals.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+/Users/arnaou/projects/dtu_chemeng/camd_iss/scripts/../src/mixture/unifac/pyomo_vle.py:91: RuntimeWarning: overflow encountered in scalar power
+  psat_init[j, i] = 10**(A - B / (C + T[j]))
+/Users/arnaou/projects/dtu_chemeng/camd_iss/scripts/../src/mixture/unifac/pyomo_vle.py:100: RuntimeWarning: invalid value encountered in divide
+  y_init[j, :] = y_init[j, :] / np.sum(y_init[j, :])
+  solvent_398: Solver failed - Status: warning, Condition: unbounded
+  solvent_398: Solver failed
+Calculating VLE for solvent_399 (CH3:1, CH2:1, HCOO:1, COO:1)...
+WARNING (W1001): Setting Var 'y[40,2]' to a value `nan` (float) not in domain
+UnitInterval.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+ERROR: Solver (ipopt) returned non-zero return code (1)
+ERROR: Solver log: Ipopt 3.14.13: halt_on_ampl_error=yes max_iter=100000
+tol=1e-06
+
+
+    ******************************************************************************
+    This program contains Ipopt, a library for large-scale nonlinear
+    optimization.
+     Ipopt is released as open source code under the Eclipse Public License
+     (EPL).
+             For more information visit https://github.com/coin-or/Ipopt
+    ******************************************************************************
+
+    This is Ipopt version 3.14.13, running with linear solver MUMPS 5.2.1.
+
+    Number of nonzeros in equality constraint Jacobian...:    37078 Number of
+    nonzeros in inequality constraint Jacobian.:        0 Number of nonzeros
+    in Lagrangian Hessian.............:    34526
+
+    Error evaluating constraint eq_psat[40,2]: can't evaluate pow(10,2388.21).
+  solvent_399: Solver failed
+Calculating VLE for solvent_401 (CH2:2, HCOO:1, CH3CO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_401: Solver failed - Status: warning, Condition: unbounded
+  solvent_401: Solver failed
+Calculating VLE for solvent_403 (CH3:1, CH2:2, HCOO:1, CH2O:1)...
+  solvent_403: Solver succeeded
+Calculating VLE for solvent_405 (CH3:1, CH2:1, HCOO:1, CH2O:1)...
+  solvent_405: Solver succeeded
+Calculating VLE for solvent_410 (CH3:2, CH2:1, CH:1, CH3COO:1)...
+  solvent_410: Solver succeeded
+Calculating VLE for solvent_411 (CH3:1, CH2:1, CH:1, HCO:1, HCOO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_411: Solver failed - Status: warning, Condition: unbounded
+  solvent_411: Solver failed
+Calculating VLE for solvent_415 (CH3:2, CH2:1, CH:1, HCOO:1)...
+  solvent_415: Solver succeeded
+Calculating VLE for solvent_420 (CH3:1, CH2:2, COOH:1)...
+  solvent_420: Solver succeeded
+Calculating VLE for solvent_423 (CH3:2, CH2:1, CH:1, OH:1)...
+WARNING (W1001): Setting Var 'psat[95,2]' to a value `0.0` (float) not in
+domain PositiveReals.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+WARNING (W1001): Setting Var 'y[38,2]' to a value `nan` (float) not in domain
+UnitInterval.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+ERROR: Solver (ipopt) returned non-zero return code (1)
+ERROR: Solver log: Ipopt 3.14.13: halt_on_ampl_error=yes max_iter=100000
+tol=1e-06
+
+
+    ******************************************************************************
+    This program contains Ipopt, a library for large-scale nonlinear
+    optimization.
+     Ipopt is released as open source code under the Eclipse Public License
+     (EPL).
+             For more information visit https://github.com/coin-or/Ipopt
+    ******************************************************************************
+
+    This is Ipopt version 3.14.13, running with linear solver MUMPS 5.2.1.
+
+    Number of nonzeros in equality constraint Jacobian...:    36678 Number of
+    nonzeros in inequality constraint Jacobian.:        0 Number of nonzeros
+    in Lagrangian Hessian.............:    34526
+
+    Error evaluating constraint eq_psat[38,2]: can't evaluate pow(10,643.26).
+  solvent_423: Solver failed
+Calculating VLE for solvent_424 (CH3:1, CH2:1, CH3CO:1, CH2O:1)...
+  solvent_424: Solver succeeded
+Calculating VLE for solvent_425 (CH3:1, CH2:3, CH3CO:1)...
+  solvent_425: Solver succeeded
+Calculating VLE for solvent_427 (CH3:1, CH2:2, CH3CO:1)...
+  solvent_427: Solver succeeded
+Calculating VLE for solvent_428 (CH3:2, CH:1, HCOO:1, CH2O:1)...
+  solvent_428: Solver succeeded
+Calculating VLE for solvent_430 (CH3:2, CH:1, HCOO:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_430: Solver failed - Status: warning, Condition: unbounded
+  solvent_430: Solver failed
+Calculating VLE for solvent_432 (CH3:2, CH2:2, COO:1)...
+  solvent_432: Solver succeeded
+Calculating VLE for solvent_433 (CH3:2, CH2:2, COO:2)...
+ERROR: Solver (ipopt) returned non-zero return code (1)
+ERROR: Solver log: Ipopt 3.14.13: halt_on_ampl_error=yes max_iter=100000
+tol=1e-06
+
+
+    ******************************************************************************
+    This program contains Ipopt, a library for large-scale nonlinear
+    optimization.
+     Ipopt is released as open source code under the Eclipse Public License
+     (EPL).
+             For more information visit https://github.com/coin-or/Ipopt
+    ******************************************************************************
+
+    This is Ipopt version 3.14.13, running with linear solver MUMPS 5.2.1.
+
+    Number of nonzeros in equality constraint Jacobian...:    29380 Number of
+    nonzeros in inequality constraint Jacobian.:        0 Number of nonzeros
+    in Lagrangian Hessian.............:    26223
+
+    Total number of variables............................:     7221
+                         variables with only lower bounds:     6221
+                    variables with lower and upper bounds:      400
+                         variables with only upper bounds:        0
+    Total number of equality constraints.................:     7221 Total
+    number of inequality constraints...............:        0
+            inequality constraints with only lower bounds:        0
+       inequality constraints with lower and upper bounds:        0
+            inequality constraints with only upper bounds:        0
+
+    iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du
+    alpha_pr  ls
+       0  0.0000000e+00 2.20e+13 1.00e+00  -1.0 0.00e+00    -  0.00e+00
+       0.00e+00   0 1  0.0000000e+00 2.17e+13 4.82e+09  -1.0 2.48e+13    -
+       3.01e-03 1.40e-02f  1 2  0.0000000e+00 2.17e+13 4.82e+09  -1.0 2.44e+13
+       -  2.06e-02 1.39e-04f  1 3  0.0000000e+00 2.17e+13 4.82e+09  -1.0
+       2.44e+13    -  3.24e-02 1.39e-06f  1 4  0.0000000e+00 2.17e+13 5.81e+11
+       -1.0 2.44e+13    -  1.71e-10 2.40e-05f  1 5  0.0000000e+00 2.17e+13
+       5.81e+11  -1.0 2.44e+13    -  4.06e-02 2.81e-07f  1 6  0.0000000e+00
+       2.17e+11 9.92e+15  -1.0 1.00e+00  16.0 9.76e-01 9.91e-01h  1 7
+       0.0000000e+00 7.66e+10 4.20e+15  -1.0 1.12e-02  15.5 3.11e-01 5.78e-01h
+       1 8  0.0000000e+00 2.57e+10 1.76e+15  -1.0 4.05e-03  15.0 6.03e-02
+       5.82e-01h  1 9  0.0000000e+00 2.57e+10 1.76e+15  -1.0 2.06e+16    -
+       1.19e-03 7.49e-06f  1
+    iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du
+    alpha_pr  ls
+      10  0.0000000e+00 3.80e+08 2.85e+14  -1.0 1.86e-03  15.5 9.77e-01
+      8.40e-01h  1 11  0.0000000e+00 6.10e+12 4.48e+14  -1.0 2.11e+18    -
+      1.14e-05 9.04e-06f  1 12  0.0000000e+00 7.17e+12 4.59e+14  -1.0 2.48e+17
+      -  2.37e-05 2.09e-05f  1 13  0.0000000e+00 7.17e+12 4.59e+14  -1.0
+      1.24e+15    -  1.72e-02 4.19e-05f  1 14  0.0000000e+00 7.17e+12 4.59e+14
+      -1.0 6.21e+12    -  8.36e-05 4.56e-05f  1 15  0.0000000e+00 7.05e+12
+      4.59e+14  -1.0 5.23e-02  16.8 9.89e-01 1.77e-02h  1 16  0.0000000e+00
+      7.05e+12 4.59e+14  -1.0 1.86e+14    -  1.29e-06 4.56e-07f  1 17
+      0.0000000e+00 7.05e+12 4.59e+14  -1.0 5.24e-02  16.3 9.90e-01 7.98e-05h
+      1
+    Error evaluating constraint   18r 0.0000000e+00 7.05e+12 1.00e+03   4.8
+    0.00e+00  16.7 0.00e+00 2.66e-07R  4
+      19r 0.0000000e+00 7.03e+12 1.62e+03   4.8 2.39e+14    -  2.69e-04
+      1.79e-06f  1
+    iter    objective    inf_pr   inf_du lg(mu)  ||d||  lg(rg) alpha_du
+    alpha_pr  ls
+      20r 0.0000000e+00 4.60e+12 3.12e+03   2.8 7.74e+10    -  1.24e-01
+      5.47e-04f  1 21r 0.0000000e+00 4.60e+12 3.12e+03   2.8 3.71e+07    -
+      9.08e-84 2.20e-83F  1
+    eq_psat[4,2]: can't evaluate pow(10,2915.89).
+  solvent_433: Solver failed
+Calculating VLE for solvent_434 (CH3:2, CH2:3, COO:1)...
+  solvent_434: Solver succeeded
+Calculating VLE for solvent_435 (CH3:2, CH2:1, COO:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_435: Solver failed - Status: warning, Condition: unbounded
+  solvent_435: Solver failed
+Calculating VLE for solvent_438 (CH3:2, CH:1, CH3CO:1, CH2O:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_438: Solver failed - Status: warning, Condition: infeasible
+  solvent_438: Solver failed
+Calculating VLE for solvent_439 (CH3:3, CH:1, CH2O:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_439: Solver failed - Status: warning, Condition: infeasible
+  solvent_439: Solver failed
+Calculating VLE for solvent_440 (CH3:2, CH:1, COOH:1)...
+  solvent_440: Solver succeeded
+Calculating VLE for solvent_441 (CH3:3, CH:1, CH2O:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_441: Solver failed - Status: warning, Condition: unbounded
+  solvent_441: Solver failed
+Calculating VLE for solvent_443 (CH3:3, CH:1, COO:2)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_443: Solver failed - Status: warning, Condition: unbounded
+  solvent_443: Solver failed
+Calculating VLE for solvent_444 (CH3:1, CH3CO:1, COO:1)...
+  solvent_444: Solver succeeded
+Calculating VLE for solvent_446 (CH3:1, CH2:1, CH3CO:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_446: Solver failed - Status: warning, Condition: unbounded
+  solvent_446: Solver failed
+Calculating VLE for solvent_451 (CH3:1, CH2:1, CH3COO:1, COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: unbounded
+    - message from solver: Ipopt 3.14.13\x3a Iterates diverging; problem might
+      be unbounded.
+  solvent_451: Solver failed - Status: warning, Condition: unbounded
+  solvent_451: Solver failed
+Calculating VLE for solvent_452 (CH3:1, CH2:3, CH3COO:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_452: Solver failed - Status: warning, Condition: infeasible
+  solvent_452: Solver failed
+Calculating VLE for solvent_454 (CH3:1, CH2:2, CH3COO:1)...
+  solvent_454: Solver succeeded
+Calculating VLE for solvent_455 (CH3:1, CH2:1, CH3COO:1, CH2O:1)...
+WARNING: Loading a SolverResults object with a warning status into
+model.name="vle";
+    - termination condition: infeasible
+    - message from solver: Ipopt 3.14.13\x3a Converged to a locally infeasible
+      point. Problem may be infeasible.
+  solvent_455: Solver failed - Status: warning, Condition: infeasible
+  solvent_455: Solver failed
+Calculating VLE for solvent_456 (CH3:1, CH2:3, HCO:1)...
+  solvent_456: Solver succeeded
+Calculating VLE for solvent_457 (CH3:1, CH2:4, HCO:1)...
+  solvent_457: Solver succeeded
+Calculating VLE for solvent_462 (CH3:2, CH2:1, CH:1, CH3CO:1)...
+  solvent_462: Solver succeeded
+Calculating VLE for solvent_472 (CH3:1, CH2:1, HCO:1, CH2O:1)...
+  solvent_472: Solver succeeded
+Calculating VLE for solvent_478 (CH3:2, CH:1, CH3CO:1, COO:1)...
+WARNING (W1001): Setting Var 'y[20,2]' to a value `nan` (float) not in domain
+UnitInterval.
+    See also https://pyomo.readthedocs.io/en/stable/errors.html#w1001
+ERROR: Solver (ipopt) returned non-zero return code (1)
+ERROR: Solver log: Ipopt 3.14.13: halt_on_ampl_error=yes max_iter=100000
+tol=1e-06
+
+
+    ******************************************************************************
+    This program contains Ipopt, a library for large-scale nonlinear
+    optimization.
+     Ipopt is released as open source code under the Eclipse Public License
+     (EPL).
+             For more information visit https://github.com/coin-or/Ipopt
+    ******************************************************************************
+
+    This is Ipopt version 3.14.13, running with linear solver MUMPS 5.2.1.
+
+    Number of nonzeros in equality constraint Jacobian...:    29979 Number of
+    nonzeros in inequality constraint Jacobian.:        0 Number of nonzeros
+    in Lagrangian Hessian.............:    27723
+
+    Error evaluating constraint eq_psat[20,2]: can't evaluate pow(10,1304.76).
+  solvent_478: Solver failed
+
+VLE Overview:
+  Successful: ['solvent_1', 'solvent_2', 'solvent_3', 'solvent_4', 'solvent_6', 'solvent_21', 'solvent_38', 'solvent_46', 'solvent_50', 'solvent_59', 'solvent_65', 'solvent_69', 'solvent_71', 'solvent_82', 'solvent_85', 'solvent_94', 'solvent_98', 'solvent_112', 'solvent_121', 'solvent_132', 'solvent_153', 'solvent_160', 'solvent_176', 'solvent_180', 'solvent_187', 'solvent_191', 'solvent_193', 'solvent_195', 'solvent_200', 'solvent_201', 'solvent_208', 'solvent_212', 'solvent_213', 'solvent_219', 'solvent_237', 'solvent_238', 'solvent_245', 'solvent_280', 'solvent_281', 'solvent_302', 'solvent_303', 'solvent_304', 'solvent_305', 'solvent_318', 'solvent_329', 'solvent_334', 'solvent_339', 'solvent_357', 'solvent_371', 'solvent_376', 'solvent_382', 'solvent_383', 'solvent_391', 'solvent_392', 'solvent_396', 'solvent_397', 'solvent_403', 'solvent_405', 'solvent_410', 'solvent_415', 'solvent_420', 'solvent_424', 'solvent_425', 'solvent_427', 'solvent_428', 'solvent_432', 'solvent_434', 'solvent_440', 'solvent_444', 'solvent_454', 'solvent_456', 'solvent_457', 'solvent_462', 'solvent_472']
+  Failed: ['solvent_37', 'solvent_44', 'solvent_61', 'solvent_100', 'solvent_129', 'solvent_144', 'solvent_148', 'solvent_151', 'solvent_166', 'solvent_172', 'solvent_197', 'solvent_229', 'solvent_241', 'solvent_243', 'solvent_276', 'solvent_286', 'solvent_294', 'solvent_307', 'solvent_311', 'solvent_316', 'solvent_331', 'solvent_373', 'solvent_375', 'solvent_393', 'solvent_398', 'solvent_399', 'solvent_401', 'solvent_411', 'solvent_423', 'solvent_430', 'solvent_433', 'solvent_435', 'solvent_438', 'solvent_439', 'solvent_441', 'solvent_443', 'solvent_446', 'solvent_451', 'solvent_452', 'solvent_455', 'solvent_478']
+  Success rate: 74/115 (64%)
