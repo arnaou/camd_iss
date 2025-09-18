@@ -10,6 +10,8 @@ from src.molecules import StructuralValidator, generate_molecules
 from src.pure import PropertyCalculator, AntoineCalculator
 from src.data import load_unifac_data, check_unifac_parameters
 from src.mixture.unifac import pyo_vle
+from src.mixture.unifac.pyomo_iss import pyo_iss
+import pyomo.environ as pyo
 
 
 # Step 1: Define binary system (compounds A and B to be separated)
@@ -459,17 +461,19 @@ if compatible_solvents:
                 T_bubble = np.zeros(n_points)
                 y_vapor = np.zeros((n_points, 3))
                 gamma = np.zeros((n_points, 3))
+                psat = np.zeros((n_points, 3))
 
                 for i in range(n_points):
                     T_bubble[i] = vle_model.T[i].value if vle_model.T[i].value else T_guess[i]
                     for j in range(3):
-                        y_vapor[i, j] = vle_model.y[i, j].value if vle_model.y[i, j].value else 0.0
-                        gamma[i, j] = vle_model.gamma[i, j].value if vle_model.gamma[i, j].value else 1.0
+                        y_vapor[i, j] = vle_model.y[i, j].value #if vle_model.y[i, j].value else 0.0
+                        gamma[i, j] = vle_model.gamma[i, j].value #if vle_model.gamma[i, j].value else 1.0
+                        psat[i, j] = vle_model.psat[i, j].value #if vle_model.psat[i, j].value else 0.0
 
                 vle_results[solvent_name] = {
-                    'x_liquid': x_all,
-                    'T_bubble': T_bubble,
-                    'y_vapor': y_vapor,
+                    'x': x_all,
+                    'T': T_bubble,
+                    'y': y_vapor,
                     'gamma': gamma,
                     'compound_names': list(ternary_mixture.keys())
                 }
@@ -483,32 +487,207 @@ if compatible_solvents:
             failed_solvents.append(solvent_name)
             print(f"  {solvent_name}: Solver failed")
 
+        # Calculate mixture properties from the vle_model
+        P0 = 1.01325  # Reference pressure (bar)
+        # selectivity at infinite dilution
+        vle_results[solvent_name]['S'] = gamma[0, 0] / gamma[0, 1]
+        # capacity at infinite dilution
+        vle_results[solvent_name]['C'] = 1 / gamma[0, 1]
+        # SxC product
+        vle_results[solvent_name]['SxC'] = vle_results[solvent_name]['S'] * vle_results[solvent_name]['C']
+        # relative volatility at infinite dilution
+        vle_results[solvent_name]['alpha'] = gamma[0, 0]/psat[0, 0] * gamma[0, 1]/psat[0, 1]
+        # azeotrope detection AE
+        vle_results[solvent_name]['az_AE'] = np.log(gamma[0,0] * psat[0,0]/P0) * (-np.log(gamma[n_data-1,2] * psat[n_data-1,2]/P0))
+        # azeotrope detection BE
+        vle_results[solvent_name]['az_BE'] = np.log(gamma[n_data,1] * psat[n_data,1]/P0) * (-np.log(gamma[-1,2] * psat[-1,2]/P0))
+        # deltaG mix: TODO: fix it so it does AE and then BE cause otherwise it does it wrongly. lets valiudate in vle ternary
+        vle_results[solvent_name]['G_mix'] = (np.sum(x_all * np.log(gamma), axis=1) + np.sum(np.ma.log(x_all).filled(0) * x_all, axis=1))
+        vle_results[solvent_name]['G_mix_AE'] = vle_results[solvent_name]['G_mix'][:n_data]
+        vle_results[solvent_name]['G_mix_BE'] = vle_results[solvent_name]['G_mix'][n_data:]
+        # delta2G mix
+        vle_results[solvent_name]['G2_mix_AE'] = np.diff(np.diff(vle_results[solvent_name]['G_mix_AE']))
+        vle_results[solvent_name]['G2_mix_BE'] = np.diff(np.diff(vle_results[solvent_name]['G_mix_BE']))
     # VLE Overview
     print(f"\nVLE Overview:")
     print(f"  Successful: {successful_solvents}")
     print(f"  Failed: {failed_solvents}")
     print(f"  Success rate: {len(successful_solvents)}/{len(compatible_solvents)} ({len(successful_solvents)/len(compatible_solvents)*100:.0f}%)")
-
+    # print vle_results for all successful solvents
+    if successful_solvents:
+        print(f"\nVLE results for all {len(successful_solvents)} successful solvents:")
+        for solvent in successful_solvents:
+            print(f"\n{solvent}:")
+            print(f"  Groups: {compatible_solvents[solvent]['groups']}")
+            print(f"  Compounds: {vle_results[solvent]['compound_names']}")
+            print(f"  S: {vle_results[solvent]['S']:.3f}, C: {vle_results[solvent]['C']:.3f}, SxC: {vle_results[solvent]['SxC']:.3f}, alpha: {vle_results[solvent]['alpha']:.3f}, az_AE: {vle_results[solvent]['az_AE']:.3f}, az_BE: {vle_results[solvent]['az_BE']:.3f}")
 else:
     print("⚠ No compatible solvents available for VLE calculations")
     vle_results = {}
     failed_solvents = []
 
-# calculate selectivity at infinite dilution
-
-
-# calculate capacity at infinite dilution
-
-# calculate relative volatility at infinite dilution
-
-# calculate deltaG mix
-
-# calculate delta2G min
-
 # step 12: screen based on mixture properties
+print("\nStep 12: Screening solvents based on mixture properties...")
+
+if vle_results:
+    screened_solvents = {}
+    rejected_solvents = {}
+
+    for solvent_name, results in vle_results.items():
+        if solvent_name in successful_solvents:
+            az_AE = results['az_AE']
+            az_BE = results['az_BE']
+            G_mix_AE = results['G_mix_AE']
+            G_mix_BE = results['G_mix_BE']
+            G2_mix_AE = results['G2_mix_AE']
+            G2_mix_BE = results['G2_mix_BE']
+            
+
+            # Check constraints: az_AE > 0, az_BE > 0, G_mix <= 0, G2_mix >= 0
+            az_AE_valid = az_AE > 0
+            az_BE_valid = az_BE > 0
+            G_mix_AE_valid = np.all(G_mix_AE[1:-1] <= 0)
+            G_mix_BE_valid = np.all(G_mix_BE[1:-1] <= 0)
+            G_mix_valid = G_mix_AE_valid and G_mix_BE_valid
+            G2_mix_AE_valid = np.all(G2_mix_AE[1:-1] >= 0)
+            G2_mix_BE_valid = np.all(G2_mix_BE[1:-1] >= 0)
+            G2_mix_valid = G2_mix_AE_valid and G2_mix_BE_valid
+            S_valid = results['S'] >= 2.0  # Example: selectivity greater than 2
+
+            if az_AE_valid and az_BE_valid and G_mix_valid and G2_mix_valid and S_valid:
+                screened_solvents[solvent_name] = results
+                status = "✓ PASSED"
+            else:
+                rejected_solvents[solvent_name] = {
+                    'results': results,
+                    'reasons': []
+                }
+                if not az_AE_valid:
+                    rejected_solvents[solvent_name]['reasons'].append(f"az_AE={az_AE:.3f} ≤ 0")
+                if not az_BE_valid:
+                    rejected_solvents[solvent_name]['reasons'].append(f"az_BE={az_BE:.3f} ≤ 0")
+                if not G_mix_valid:
+                    rejected_solvents[solvent_name]['reasons'].append(f"G_mix has values > 0")
+                if not G2_mix_valid:
+                    rejected_solvents[solvent_name]['reasons'].append(f"G2_mix has values < 0")
+                status = "✗ REJECTED: " + "; ".join(rejected_solvents[solvent_name]['reasons'])
+
+            print(f"  {solvent_name}: {status}")
+
+    print(f"\nMixture Properties Screening Results:")
+    print(f"  Passed screening: {len(screened_solvents)}/{len(successful_solvents)}")
+    print(f"  Rejected: {len(rejected_solvents)}")
+
+    if screened_solvents:
+        print(f"  Solvents passing all constraints: {list(screened_solvents.keys())}")
+    else:
+        print("  ⚠ No solvents passed all mixture property constraints")
+else:
+    print("  ⚠ No VLE results available for screening")
+    screened_solvents = {}
+    rejected_solvents = {}
 
 
 # step 13: perform the iss-methodology
+print("\nStep 13: Performing ISS methodology on screened solvents...")
 
+if screened_solvents:
+    iss_results = {}
+
+    # Ensure UNIFAC data is loaded (should already be loaded from step 11)
+    if 'rk_data' not in locals():
+        rk_data, qk_data, interaction_data = load_unifac_data()
+
+    # Define initial conditions for ISS
+    boiling_points = [pure_props[compound]['tb'] for compound in mixture.keys()]
+    T_min = min(boiling_points)
+    T_max = max(boiling_points)
+    T0 = np.array([(T_max + T_min) / 2, (T_max + T_min) / 2])  # Two temperatures for two data points
+    x_iso = 0.75
+    xA = 0.5
+    x0 = np.array([[x_iso, 0.0, 1-x_iso],    # Point 0: iso-volatility point (A, B, E)
+                   [xA, 0.0, 1-xA]])          # Point 1: minimum point (A, B, E)
+
+    print(f"Running ISS calculations for {len(screened_solvents)} screened solvents...")
+
+    for solvent_name in screened_solvents.keys():
+        groups_str = ", ".join([f"{k}:{v}" for k, v in compatible_solvents[solvent_name]['groups'].items()])
+        print(f"\nCalculating ISS for {solvent_name} ({groups_str})...")
+
+        try:
+            # Create ternary mixture: A + B + Solvent
+            ternary_mixture = dict(mixture)
+            ternary_mixture[solvent_name] = compatible_solvents[solvent_name]['groups']
+
+            # Get ternary Antoine parameters
+            ternary_antoine = dict(antoine_params)
+            ternary_antoine[solvent_name] = solvent_antoine_params[solvent_name]
+
+            # Perform ISS calculation
+            results, model = pyo_iss(x0, T0, ternary_mixture, rk_data, qk_data, interaction_data, ternary_antoine, verbose=False)
+
+            # Check solver status
+            if results is not None and model is not None:
+                solv_stat = str(results.solver.status)
+                term_cond = str(results.solver.termination_condition)
+
+                if solv_stat != 'ok' or term_cond != 'optimal':
+                    solver_success = False
+                    print(f"  {solvent_name}: Solver failed - Status: {solv_stat}, Condition: {term_cond}")
+                else:
+                    solver_success = True
+            else:
+                solver_success = False
+
+            if solver_success:
+                # Extract ED and R values
+                ED = pyo.value(model.obj)
+                R_value = pyo.value(model.R)
+
+                iss_results[solvent_name] = {
+                    'ED': ED,
+                    'R': R_value,
+                    'groups': compatible_solvents[solvent_name]['groups']
+                }
+
+                print(f"  ED (E/D): {ED:.6f}")
+                print(f"  R value: {R_value:.6f}")
+            else:
+                iss_results[solvent_name] = {
+                    'ED': None,
+                    'R': None,
+                    'groups': compatible_solvents[solvent_name]['groups'],
+                    'error': 'Solver failed'
+                }
+
+        except Exception as e:
+            print(f"  ❌ ISS calculation failed for {solvent_name}: {e}")
+            iss_results[solvent_name] = {
+                'ED': None,
+                'R': None,
+                'groups': compatible_solvents[solvent_name]['groups'],
+                'error': str(e)
+            }
+
+    print(f"\n✅ ISS calculations completed for {len(iss_results)} solvents")
+
+    # Show summary of ISS results
+    successful_iss = {k: v for k, v in iss_results.items() if v['ED'] is not None}
+    failed_iss = {k: v for k, v in iss_results.items() if v['ED'] is None}
+
+    if successful_iss:
+        print(f"\nISS Results Summary ({len(successful_iss)} successful):")
+        for solvent_name, data in successful_iss.items():
+            groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
+            print(f"  {solvent_name}: ED={data['ED']:.6f}, R={data['R']:.6f} ({groups_str})")
+
+    if failed_iss:
+        print(f"\nFailed ISS calculations ({len(failed_iss)}):")
+        for solvent_name, data in failed_iss.items():
+            print(f"  {solvent_name}: {data['error']}")
+
+else:
+    print("⚠ No screened solvents available for ISS calculations")
+    iss_results = {}
 
 # step 14: print the results

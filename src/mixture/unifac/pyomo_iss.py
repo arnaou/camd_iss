@@ -282,12 +282,12 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, P
                      initialize={(j, i): float(x[j, i]) for j in range(n_data) for i in range(n_comp)},
                      within=pyo.UnitInterval, name='liquid composition x')
     model.K = pyo.Var(model.dp, model.i, 
-                     initialize=create_init_dict_2d(init_values['K'] if init_values else None, 1.0), 
+                     initialize=create_init_dict_2d(init_values['K'] if init_values else None, 0.8), 
                      within=pyo.PositiveReals, name='equilibrium constants')
     
     # ISS-specific variables
-    model.ED = pyo.Var(initialize=3.2, within=pyo.PositiveReals, name='Entrainer to distillate ratio')
-    model.R = pyo.Var(initialize=3.5, within=pyo.PositiveReals, name='Reflux ratio')
+    model.ED = pyo.Var(initialize=1.5, within=pyo.PositiveReals, name='Entrainer to distillate ratio')
+    model.R = pyo.Var(initialize=0.5, within=pyo.PositiveReals, name='Reflux ratio')
     
     # UNIFAC constraint definitions
     def eq_r(m, i):
@@ -446,10 +446,10 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, P
         return m.R == (m.K[1, 1] - m.ED) / (1.00 - m.K[1, 1])
     model.eq_R = pyo.Constraint(rule=eq_R, name='calculation of reflux ratio')
     
-    def eq_ED_calc(m):
+    def eq_ED(m):
         """Calculation of entrainer to distillate ratio"""
         return m.ED == 1 - ((1 - (m.K[1, 1])) / (m.x[1, 0] * (m.K[1, 0] - m.K[1, 1])))
-    model.eq_ED_calc = pyo.Constraint(rule=eq_ED_calc, name='calculation of entrainer to distillate ratio')
+    model.eq_ED = pyo.Constraint(rule=eq_ED, name='calculation of entrainer to distillate ratio')
     
     def con_x_min(m):
         """x_min has to be lower than the iso-volatility composition"""
@@ -469,7 +469,7 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, P
     opt = pyo.SolverFactory('ipopt')
     # define solver options
     opt.options["halt_on_ampl_error"] = "yes"
-    opt.options["max_iter"] = 10000
+    opt.options["max_iter"] = 100000
     opt.options["tol"] = 1e-8
     
     # solve the optimization problem

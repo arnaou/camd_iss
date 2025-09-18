@@ -1,4 +1,4 @@
-Solver command line: ['/Users/arnaou/miniconda3/envs/camd/bin/ipopt', '/var/folders/5_/x5fhgj5d0252mwb_1nbb2d8r0000gp/T/tmp1o4ffs6a.pyomo.nl', '-AMPL', 'halt_on_ampl_error=yes', 'max_iter=10000']
+Solver command line: ['/Users/arnaou/miniconda3/envs/camd/bin/ipopt', '/var/folders/5_/x5fhgj5d0252mwb_1nbb2d8r0000gp/T/tmpjhb13lrl.pyomo.nl', '-AMPL', 'halt_on_ampl_error=yes', 'max_iter=10000']
 
 Ipopt 3.14.13: halt_on_ampl_error=yes
 max_iter=10000
@@ -48,7 +48,7 @@ Number of inequality constraint evaluations          = 0
 Number of equality constraint Jacobian evaluations   = 2
 Number of inequality constraint Jacobian evaluations = 0
 Number of Lagrangian Hessian evaluations             = 1
-Total seconds in IPOPT                               = 0.002
+Total seconds in IPOPT                               = 0.004
 
 EXIT: Optimal Solution Found.
 
