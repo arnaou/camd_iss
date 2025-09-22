@@ -89,6 +89,6 @@ target/
 .mypy_cache/
 
 trash/
-data/json/
+data/
 old_code
 src/mixture/unifac_backup_20250912_085147/
