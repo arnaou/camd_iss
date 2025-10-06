@@ -127,7 +127,7 @@ class AntoineCalculator:
         p1 = P0
         p2 = Pw
         p3 = Pc
-        print(f"Characteristic points (T [K], P [bar]): ({t1}, {p1}), ({t2}, {p2}), ({t3}, {p3})")
+        #print(f"Characteristic points (T [K], P [bar]): ({t1}, {p1}), ({t2}, {p2}), ({t3}, {p3})")
         y1 = np.log10(p1)
         y2 = np.log10(p2)
         y3 = np.log10(p3)

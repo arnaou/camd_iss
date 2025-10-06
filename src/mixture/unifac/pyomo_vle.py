@@ -167,8 +167,8 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     
     # define the constants/parameters
     model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)}, 
-                       within=pyo.PositiveReals, bounds=(T.min()-3, T.max()+5), name='Temperature in K')
-    #print(f"Temperature bounds: {T.min()-5} - {T.max()+5}")
+                       within=pyo.PositiveReals, bounds=(T.min()-10, T.max()+10),name='Temperature in K')
+    #print(f"Temperature bounds: {T.min()-5} - {T.max()+5}") bounds=(T.min()-3, T.max()+5)
     # Flatten interaction parameters for Pyomo
     a_dict = {}
     for k1 in interaction_data:
@@ -282,6 +282,7 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     model.y = pyo.Var(model.dp, model.i, 
                      initialize=create_init_dict_2d(init_values['y'] if init_values else None, 0.5), 
                      within=pyo.UnitInterval, name='vapor composition y')
+    
     
     def eq_r(m, i):
         """

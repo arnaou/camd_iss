@@ -1,0 +1,151 @@
+# Configuration for CAMD-ISS workflow
+
+# Project metadata and general settings
+project:
+  name: "acetone_methanol_separation"
+  description: "CAMD-ISS for acetone/methanol separation using extractive distillation"
+  output_dir: "results"
+  verbose: true
+
+# Step 1: Binary mixture definition
+mixture:
+  components:
+    acetone:
+      groups:
+        CH3: 1
+        CH3CO: 1
+    methanol:
+      groups:
+        CH3OH: 1
+
+# Step 2: Pure component property settings
+pure_properties:
+  # Properties to calculate for all components
+  properties_to_calculate: ["tc", "pc", "tb", "ac", "hv"]
+
+  # Manual property overrides (Step 2c) - when experimental data is available
+  property_overrides:
+    acetone:
+      tc: 508.1  # Critical temperature [K]
+      pc: 48.0   # Critical pressure [bar]
+      tb: 329.3  # Boiling temperature [K]
+
+  # Antoine parameter calculation settings
+  antoine:
+    method: "enthalpy_vap" 
+
+
+# Step 4-5: Solvent design constraints
+solvent_design:
+  # Available functional groups for molecular design
+  design_groups:
+    - "CH3"      # Methyl
+    - "CH2"      # Methylene
+    - "CH"       # Methine
+    - "C"        # Quaternary carbon
+    - "OH"       # Hydroxyl
+    - "CHO"      # Aldehyde
+    - "HCO"      # Formate
+    - "CH3COO"   # Acetate
+    - "CH2COO"   # Propanoate
+    - "HCOO"     # Formate
+    - "CH3CO"    # Acetyl
+    - "CH2O"     # Ether
+    - "COOH"     # Carboxyl
+    - "COO"      # Ester
+    - "H2O"      # Water
+    - "DMSO"     # Dimethyl sulfoxide
+    - "DOH"      # Secondary alcohol
+
+  # Structural constraints for molecule generation
+  structural_constraints:
+    min_total_groups: 3        # Minimum total number of groups
+    max_total_groups: 6        # Maximum total number of groups
+    min_functional_groups: 1   # Minimum number of functional groups
+    max_functional_groups: 2   # Maximum number of functional groups
+    molecular_type: 1          # 1=acyclic, 0=monocyclic, -1=bicyclic
+
+  # Generation settings
+  generation:
+    max_candidates: 1000              # Maximum number of candidates to generate
+    exclude_binary_components: true   # Exclude components from binary mixture
+
+# Step 7: Pure component property constraints for initial screening
+pure_screening:
+  # Property range constraints
+  constraints:
+    tb: [368.0, 500.0]     # Boiling point range [K]
+    tm: [0.0, 298.0]       # Melting point range [K]
+    hv: [-9999.0, 67.0]    # Heat of vaporization range [kJ/mol]
+
+
+# Step 11: VLE calculation settings
+vle_calculations:
+
+  # Calculation grid settings
+  composition_points: 50       # Number of composition points on each binary edge
+
+
+  # Solver settings for VLE
+  solver:
+    verbose: false
+    max_iterations: 1000
+
+# Step 12: Mixture property constraints for thermodynamic screening
+mixture_screening:
+  # Azeotrope formation constraints
+  azeotrope_constraints:
+    allow_azeotrope_AE: false  # Allow azeotrope with component A
+    allow_azeotrope_BE: false  # Allow azeotrope with component B
+    
+
+  # Thermodynamic stability constraints
+  stability_constraints:
+    miscibility_AE: true   # Solvent miscible with component A
+    miscibility_BE: true   # Solvent miscible with component B
+
+
+  # Solvent performance constraints
+  performance_constraints:
+    selectivity_min: 2.0   # Minimum selectivity S ≥ 2.0
+    capacity_min: null     # Optional minimum capacity constraint
+    sxc_min: null         # Optional minimum S×C product constraint
+    alpha_min: null       # Optional minimum relative volatility constraint
+
+# Step 13: ISS (Infinite-dilution Selectivity and Solubility) methodology settings
+iss_methodology:
+  # Initial composition points for ISS calculation
+  initial_guess:
+    iso_volatility_point:
+      x_iso: 0.75         # Mole fraction for iso-volatility condition
+    minimum_point:
+      x_A: 0.5           # Mole fraction of component A for minimum point
+
+
+  # ISS solver settings
+  solver:
+    verbose: false
+
+# Computational settings
+computation:
+  # Property calculation method
+  property_calculation:
+    method: "constantinou_gani"       # "constantinou_gani", "joback_reid"
+    missing_group_action: "remove_compounds"  # "remove_compounds", "skip", "warn"
+
+
+
+# Output and reporting settings
+output:
+  # File export settings
+  export:
+    formats: ["csv", "json"]  # Available: "csv", "json", "excel", "pickle"
+    save_intermediate: true   # Save intermediate screening results
+    save_failed: false       # Save failed calculations for debugging
+
+
+  # Logging and debugging
+  logging:
+    level: "info"         # "debug", "info", "warning", "error"
+    save_logs: true
+    log_file: "camd_run.log"

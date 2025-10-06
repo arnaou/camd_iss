@@ -1,0 +1,56 @@
+# CAMD-ISS Configuration - SCREEN MODE
+# Evaluate predefined solvents
+
+mode: "screen"
+
+# Binary mixture: Ethanol/Water separation
+mixture:
+  component_a:
+    groups: {CH3: 1, CH2: 1, OH: 1}  # ethanol
+  component_b:
+    groups: {H2O: 1}  # water
+
+# Predefined solvents to evaluate
+screen:
+  solvents:
+    - name: "ethylene_glycol"
+      groups: {CH2: 2, OH: 2}
+
+    - name: "1_butanol"
+      groups: {CH3: 1, CH2: 3, OH: 1}
+
+    - name: "2_butanol"
+      groups: {CH3: 2, CH2: 1, DOH: 1}
+
+    - name: "acetone"
+      groups: {CH3: 1, CH3CO: 1}
+
+    - name: "dimethyl_sulfoxide"
+      groups: {DMSO: 1}
+
+    - name: "acetic_acid"
+      groups: {CH3: 1, COOH: 1}
+
+# Property screening
+screening:
+  pure:
+    tb: [300.0, 550.0]  # K
+    tm: [0.0, 298.0]    # K
+    hv: [-9999.0, 80.0] # kJ/mol
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: true
+    selectivity_min: 1.5
+
+# ISS settings
+iss:
+  x_iso: 0.75
+  x_min: 0.5
+
+# Output
+output:
+  dir: "results/screen"
+  formats: ["csv", "json"]
+  verbose: true

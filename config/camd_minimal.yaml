@@ -1,0 +1,68 @@
+# Minimal CAMD-ISS Configuration File
+# Mode: "design" (generate solvents) or "screen" (evaluate predefined solvents)
+mode: "design"  # or "screen"
+
+# Binary mixture to separate
+mixture:
+  component_a:
+    groups: {CH3: 1, CH3CO: 1}  # acetone
+  component_b:
+    groups: {CH3OH: 1}  # methanol
+
+# Pure property overrides (optional - use experimental data when available)
+pure_properties:
+  component_a:
+    tc: 508.1  # K
+    pc: 48.0   # bar
+    tb: 329.3  # K
+  # component_b: {}  # Use calculated values
+
+# DESIGN MODE: Solvent generation settings (only used if mode="design")
+design:
+  # Groups available for solvent design
+  groups: ["CH3", "CH2", "CH", "C", "OH", "CHO", "CH3CO", "CH2O", "COOH"]
+
+  # Structural constraints
+  constraints:
+    min_groups: 3
+    max_groups: 6
+    min_func_groups: 1
+    max_func_groups: 2
+    molecular_type: 1  # 1=acyclic, 0=monocyclic, -1=bicyclic
+
+  # Maximum candidates to generate
+  max_candidates: 1000
+
+# SCREEN MODE: Predefined solvents (only used if mode="screen")
+screen:
+  solvents:
+    - name: "ethanol"
+      groups: {CH3: 1, CH2: 1, OH: 1}
+    - name: "butanol"
+      groups: {CH3: 1, CH2: 3, OH: 1}
+    - name: "water"
+      groups: {H2O: 1}
+
+# Property screening constraints
+screening:
+  pure:
+    tb: [368.0, 500.0]  # K
+    tm: [0.0, 298.0]    # K
+    hv: [-9999.0, 67.0] # kJ/mol
+
+  mixture:
+    no_azeotrope_AE: true   # No azeotrope between A and solvent
+    no_azeotrope_BE: true   # No azeotrope between B and solvent
+    miscibility: true       # Fully miscible
+    selectivity_min: 2.0    # Minimum selectivity
+
+# ISS methodology settings
+iss:
+  x_iso: 0.75   # Iso-volatility point composition
+  x_min: 0.5    # Minimum point composition
+
+# Output settings
+output:
+  dir: "results"
+  formats: ["csv", "json"]
+  verbose: true
