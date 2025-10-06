@@ -3,6 +3,21 @@
 CAMD-ISS: Computer-Aided Molecular Design for Infinite-dilution Selectivity and Solubility
 
 Config-driven script for solvent design and screening.
+
+Workflow Steps:
+1. Check defined mixture for validity
+2. Check mixture for pure component and binary parameters
+3. Calculate pure component properties (mixture)
+4. Override if properties are provided by user
+5. Calculate Antoine parameters (mixture)
+6. [Screen mode] Test defined solvent candidates OR [Design mode] Generate solvent candidates
+7. Check and handle missing pure component and binary parameters (solvents)
+8. Calculate pure component properties (solvents)
+9. Screen based on pure property constraints
+10. Calculate Antoine parameters (solvents)
+11. Perform VLE
+12. Screen based on mixture constraints
+13. Perform ISS calculation
 """
 
 import sys
@@ -23,6 +38,25 @@ from src.mixture.unifac import pyo_vle
 from src.mixture.unifac.pyomo_iss import pyo_iss
 
 
+class TeeLogger:
+    """Logger that writes to both console and file."""
+    def __init__(self, log_file):
+        self.terminal = sys.stdout
+        self.log = open(log_file, 'w')
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log.write(message)
+        self.log.flush()
+
+    def flush(self):
+        self.terminal.flush()
+        self.log.flush()
+
+    def close(self):
+        self.log.close()
+
+
 def load_config(config_path):
     """Load YAML configuration file."""
     with open(config_path, 'r') as f:
@@ -37,25 +71,87 @@ def setup_output_dir(config):
     return output_dir
 
 
-def get_mixture(config):
-    """Extract binary mixture from config."""
+def print_step(step_num, title, verbose):
+    """Print step header."""
+    if verbose:
+        print("\n" + "="*60)
+        print(f"STEP {step_num}: {title}")
+        print("="*60)
+
+
+# === STEP 1: Check defined mixture for validity ===
+def validate_mixture(config, verbose=False):
+    """Check defined mixture for structural validity."""
+    print_step(1, "Validate Binary Mixture", verbose)
+
     mixture = {
         'A': config['mixture']['component_a']['groups'],
         'B': config['mixture']['component_b']['groups']
     }
+
+    validator = StructuralValidator()
+
+    # Validate A
+    is_valid_A = validator.is_valid(mixture['A'])
+    # Validate B
+    is_valid_B = validator.is_valid(mixture['B'])
+
+    if verbose:
+        groups_A = ", ".join([f"{k}:{v}" for k, v in mixture['A'].items()])
+        groups_B = ", ".join([f"{k}:{v}" for k, v in mixture['B'].items()])
+        print(f"Component A: {groups_A}")
+        print(f"  {'✓ Valid' if is_valid_A else '✗ Invalid'}")
+        print(f"Component B: {groups_B}")
+        print(f"  {'✓ Valid' if is_valid_B else '✗ Invalid'}")
+        print(f"\nSummary: {'Both components valid' if is_valid_A and is_valid_B else 'Validation failed'}")
+
+    if not (is_valid_A and is_valid_B):
+        raise ValueError("Binary mixture validation failed")
+
     return mixture
 
 
-def calculate_pure_properties(mixture, config, verbose=False):
-    """Calculate pure component properties for binary mixture."""
-    if verbose:
-        print("\n=== Step 1: Pure Component Properties ===")
+# === STEP 2: Check mixture for pure component and binary parameters ===
+def check_mixture_parameters(mixture, verbose=False):
+    """Check UNIFAC parameters for binary mixture."""
+    print_step(2, "Check Binary Mixture Parameters", verbose)
 
-    prop_list = ['tc', 'pc', 'tb', 'ac', 'hv']
+    result = check_unifac_parameters(mixture=mixture)
+
+    if verbose:
+        if result['compatible']:
+            print("✓ All UNIFAC parameters available")
+        else:
+            print("✗ Missing UNIFAC parameters")
+        print(f"\nSummary: {'Compatible' if result['compatible'] else 'Missing parameters'}")
+
+    return result['compatible']
+
+
+# === STEP 3: Calculate pure component properties ===
+def calculate_mixture_pure_properties(mixture, verbose=False):
+    """Calculate pure component properties for binary mixture."""
+    print_step(3, "Calculate Pure Component Properties (Mixture)", verbose)
+
+    prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
     pure_calc = PropertyCalculator()
     pure_props = pure_calc.calculate(mixture, prop_list)
 
-    # Apply manual overrides if provided
+    if verbose:
+        for comp, props in pure_props.items():
+            print(f"{comp}: Tc={props['tc']:.1f}K, Pc={props['pc']:.1f}bar, Tb={props['tb']:.1f}K")
+        print(f"\nSummary: Calculated properties for {len(pure_props)} components")
+
+    return pure_props
+
+
+# === STEP 4: Override if properties are provided by user ===
+def override_mixture_properties(pure_props, config, verbose=False):
+    """Apply user-provided property overrides."""
+    print_step(4, "Override Mixture Properties (if provided)", verbose)
+
+    overrides_applied = 0
+
     if 'pure_properties' in config:
         for comp in ['component_a', 'component_b']:
             if comp in config['pure_properties']:
@@ -64,23 +160,27 @@ def calculate_pure_properties(mixture, config, verbose=False):
                 for prop, value in overrides.items():
                     if value is not None:
                         pure_props[comp_key][prop] = value
+                        overrides_applied += 1
                         if verbose:
-                            print(f"  Override {comp_key}.{prop} = {value}")
+                            print(f"Override {comp_key}.{prop} = {value}")
 
     if verbose:
-        for comp, props in pure_props.items():
-            print(f"  {comp}: Tc={props['tc']:.1f}K, Pc={props['pc']:.1f}bar, Tb={props['tb']:.1f}K")
+        if overrides_applied > 0:
+            print(f"\nSummary: {overrides_applied} property overrides applied")
+        else:
+            print("\nSummary: No overrides (using calculated values)")
 
     return pure_props
 
 
-def calculate_antoine_parameters(mixture, pure_props, verbose=False):
-    """Calculate Antoine parameters for components."""
-    if verbose:
-        print("\n=== Step 2: Antoine Parameters ===")
+# === STEP 5: Calculate Antoine parameters ===
+def calculate_mixture_antoine(mixture, pure_props, verbose=False):
+    """Calculate Antoine parameters for mixture components."""
+    print_step(5, "Calculate Antoine Parameters (Mixture)", verbose)
 
     antoine_calc = AntoineCalculator()
     antoine_params = {}
+    failed = []
 
     for compound, props in pure_props.items():
         compound_dict = {compound: mixture[compound]}
@@ -95,40 +195,73 @@ def calculate_antoine_parameters(mixture, pure_props, verbose=False):
                 'C': results['C']
             }
             if verbose:
-                print(f"  {compound}: A={results['A']:.3f}, B={results['B']:.1f}, C={results['C']:.1f}")
+                print(f"✓ {compound}: A={results['A']:.3f}, B={results['B']:.1f}, C={results['C']:.1f}")
         else:
+            failed.append(compound)
             if verbose:
-                print(f"  WARNING: Failed for {compound}")
+                print(f"✗ {compound}: Failed")
+
+    if verbose:
+        print(f"\nSummary: {len(antoine_params)}/{len(pure_props)} successful")
+
+    if len(antoine_params) != len(pure_props):
+        raise ValueError("Antoine parameter calculation failed for mixture components")
 
     return antoine_params
 
 
-def check_binary_unifac(mixture, verbose=False):
-    """Check UNIFAC parameters for binary mixture."""
+# === STEP 6a: Test defined solvent candidates (screen mode) ===
+def load_and_validate_solvents(config, verbose=False):
+    """Load and validate predefined solvents."""
+    print_step(6, "Load and Validate Solvent Candidates", verbose)
+
+    screen_config = config['screen']
+    solvents = []
+    solvent_names = []
+    validator = StructuralValidator()
+
+    valid_count = 0
+    invalid_count = 0
+
     if verbose:
-        print("\n=== Step 3: Binary UNIFAC Check ===")
+        print("Validating predefined solvents:")
 
-    result = check_unifac_parameters(mixture=mixture)
+    for solvent in screen_config['solvents']:
+        name = solvent['name']
+        groups = solvent['groups']
+        is_valid = validator.is_valid(groups)
 
-    if result['compatible']:
-        if verbose:
-            print("  ✓ All UNIFAC parameters available")
-        return True
-    else:
-        if verbose:
-            print("  ✗ Missing UNIFAC parameters")
-        return False
+        if is_valid:
+            solvents.append(groups)
+            solvent_names.append(name)
+            valid_count += 1
+            if verbose:
+                groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
+                print(f"  ✓ {name}: {groups_str}")
+        else:
+            invalid_count += 1
+            if verbose:
+                groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
+                print(f"  ✗ {name}: {groups_str} - Invalid")
+
+    if verbose:
+        print(f"\nSummary: {valid_count} valid, {invalid_count} invalid")
+
+    return solvents, solvent_names
 
 
+# === STEP 6b: Generate solvent candidates (design mode) ===
 def generate_solvent_candidates(config, mixture, verbose=False):
-    """Generate solvent candidates using MILP (design mode)."""
-    if verbose:
-        print("\n=== Step 4: Generate Solvent Candidates ===")
+    """Generate solvent candidates using MILP."""
+    print_step(6, "Generate Solvent Candidates", verbose)
 
     design_config = config['design']
-
-    # Extract binary components to exclude
     binary_components = list(mixture.values())
+
+    if verbose:
+        print(f"Design groups: {', '.join(design_config['groups'])}")
+        print(f"Constraints: {design_config['constraints']['min_groups']}-{design_config['constraints']['max_groups']} total groups, "
+              f"{design_config['constraints']['min_func_groups']}-{design_config['constraints']['max_func_groups']} functional groups")
 
     candidates = generate_molecules(
         design_groups=design_config['groups'],
@@ -139,55 +272,67 @@ def generate_solvent_candidates(config, mixture, verbose=False):
         molecular_type=design_config['constraints']['molecular_type'],
         max_solutions=design_config['max_candidates'],
         exclude_compounds=binary_components,
-        verbose=verbose
+        verbose=False
     )
 
     if verbose:
-        print(f"  Generated {len(candidates)} candidates")
+        print(f"\nSummary: Generated {len(candidates)} candidates")
 
     return candidates
 
 
-def get_predefined_solvents(config, verbose=False):
-    """Get predefined solvents from config (screen mode)."""
+# === STEP 7: Check and handle missing pure component and binary parameters ===
+def check_solvent_parameters(solvents, mixture, verbose=False):
+    """Check UNIFAC parameters for solvent candidates."""
+    print_step(7, "Check Solvent Parameters (UNIFAC)", verbose)
+
+    result = check_unifac_parameters(mixture=mixture, solvent_candidates=solvents)
+
+    compatible_indices = result['compatible_solvents']
+    compatible = [solvents[i] for i in compatible_indices]
+
     if verbose:
-        print("\n=== Step 4: Loading Predefined Solvents ===")
+        print(f"Checked: {len(solvents)}")
+        print(f"Compatible: {len(compatible)}")
+        print(f"Incompatible: {len(solvents) - len(compatible)}")
+        print(f"\nSummary: {len(compatible)}/{len(solvents)} have complete UNIFAC parameters")
 
-    screen_config = config['screen']
-    solvents = [s['groups'] for s in screen_config['solvents']]
-    solvent_names = [s['name'] for s in screen_config['solvents']]
-
-    if verbose:
-        print(f"  Loaded {len(solvents)} predefined solvents")
-        for name, groups in zip(solvent_names, solvents):
-            groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
-            print(f"    {name}: {groups_str}")
-
-    return solvents, solvent_names
+    return compatible, compatible_indices
 
 
-def screen_pure_properties(candidates, config, verbose=False):
-    """Screen candidates based on pure property constraints."""
-    if verbose:
-        print("\n=== Step 5: Pure Property Screening ===")
+# === STEP 8: Calculate pure component properties (solvents) ===
+def calculate_solvent_pure_properties(solvents, config, verbose=False):
+    """Calculate pure component properties for solvents."""
+    print_step(8, "Calculate Pure Component Properties (Solvents)", verbose)
 
-    constraints = config['screening']['pure']
     prop_calc = PropertyCalculator()
+    solvent_compounds = {f"solvent_{i+1}": sol for i, sol in enumerate(solvents)}
 
-    # Create compound dict
-    solvent_compounds = {f"solvent_{i+1}": cand for i, cand in enumerate(candidates)}
-
-    # Calculate properties
     prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
     solvent_props_raw = prop_calc.calculate(solvent_compounds, prop_list)
 
-    # Filter None values
+    # Filter None values (missing groups)
     solvent_props = {name: props for name, props in solvent_props_raw.items() if props is not None}
 
-    # Screen based on constraints
+    if verbose:
+        dropped = len(solvent_props_raw) - len(solvent_props)
+        if dropped > 0:
+            print(f"Dropped: {dropped} (missing group contributions)")
+        print(f"\nSummary: {len(solvent_props)}/{len(solvents)} properties calculated")
+
+    return solvent_props
+
+
+# === STEP 9: Screen based on pure property constraints ===
+def screen_pure_properties(solvents, solvent_props, config, verbose=False):
+    """Screen solvents based on pure property constraints."""
+    print_step(9, "Screen Pure Properties", verbose)
+
+    constraints = config['screening']['pure']
     screened = {}
+
     for name, props in solvent_props.items():
-        # Sanity: Tb < Tc
+        # Sanity check: Tb < Tc
         if props.get('tb') and props.get('tc') and props['tb'] >= props['tc']:
             continue
 
@@ -205,46 +350,29 @@ def screen_pure_properties(candidates, config, verbose=False):
         if passes:
             idx = int(name.split('_')[1]) - 1
             screened[name] = {
-                'groups': candidates[idx],
+                'groups': solvents[idx],
                 'properties': props
             }
 
     if verbose:
-        print(f"  {len(screened)}/{len(candidates)} candidates passed")
+        print(f"Initial: {len(solvent_props)}")
+        print(f"Passed: {len(screened)}")
+        print(f"Rejected: {len(solvent_props) - len(screened)}")
+        print(f"\nSummary: {len(screened)}/{len(solvent_props)} passed pure property screening")
 
     return screened
 
 
-def check_solvent_unifac(screened_solvents, mixture, verbose=False):
-    """Check UNIFAC compatibility for screened solvents."""
-    if verbose:
-        print("\n=== Step 6: UNIFAC Compatibility Check ===")
-
-    compatible = {}
-    solvent_candidates = [data['groups'] for data in screened_solvents.values()]
-    solvent_names = list(screened_solvents.keys())
-
-    result = check_unifac_parameters(mixture=mixture, solvent_candidates=solvent_candidates)
-
-    for i, name in enumerate(solvent_names):
-        if i in result['compatible_solvents']:
-            compatible[name] = screened_solvents[name]
-
-    if verbose:
-        print(f"  {len(compatible)}/{len(screened_solvents)} solvents compatible")
-
-    return compatible
-
-
-def calculate_solvent_antoine(compatible_solvents, verbose=False):
-    """Calculate Antoine parameters for compatible solvents."""
-    if verbose:
-        print("\n=== Step 7: Solvent Antoine Parameters ===")
+# === STEP 10: Calculate Antoine parameters (solvents) ===
+def calculate_solvent_antoine(screened_solvents, verbose=False):
+    """Calculate Antoine parameters for screened solvents."""
+    print_step(10, "Calculate Antoine Parameters (Solvents)", verbose)
 
     antoine_calc = AntoineCalculator()
     antoine_params = {}
+    failed = 0
 
-    for name, data in compatible_solvents.items():
+    for name, data in screened_solvents.items():
         props = data['properties']
         groups = data['groups']
 
@@ -261,30 +389,40 @@ def calculate_solvent_antoine(compatible_solvents, verbose=False):
                     'B': results['B'],
                     'C': results['C']
                 }
+            else:
+                failed += 1
+        else:
+            failed += 1
 
     if verbose:
-        print(f"  Calculated Antoine for {len(antoine_params)} solvents")
+        print(f"Successful: {len(antoine_params)}")
+        print(f"Failed: {failed}")
+        print(f"\nSummary: {len(antoine_params)}/{len(screened_solvents)} calculated")
 
     return antoine_params
 
 
-def run_vle_calculations(compatible_solvents, solvent_antoine, mixture, binary_antoine,
-                        binary_props, n_data=50, verbose=False):
-    """Perform VLE calculations for all compatible solvents."""
-    if verbose:
-        print("\n=== Step 8: VLE Calculations ===")
+# === STEP 11: Perform VLE ===
+def perform_vle(screened_solvents, solvent_antoine, mixture, binary_antoine, binary_props, verbose=False):
+    """Perform VLE calculations for solvents."""
+    print_step(11, "Perform VLE Calculations", verbose)
 
     rk_data, qk_data, interaction_data = load_unifac_data()
     P = 1.01325  # bar
+    n_data = 50
 
     tb_A = binary_props['A']['tb']
     tb_B = binary_props['B']['tb']
 
     vle_results = {}
     successful = []
+    failed = 0
 
-    for solvent_name, solvent_data in compatible_solvents.items():
+    total = len([name for name in screened_solvents.keys() if name in solvent_antoine])
+
+    for solvent_name, solvent_data in screened_solvents.items():
         if solvent_name not in solvent_antoine:
+            failed += 1
             continue
 
         try:
@@ -324,12 +462,14 @@ def run_vle_calculations(compatible_solvents, solvent_antoine, mixture, binary_a
             )
 
             if vle_solution is None or vle_model is None:
+                failed += 1
                 continue
 
             status = str(vle_solution.solver.status)
             cond = str(vle_solution.solver.termination_condition)
 
             if status != 'ok' or cond != 'optimal':
+                failed += 1
                 continue
 
             # Extract results
@@ -384,24 +524,26 @@ def run_vle_calculations(compatible_solvents, solvent_antoine, mixture, binary_a
             }
             successful.append(solvent_name)
 
-        except Exception as e:
-            if verbose:
-                print(f"  Failed: {solvent_name}")
-            continue
+        except Exception:
+            failed += 1
 
     if verbose:
-        print(f"  {len(successful)} VLE calculations succeeded")
+        print(f"Total: {total}")
+        print(f"Successful: {len(successful)}")
+        print(f"Failed: {failed}")
+        print(f"\nSummary: {len(successful)}/{total} VLE calculations successful")
 
     return vle_results, successful
 
 
+# === STEP 12: Screen based on mixture constraints ===
 def screen_mixture_properties(vle_results, successful, config, verbose=False):
     """Screen solvents based on mixture property constraints."""
-    if verbose:
-        print("\n=== Step 9: Mixture Property Screening ===")
+    print_step(12, "Screen Mixture Properties", verbose)
 
     mixture_config = config['screening']['mixture']
     passed = {}
+    rejected = 0
 
     for name in successful:
         results = vle_results[name]
@@ -423,18 +565,23 @@ def screen_mixture_properties(vle_results, successful, config, verbose=False):
 
         if az_AE_ok and az_BE_ok and G_mix_ok and G2_mix_ok and S_ok:
             passed[name] = results
+        else:
+            rejected += 1
 
     if verbose:
-        print(f"  {len(passed)}/{len(successful)} solvents passed")
+        print(f"Input: {len(successful)}")
+        print(f"Passed: {len(passed)}")
+        print(f"Rejected: {rejected}")
+        print(f"\nSummary: {len(passed)}/{len(successful)} passed mixture screening")
 
     return passed
 
 
-def run_iss_calculations(screened_mixture, compatible_solvents, mixture, binary_antoine,
-                        solvent_antoine, binary_props, config, verbose=False):
-    """Run ISS methodology on screened solvents."""
-    if verbose:
-        print("\n=== Step 10: ISS Calculations ===")
+# === STEP 13: Perform ISS calculation ===
+def perform_iss(screened_mixture, compatible_solvents, mixture, binary_antoine,
+                solvent_antoine, binary_props, config, verbose=False):
+    """Perform ISS calculations."""
+    print_step(13, "Perform ISS Calculations", verbose)
 
     rk_data, qk_data, interaction_data = load_unifac_data()
 
@@ -450,6 +597,7 @@ def run_iss_calculations(screened_mixture, compatible_solvents, mixture, binary_
                    [xA, 0.0, 1 - xA]])
 
     iss_results = {}
+    failed = 0
 
     for solvent_name in screened_mixture.keys():
         try:
@@ -465,12 +613,14 @@ def run_iss_calculations(screened_mixture, compatible_solvents, mixture, binary_
                                     interaction_data, ternary_antoine, verbose=False)
 
             if results is None or model is None:
+                failed += 1
                 continue
 
             status = str(results.solver.status)
             cond = str(results.solver.termination_condition)
 
             if status != 'ok' or cond != 'optimal':
+                failed += 1
                 continue
 
             import pyomo.environ as pyo
@@ -483,19 +633,28 @@ def run_iss_calculations(screened_mixture, compatible_solvents, mixture, binary_
                 'groups': compatible_solvents[solvent_name]['groups']
             }
 
-        except Exception as e:
-            continue
+        except Exception:
+            failed += 1
 
     if verbose:
-        print(f"  {len(iss_results)} ISS calculations succeeded")
+        print(f"Input: {len(screened_mixture)}")
+        print(f"Successful: {len(iss_results)}")
+        print(f"Failed: {failed}")
+        print(f"\nSummary: {len(iss_results)}/{len(screened_mixture)} ISS calculations successful")
 
     return iss_results
 
 
-def save_results(iss_results, screened_mixture, compatible_solvents, output_dir, config):
+# === Save results ===
+def save_results(iss_results, screened_mixture, output_dir, config, verbose=False):
     """Save results to files."""
     import json
     import csv
+
+    if verbose:
+        print("\n" + "="*60)
+        print("SAVING RESULTS")
+        print("="*60)
 
     formats = config['output']['formats']
 
@@ -527,14 +686,19 @@ def save_results(iss_results, screened_mixture, compatible_solvents, output_dir,
                 writer = csv.DictWriter(f, fieldnames=results_list[0].keys())
                 writer.writeheader()
                 writer.writerows(results_list)
-        print(f"  Saved: {csv_path}")
+        if verbose:
+            print(f"✓ Saved: {csv_path}")
 
     # Save JSON
     if 'json' in formats:
         json_path = output_dir / 'results.json'
         with open(json_path, 'w') as f:
             json.dump(results_list, f, indent=2)
-        print(f"  Saved: {json_path}")
+        if verbose:
+            print(f"✓ Saved: {json_path}")
+
+    if verbose:
+        print(f"\nSummary: Saved {len(results_list)} results in {len(formats)} format(s)")
 
 
 def main():
@@ -547,73 +711,109 @@ def main():
     config = load_config(args.config)
     verbose = args.verbose or config['output'].get('verbose', False)
 
-    if verbose:
-        print("=" * 60)
-        print("CAMD-ISS: Solvent Design & Screening")
-        print("=" * 60)
-        print(f"Mode: {config['mode']}")
-        print(f"Config: {args.config}")
-
-    # Setup
+    # Setup output and logging
     output_dir = setup_output_dir(config)
-    mixture = get_mixture(config)
 
-    # Binary mixture calculations
-    binary_props = calculate_pure_properties(mixture, config, verbose)
-    binary_antoine = calculate_antoine_parameters(mixture, binary_props, verbose)
-    check_binary_unifac(mixture, verbose)
+    # Setup logging to file
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    log_file = output_dir / f"camd_run_{timestamp}.log"
+    logger = TeeLogger(log_file)
+    sys.stdout = logger
 
-    # Get candidates based on mode
-    if config['mode'] == 'design':
-        candidates = generate_solvent_candidates(config, mixture, verbose)
-        solvent_names = None
-    elif config['mode'] == 'screen':
-        candidates, solvent_names = get_predefined_solvents(config, verbose)
-    else:
-        raise ValueError(f"Invalid mode: {config['mode']}. Must be 'design' or 'screen'")
+    try:
+        # Header
+        print("="*60)
+        print("CAMD-ISS: Computer-Aided Molecular Design")
+        print("="*60)
+        print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"Mode: {config['mode'].upper()}")
+        print(f"Config: {args.config}")
+        print(f"Log file: {log_file}")
 
-    if not candidates:
-        print("No candidates to process")
-        return
+        # === BINARY MIXTURE WORKFLOW ===
+        mixture = validate_mixture(config, verbose)
+        check_mixture_parameters(mixture, verbose)
+        binary_props = calculate_mixture_pure_properties(mixture, verbose)
+        binary_props = override_mixture_properties(binary_props, config, verbose)
+        binary_antoine = calculate_mixture_antoine(mixture, binary_props, verbose)
 
-    # Screening pipeline
-    screened_pure = screen_pure_properties(candidates, config, verbose)
-    compatible_solvents = check_solvent_unifac(screened_pure, mixture, verbose)
-    solvent_antoine = calculate_solvent_antoine(compatible_solvents, verbose)
+        # === SOLVENT WORKFLOW ===
+        # Step 6: Get candidates (mode-dependent)
+        if config['mode'] == 'screen':
+            candidates, solvent_names = load_and_validate_solvents(config, verbose)
+        elif config['mode'] == 'design':
+            candidates = generate_solvent_candidates(config, mixture, verbose)
+        else:
+            raise ValueError(f"Invalid mode: {config['mode']}. Must be 'design' or 'screen'")
 
-    vle_results, successful = run_vle_calculations(
-        compatible_solvents, solvent_antoine, mixture, binary_antoine, binary_props,
-        n_data=50, verbose=verbose
-    )
+        if not candidates:
+            print("\n⚠ No candidates to process")
+            return
 
-    screened_mixture = screen_mixture_properties(vle_results, successful, config, verbose)
+        # Step 7-13: Screening pipeline
+        compatible, compatible_indices = check_solvent_parameters(candidates, mixture, verbose)
 
-    iss_results = run_iss_calculations(
-        screened_mixture, compatible_solvents, mixture, binary_antoine,
-        solvent_antoine, binary_props, config, verbose
-    )
+        if not compatible:
+            print("\n⚠ No compatible solvents found")
+            return
 
-    # Save results
-    if verbose:
-        print("\n=== Results ===")
+        solvent_props = calculate_solvent_pure_properties(compatible, config, verbose)
+        screened_pure = screen_pure_properties(compatible, solvent_props, config, verbose)
 
-    if iss_results:
-        save_results(iss_results, screened_mixture, compatible_solvents, output_dir, config)
+        if not screened_pure:
+            print("\n⚠ No solvents passed pure property screening")
+            return
 
-        if verbose:
-            print(f"\nTop 5 solvents:")
-            sorted_solvents = sorted(iss_results.items(), key=lambda x: x[1]['ED'])
-            for i, (name, data) in enumerate(sorted_solvents[:5]):
-                groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
-                print(f"  {i+1}. {name}: {groups_str}")
-                print(f"     ED={data['ED']:.6f}, R={data['R']:.6f}")
-    else:
-        print("No solvents passed all screening steps")
+        solvent_antoine = calculate_solvent_antoine(screened_pure, verbose)
 
-    if verbose:
-        print("\n" + "=" * 60)
-        print("CAMD-ISS Complete")
-        print("=" * 60)
+        if not solvent_antoine:
+            print("\n⚠ No solvents have valid Antoine parameters")
+            return
+
+        vle_results, successful = perform_vle(screened_pure, solvent_antoine, mixture,
+                                             binary_antoine, binary_props, verbose)
+
+        if not successful:
+            print("\n⚠ No successful VLE calculations")
+            return
+
+        screened_mixture = screen_mixture_properties(vle_results, successful, config, verbose)
+
+        if not screened_mixture:
+            print("\n⚠ No solvents passed mixture property screening")
+            return
+
+        iss_results = perform_iss(screened_mixture, screened_pure, mixture, binary_antoine,
+                                 solvent_antoine, binary_props, config, verbose)
+
+        # === RESULTS ===
+        if iss_results:
+            save_results(iss_results, screened_mixture, output_dir, config, verbose)
+
+            if verbose:
+                print("\n" + "="*60)
+                print("TOP SOLVENTS")
+                print("="*60)
+                sorted_solvents = sorted(iss_results.items(), key=lambda x: x[1]['ED'])
+                for i, (name, data) in enumerate(sorted_solvents[:5], 1):
+                    groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
+                    print(f"{i}. {name}")
+                    print(f"   Groups: {groups_str}")
+                    print(f"   ED: {data['ED']:.6f}, R: {data['R']:.6f}")
+                print(f"\nTotal: {len(iss_results)} solvents found")
+        else:
+            print("\n⚠ No solvents completed ISS calculations")
+
+        # Footer
+        print("\n" + "="*60)
+        print("CAMD-ISS COMPLETE")
+        print(f"Output: {output_dir}")
+        print("="*60)
+
+    finally:
+        # Restore stdout and close log file
+        sys.stdout = logger.terminal
+        logger.close()
 
 
 if __name__ == '__main__':
