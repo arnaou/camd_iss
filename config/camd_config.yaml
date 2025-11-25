@@ -1,4 +1,7 @@
 # Configuration for CAMD-ISS workflow
+# This file defines the settings for each step of the CAMD-ISS process
+# including mixture definition, property calculations, solvent design,
+# screening criteria, VLE calculations, and output options.
 
 # Project metadata and general settings
 project:

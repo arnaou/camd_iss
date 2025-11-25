@@ -141,7 +141,7 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     """
     # Generate initialization values using original mixture format
     init_values = _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params)
-    
+    #print(f"Initialization values generated: {init_values}")
     # Auto-convert formats for pyomo model
     mixture = _convert_mixture_format(mixture)
     antoine_array = _convert_antoine_format(antoine_params)
@@ -167,7 +167,7 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     
     # define the constants/parameters
     model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)}, 
-                       within=pyo.PositiveReals, bounds=(T.min()-10, T.max()+10),name='Temperature in K')
+                       within=pyo.PositiveReals,name='Temperature in K') #bounds=(T.min()-10.0, T.max()+10.0)
     #print(f"Temperature bounds: {T.min()-5} - {T.max()+5}") bounds=(T.min()-3, T.max()+5)
     # Flatten interaction parameters for Pyomo
     a_dict = {}
@@ -256,15 +256,15 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     model.psi = pyo.Var(model.dp, model.k, model.k, 
                        initialize=create_init_dict_3d(init_values['psi'] if init_values else None, 0.79,
                                                      keys1=range(n_data), keys2=groups, keys3=groups), 
-                       within=pyo.PositiveReals, name='unifac psi_mk')
+                       within=pyo.PositiveReals, name='unifac psi_mk', bounds=(1e-4, None))
     model.beta = pyo.Var(model.dp, model.i, model.k, 
                         initialize=create_init_dict_3d(init_values['beta'] if init_values else None, 1.7,
                                                       keys1=range(n_data), keys2=range(n_comp), keys3=groups),
-                          within=pyo.PositiveReals, name='unifac beta_ik')
+                          within=pyo.PositiveReals, name='unifac beta_ik',bounds=(1e-4, None))
     model.omega = pyo.Var(model.dp, model.k, 
                          initialize=create_init_dict_2d(init_values['omega'] if init_values else None, 1.1,
                                                        keys1=range(n_data), keys2=groups), 
-                         within=pyo.PositiveReals, name='unifac omega_k')
+                         within=pyo.PositiveReals, name='unifac omega_k', bounds=(1e-4, None))
     model.log_gamma_c = pyo.Var(model.dp, model.i, 
                                initialize=create_init_dict_2d(init_values['log_gamma_c'] if init_values else None, 0.1), 
                                within=pyo.Reals, name='unifac log_gamma_c')
@@ -277,13 +277,13 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     
     # VLE-specific variables
     model.psat = pyo.Var(model.dp, model.i, 
-                        initialize=create_init_dict_2d(init_values['psat'] if init_values else None, 101325), 
-                        within=pyo.PositiveReals, name='vapor pressure in Pa')
+                        initialize=create_init_dict_2d(init_values['psat'] if init_values else None, 2.5), 
+                        within=pyo.PositiveReals, name='vapor pressure in bar')
     model.y = pyo.Var(model.dp, model.i, 
                      initialize=create_init_dict_2d(init_values['y'] if init_values else None, 0.5), 
                      within=pyo.UnitInterval, name='vapor composition y')
     
-    
+    eps = 1e-15  # small value to prevent division by zero
     def eq_r(m, i):
         """
         Molecular volume parameter (Equation A.3):
@@ -388,8 +388,8 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
         log_gamma_r = q * (1 - Σ(theta * beta / omega - e * ln(beta / omega)))
         """
         return m.log_gamma_r[dp, i] == m.q[i] * (1 - sum(m.theta[dp, k] * m.beta[dp, i, k] / m.omega[dp, k] - 
-                                                         m.e[i, k] * pyo.log(m.beta[dp, i, k] / m.omega[dp, k]) 
-                                                         for k in m.k))
+                                                         m.e[i, k] * (pyo.log(m.beta[dp, i, k]) - pyo.log(m.omega[dp, k])) 
+                                                         for k in m.k)) # the log here is an issue check it
     
     model.eq_log_gamma_r = pyo.Constraint(model.dp, model.i, rule=eq_log_gamma_r,
                                          name='Constraint for calculating log_gamma_r of unifac')

@@ -139,8 +139,15 @@ def calculate_mixture_pure_properties(mixture, verbose=False):
 
     if verbose:
         for comp, props in pure_props.items():
-            print(f"{comp}: Tc={props['tc']:.1f}K, Pc={props['pc']:.1f}bar, Tb={props['tb']:.1f}K")
-        print(f"\nSummary: Calculated properties for {len(pure_props)} components")
+            groups_str = ", ".join([f"{k}:{v}" for k, v in mixture[comp].items()])
+            print(f"\n{comp} ({groups_str}):")
+            print(f"  Tc: {props['tc']:.2f} K")
+            print(f"  Pc: {props['pc']:.2f} bar")
+            print(f"  Tb: {props['tb']:.2f} K")
+            print(f"  Tm: {props['tm']:.2f} K")
+            print(f"  Ac: {props['ac']:.4f}")
+            print(f"  Hv: {props['hv']:.2f} kJ/mol")
+        print(f"\nSummary: Calculated {len(prop_list)} properties for {len(pure_props)} components")
 
     return pure_props
 
@@ -330,34 +337,57 @@ def screen_pure_properties(solvents, solvent_props, config, verbose=False):
 
     constraints = config['screening']['pure']
     screened = {}
+    rejected = {}
 
     for name, props in solvent_props.items():
+        idx = int(name.split('_')[1]) - 1
+        groups = solvents[idx]
+        groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
+
         # Sanity check: Tb < Tc
         if props.get('tb') and props.get('tc') and props['tb'] >= props['tc']:
+            rejected[name] = {
+                'groups': groups_str,
+                'reason': f"Tb ({props['tb']:.1f}K) >= Tc ({props['tc']:.1f}K)"
+            }
             continue
 
         # Check constraints
         passes = True
+        rejection_reason = None
+
         for prop, (min_val, max_val) in constraints.items():
             if prop in props and props[prop] is not None:
                 if not (min_val <= props[prop] <= max_val):
                     passes = False
+                    rejection_reason = f"{prop}={props[prop]:.1f} outside [{min_val}, {max_val}]"
                     break
             else:
                 passes = False
+                rejection_reason = f"Missing {prop}"
                 break
 
         if passes:
-            idx = int(name.split('_')[1]) - 1
             screened[name] = {
-                'groups': solvents[idx],
+                'groups': groups,
                 'properties': props
+            }
+        else:
+            rejected[name] = {
+                'groups': groups_str,
+                'reason': rejection_reason
             }
 
     if verbose:
         print(f"Initial: {len(solvent_props)}")
         print(f"Passed: {len(screened)}")
-        print(f"Rejected: {len(solvent_props) - len(screened)}")
+        print(f"Rejected: {len(rejected)}")
+
+        if rejected:
+            print(f"\nRejection reasons:")
+            for name, data in rejected.items():
+                print(f"  {name} ({data['groups']}): {data['reason']}")
+
         print(f"\nSummary: {len(screened)}/{len(solvent_props)} passed pure property screening")
 
     return screened
@@ -416,13 +446,18 @@ def perform_vle(screened_solvents, solvent_antoine, mixture, binary_antoine, bin
 
     vle_results = {}
     successful = []
-    failed = 0
+    failed = {}
 
     total = len([name for name in screened_solvents.keys() if name in solvent_antoine])
 
     for solvent_name, solvent_data in screened_solvents.items():
+        groups_str = ", ".join([f"{k}:{v}" for k, v in solvent_data['groups'].items()])
+
         if solvent_name not in solvent_antoine:
-            failed += 1
+            failed[solvent_name] = {
+                'groups': groups_str,
+                'reason': "No Antoine parameters"
+            }
             continue
 
         try:
@@ -462,14 +497,20 @@ def perform_vle(screened_solvents, solvent_antoine, mixture, binary_antoine, bin
             )
 
             if vle_solution is None or vle_model is None:
-                failed += 1
+                failed[solvent_name] = {
+                    'groups': groups_str,
+                    'reason': "VLE solver returned None"
+                }
                 continue
 
             status = str(vle_solution.solver.status)
             cond = str(vle_solution.solver.termination_condition)
 
             if status != 'ok' or cond != 'optimal':
-                failed += 1
+                failed[solvent_name] = {
+                    'groups': groups_str,
+                    'reason': f"VLE solver: {status}/{cond}"
+                }
                 continue
 
             # Extract results
@@ -524,54 +565,83 @@ def perform_vle(screened_solvents, solvent_antoine, mixture, binary_antoine, bin
             }
             successful.append(solvent_name)
 
-        except Exception:
-            failed += 1
+        except Exception as e:
+            failed[solvent_name] = {
+                'groups': groups_str,
+                'reason': f"VLE error: {type(e).__name__}"
+            }
 
     if verbose:
         print(f"Total: {total}")
         print(f"Successful: {len(successful)}")
-        print(f"Failed: {failed}")
+        print(f"Failed: {len(failed)}")
+
+        if failed:
+            print(f"\nFailure reasons:")
+            for name, data in failed.items():
+                print(f"  {name} ({data['groups']}): {data['reason']}")
+
         print(f"\nSummary: {len(successful)}/{total} VLE calculations successful")
 
     return vle_results, successful
 
 
 # === STEP 12: Screen based on mixture constraints ===
-def screen_mixture_properties(vle_results, successful, config, verbose=False):
+def screen_mixture_properties(vle_results, successful, screened_solvents, config, verbose=False):
     """Screen solvents based on mixture property constraints."""
     print_step(12, "Screen Mixture Properties", verbose)
 
     mixture_config = config['screening']['mixture']
     passed = {}
-    rejected = 0
+    rejected = {}
 
     for name in successful:
         results = vle_results[name]
+        groups_str = ", ".join([f"{k}:{v}" for k, v in screened_solvents[name]['groups'].items()])
 
         # Check constraints
-        az_AE_ok = results['az_AE'] > 0 if mixture_config.get('no_azeotrope_AE', False) else True
-        az_BE_ok = results['az_BE'] > 0 if mixture_config.get('no_azeotrope_BE', False) else True
+        rejection_reasons = []
 
-        G_mix_AE_ok = np.all(results['G_mix_AE'][1:-1] <= 0) if mixture_config.get('miscibility', False) else True
-        G_mix_BE_ok = np.all(results['G_mix_BE'][1:-1] <= 0) if mixture_config.get('miscibility', False) else True
-        G_mix_ok = G_mix_AE_ok and G_mix_BE_ok
+        if mixture_config.get('no_azeotrope_AE', False):
+            if results['az_AE'] <= 0:
+                rejection_reasons.append(f"Azeotrope A-E (az_AE={results['az_AE']:.3f})")
 
-        G2_mix_AE_ok = np.all(results['G2_mix_AE'][1:-1] >= 0) if mixture_config.get('miscibility', False) else True
-        G2_mix_BE_ok = np.all(results['G2_mix_BE'][1:-1] >= 0) if mixture_config.get('miscibility', False) else True
-        G2_mix_ok = G2_mix_AE_ok and G2_mix_BE_ok
+        if mixture_config.get('no_azeotrope_BE', False):
+            if results['az_BE'] <= 0:
+                rejection_reasons.append(f"Azeotrope B-E (az_BE={results['az_BE']:.3f})")
+
+        if mixture_config.get('miscibility', False):
+            if not np.all(results['G_mix_AE'][1:-1] <= 0):
+                rejection_reasons.append("Phase split A-E (G_mix > 0)")
+            if not np.all(results['G_mix_BE'][1:-1] <= 0):
+                rejection_reasons.append("Phase split B-E (G_mix > 0)")
+            if not np.all(results['G2_mix_AE'][1:-1] >= 0):
+                rejection_reasons.append("Instability A-E (G2_mix < 0)")
+            if not np.all(results['G2_mix_BE'][1:-1] >= 0):
+                rejection_reasons.append("Instability B-E (G2_mix < 0)")
 
         S_min = mixture_config.get('selectivity_min', 0)
-        S_ok = results['S'] >= S_min
+        if results['S'] < S_min:
+            rejection_reasons.append(f"Low selectivity (S={results['S']:.2f} < {S_min})")
 
-        if az_AE_ok and az_BE_ok and G_mix_ok and G2_mix_ok and S_ok:
+        if not rejection_reasons:
             passed[name] = results
         else:
-            rejected += 1
+            rejected[name] = {
+                'groups': groups_str,
+                'reason': "; ".join(rejection_reasons)
+            }
 
     if verbose:
         print(f"Input: {len(successful)}")
         print(f"Passed: {len(passed)}")
-        print(f"Rejected: {rejected}")
+        print(f"Rejected: {len(rejected)}")
+
+        if rejected:
+            print(f"\nRejection reasons:")
+            for name, data in rejected.items():
+                print(f"  {name} ({data['groups']}): {data['reason']}")
+
         print(f"\nSummary: {len(passed)}/{len(successful)} passed mixture screening")
 
     return passed
@@ -597,9 +667,11 @@ def perform_iss(screened_mixture, compatible_solvents, mixture, binary_antoine,
                    [xA, 0.0, 1 - xA]])
 
     iss_results = {}
-    failed = 0
+    failed = {}
 
     for solvent_name in screened_mixture.keys():
+        groups_str = ", ".join([f"{k}:{v}" for k, v in compatible_solvents[solvent_name]['groups'].items()])
+
         try:
             # Build ternary
             ternary_mixture = dict(mixture)
@@ -613,14 +685,20 @@ def perform_iss(screened_mixture, compatible_solvents, mixture, binary_antoine,
                                     interaction_data, ternary_antoine, verbose=False)
 
             if results is None or model is None:
-                failed += 1
+                failed[solvent_name] = {
+                    'groups': groups_str,
+                    'reason': "ISS solver returned None"
+                }
                 continue
 
             status = str(results.solver.status)
             cond = str(results.solver.termination_condition)
 
             if status != 'ok' or cond != 'optimal':
-                failed += 1
+                failed[solvent_name] = {
+                    'groups': groups_str,
+                    'reason': f"ISS solver: {status}/{cond}"
+                }
                 continue
 
             import pyomo.environ as pyo
@@ -633,13 +711,22 @@ def perform_iss(screened_mixture, compatible_solvents, mixture, binary_antoine,
                 'groups': compatible_solvents[solvent_name]['groups']
             }
 
-        except Exception:
-            failed += 1
+        except Exception as e:
+            failed[solvent_name] = {
+                'groups': groups_str,
+                'reason': f"ISS error: {type(e).__name__}"
+            }
 
     if verbose:
         print(f"Input: {len(screened_mixture)}")
         print(f"Successful: {len(iss_results)}")
-        print(f"Failed: {failed}")
+        print(f"Failed: {len(failed)}")
+
+        if failed:
+            print(f"\nFailure reasons:")
+            for name, data in failed.items():
+                print(f"  {name} ({data['groups']}): {data['reason']}")
+
         print(f"\nSummary: {len(iss_results)}/{len(screened_mixture)} ISS calculations successful")
 
     return iss_results
@@ -777,7 +864,7 @@ def main():
             print("\n⚠ No successful VLE calculations")
             return
 
-        screened_mixture = screen_mixture_properties(vle_results, successful, config, verbose)
+        screened_mixture = screen_mixture_properties(vle_results, successful, screened_pure, config, verbose)
 
         if not screened_mixture:
             print("\n⚠ No solvents passed mixture property screening")
