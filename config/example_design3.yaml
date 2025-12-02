@@ -1,7 +1,7 @@
 # CAMD-ISS Configuration - DESIGN MODE
 # Automatically generate and screen solvent candidates
 
-mode: "design"
+mode: "iss: acetone + n-heptane"
 
 # Binary mixture: Acetone/n-heptane separation
 mixture:
@@ -20,6 +20,7 @@ pure_properties:
     tc: 540.2  # K
     pc: 27.4   # bar
     tb: 371.5  # K
+    hv: 36.3  # kJ/mol
 
 
 # Solvent design settings
@@ -34,7 +35,7 @@ design:
     max_func_groups: 2
     molecular_type: 1  # acyclic
 
-  max_candidates: 1000
+  max_candidates: 10000
 
 # Property screening
 screening:
@@ -47,7 +48,7 @@ screening:
     no_azeotrope_AE: true
     no_azeotrope_BE: true
     miscibility: true
-    selectivity_min: 1.5
+    selectivity_min: 0.5
 
 # ISS settings
 iss:
