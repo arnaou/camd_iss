@@ -1,48 +1,50 @@
-# CAMD-ISS Configuration - SCREEN MODE
-# Evaluate predefined solvents
+# Screen-ISS Configuration
+# Evaluate a predefined set of entrainers for ISS performance
+# (No molecule generation, only screening)
 
 mode: "screen"
 
 # Binary mixture: Ethanol/Water separation
 mixture:
   component_a:
-    groups: {CH3: 1, CH2: 1, OH: 1}  # ethanol
+    groups: {CH3: 1, CH3CO: 1}  # acetone
   component_b:
-    groups: {H2O: 1}  # water
+    groups: {CH3OH: 1}  # methanol
 
-# Predefined solvents to evaluate
+# override with experimental data
+pure_properties:
+  component_a:
+    tc: 508.1  # K
+    pc: 48.0   # bar
+    tb: 329.3  # K
+
+# Predefined entrainers to evaluate
 screen:
-  solvents:
+  entrainers:
     - name: "ethylene_glycol"
-      groups: {CH2: 2, OH: 2}
+      groups: {DOH: 1}
 
-    - name: "1_butanol"
-      groups: {CH3: 1, CH2: 3, OH: 1}
+    - name: "DMSO"
+      groups: {DMSO: 1}
 
-    - name: "2_butanol"
-      groups: {CH3: 2, CH2: 1, DOH: 1}
+    - name: "water"
+      groups: {H2O: 1}
 
     - name: "acetone"
       groups: {CH3: 1, CH3CO: 1}
 
-    - name: "dimethyl_sulfoxide"
-      groups: {DMSO: 1}
-
-    - name: "acetic_acid"
-      groups: {CH3: 1, COOH: 1}
-
 # Property screening
 screening:
   pure:
-    tb: [300.0, 550.0]  # K
+    tb: [368.0, 500.0]  # K
     tm: [0.0, 298.0]    # K
-    hv: [-9999.0, 80.0] # kJ/mol
+    hv: [-9999.0, 67.0] # kJ/mol
 
   mixture:
     no_azeotrope_AE: true
     no_azeotrope_BE: true
     miscibility: true
-    selectivity_min: 1.5
+    selectivity_min: 1.2
 
 # ISS settings
 iss:
