@@ -1,0 +1,62 @@
+# Screen-ISS Configuration
+# Evaluate a predefined set of entrainers for ISS performance
+# (No molecule generation, only screening)
+
+mode: "screen"
+
+# Binary mixture: Ethanol/Water separation
+mixture:
+  component_a:
+    groups: {CH3: 1, CH3CO: 1}  # acetone
+  component_b:
+    groups: {CH3OH: 1}  # methanol
+
+# override with experimental data
+pure_properties:
+  component_a:
+    tc: 508.1  # K
+    pc: 48.0   # bar
+    tb: 329.3  # K
+
+# Predefined entrainers to evaluate
+screen:
+  entrainers:
+    - name: "ethanol"
+      groups: {CH3: 1, CH2: 1, OH: 1}
+
+    - name: "Proponal"
+      groups: {CH3: 1, CH2: 2, OH: 1}
+
+    - name: "butanol"
+      groups: {CH3: 1, CH2: 3, OH: 1}
+    
+    - name: "pentanol"
+      groups: {CH3: 1, CH2: 4, OH: 1}
+    
+    - name: "hexanol"
+      groups: {CH3: 1, CH2: 5, OH: 1}
+
+
+# Property screening
+screening:
+  pure:
+    tb: [368.0, 5000.0]  # K
+    tm: [0.0, 298.0]    # K
+    hv: [-9999.0, 67.0] # kJ/mol
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: true
+    selectivity_min: 1.01
+
+# ISS settings
+iss:
+  x_iso: 0.75
+  x_min: 0.5
+
+# Output
+output:
+  dir: "results/screen"
+  formats: ["csv", "json"]
+  verbose: true

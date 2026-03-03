@@ -969,8 +969,9 @@ def main():
         mixture = validate_mixture(config, verbose)
         check_mixture_parameters(mixture, verbose)
         binary_props = calculate_mixture_pure_properties(mixture, verbose)
+        binary_props = override_mixture_properties(binary_props, config, verbose)
 
-        # Validate boiling point order: Tb_A < Tb_B
+        # Validate boiling point order: Tb_A < Tb_B (after overrides applied)
         tb_A = binary_props['A']['tb']
         tb_B = binary_props['B']['tb']
         if tb_A >= tb_B:
@@ -978,7 +979,6 @@ def main():
         if verbose:
             print(f"\n✓ Boiling point validation: Tb_A ({tb_A:.2f}K) < Tb_B ({tb_B:.2f}K)")
 
-        binary_props = override_mixture_properties(binary_props, config, verbose)
         binary_antoine = calculate_mixture_antoine(mixture, binary_props, verbose)
 
         # === SOLVENT WORKFLOW ===

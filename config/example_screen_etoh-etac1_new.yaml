@@ -1,0 +1,95 @@
+mode: "screen"
+
+# Binary mixture: Ethyl acetate (A) / Ethanol (B)
+mixture:
+  component_a:        # Ethyl acetate (CH3–COO–CH2–CH3)
+    groups: {CH3: 1, CH2: 1, CH3COO: 1}
+
+  component_b:        # Ethanol (CH3–CH2–OH)
+    groups: {CH3: 1, CH2: 1, OH: 1} 
+
+# Override with experimental data so we DON'T rely on UNIFAC here
+pure_properties:
+  component_a:   
+    tc: 530.0    
+    pc: 38.83     
+    tb: 350.0   
+  component_b:   
+    tc: 514.0    
+    pc: 63.0     
+    tb: 351.5
+     # K   (~78 °C)
+
+# Predefined entrainers: linear diols
+screen:
+  entrainers:
+
+
+    # --- 1-Propanol ---
+    # CH3–CH2–CH2–OH
+    - name: "1-propanol"
+      groups: {OH: 1, CH3: 1, CH2: 2}
+
+    # --- 1-Butanol ---
+    # CH3–(CH2)3–OH
+    - name: "1-butanol"
+      groups: {OH: 1, CH3: 1, CH2: 3}
+
+    # --- 1-Pentanol ---
+    # CH3–(CH2)4–OH
+    - name: "1-pentanol"
+      groups: {OH: 1, CH3: 1, CH2: 4}
+
+    # --- 1-Hexanol ---
+    # CH3–(CH2)5–OH
+    - name: "1-hexanol"
+      groups: {OH: 1, CH3: 1, CH2: 5}
+
+    # --- 1-Heptanol ---
+    # CH3–(CH2)6–OH
+    - name: "1-heptanol"
+      groups: {OH: 1, CH3: 1, CH2: 6}
+
+    # --- 1-Octanol ---
+    # CH3–(CH2)7–OH
+    - name: "1-octanol"
+      groups: {OH: 1, CH3: 1, CH2: 7}
+
+    # --- 1-Nonanol ---
+    # CH3–(CH2)8–OH
+    - name: "1-nonanol"
+      groups: {OH: 1, CH3: 1, CH2: 8}
+
+    # --- 1-Decanol ---
+    # CH3–(CH2)9–OH
+    - name: "1-decanol"
+      groups: {OH: 1, CH3: 1, CH2: 9}
+
+    # --- 1-Undecanol ---
+    # CH3–(CH2)10–OH
+    - name: "1-undecanol"
+      groups: {OH: 1, CH3: 1, CH2: 10}
+
+
+     
+
+screening:
+  pure:
+    tb: [370.0, 6000.0]
+    tm: [0.0, 298.0]
+    hv: [-9999.0, 1500.0]
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: true
+    selectivity_min: 1.1
+
+iss:
+  x_iso: 0.85
+  x_min: 0.40
+
+output:
+  dir: "results/screen"
+  formats: ["csv", "json"]
+  verbose: true

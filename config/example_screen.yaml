@@ -29,9 +29,13 @@ screen:
 
     - name: "water"
       groups: {H2O: 1}
+    
+    - name: "ethanol"
+      groups: {CH3: 1, CH2: 1, OH: 1}
+    
+    - name: "2-Proponal"
+      groups: {CH3: 2, CH: 1, OH: 1}
 
-    - name: "acetone"
-      groups: {CH3: 1, CH3CO: 1}
 
 # Property screening
 screening:

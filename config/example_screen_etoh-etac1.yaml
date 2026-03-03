@@ -1,0 +1,67 @@
+mode: "screen"
+
+# Binary mixture: Ethyl acetate (A) / Ethanol (B)
+mixture:
+  component_a:        # Ethyl acetate (CH3–COO–CH2–CH3)
+    groups: {CH3: 2, CH2COO: 1} 
+    
+  component_b:        # Ethanol (CH3–CH2–OH)
+    groups: {CH3: 1, CH2: 1, OH: 1}
+
+# Override with experimental data so we DON'T rely on UNIFAC here
+pure_properties:
+  component_b:   # Ethyl acetate
+    tc: 514.0    # K   (approx)
+    pc: 63.0     # bar (approx)
+    tb: 351.5   
+ 
+  component_a:   # Ethyl acetate
+    tc: 530.0    # K   (approx)
+    pc: 38.83     # bar (approx)
+    tb: 350.0 
+     # K   (~78 °C)
+
+# Predefined entrainers: linear diols
+screen:
+  entrainers:
+
+     - name: "solvent_1"
+       groups: {OH: 2, CH2: 3}
+
+     - name: "solvent_2"
+       groups: {OH: 2, CH2: 4}
+
+     - name: "solvent_3"
+       groups: {OH: 2, CH2: 5}
+
+     - name: "solvent_4"
+       groups: {OH: 2, CH2: 6}
+
+     - name: "solvent_5"
+       groups: {OH: 2, CH2: 7}
+  
+     - name: "solvent_6"
+       groups: {OH: 2, CH2: 8}
+
+     
+
+screening:
+  pure:
+    tb: [370.0, 600.0]
+    tm: [0.0, 305.0]
+    hv: [-9999.0, 150.0]
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: true
+    selectivity_min: 0.1
+
+iss:
+  x_iso: 0.75
+  x_min: 0.5
+
+output:
+  dir: "results/screen"
+  formats: ["csv", "json"]
+  verbose: true
