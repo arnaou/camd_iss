@@ -88,6 +88,7 @@ target/
 # Project-specific: deprecated/local directories
 trash/
 old_code/
+old_files/
 src/mixture/unifac_backup_20250912_085147/
 resources/
 pyomo_antoine_log
