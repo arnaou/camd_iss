@@ -1,0 +1,1333 @@
+{
+  "unifac_groups": [
+    {
+      "id": 1,
+      "unifac_id": "CH3",
+      "main_group": 1,
+      "subgroup": 1,
+      "connections": 1,
+      "smarts": [
+        "[CH3;X4]"
+      ],
+      "name": "CH3"
+    },
+    {
+      "id": 2,
+      "unifac_id": "CH2",
+      "main_group": 1,
+      "subgroup": 2,
+      "connections": 2,
+      "smarts": [
+        "[CH2;X4]"
+      ],
+      "name": "CH2"
+    },
+    {
+      "id": 3,
+      "unifac_id": "CH",
+      "main_group": 1,
+      "subgroup": 3,
+      "connections": 3,
+      "smarts": [
+        "[CH1;X4]"
+      ],
+      "name": "CH"
+    },
+    {
+      "id": 4,
+      "unifac_id": "C",
+      "main_group": 1,
+      "subgroup": 4,
+      "connections": 4,
+      "smarts": [
+        "[CH0;X4]"
+      ],
+      "name": "C"
+    },
+    {
+      "id": 5,
+      "unifac_id": "CH2=CH",
+      "main_group": 2,
+      "subgroup": 5,
+      "connections": 1,
+      "smarts": [
+        "[CH2]=[CH]"
+      ],
+      "name": "CH2=CH"
+    },
+    {
+      "id": 6,
+      "unifac_id": "CH=CH",
+      "main_group": 2,
+      "subgroup": 6,
+      "connections": 2,
+      "smarts": [
+        "[CH]=[CH]"
+      ],
+      "name": "CH=CH"
+    },
+    {
+      "id": 7,
+      "unifac_id": "CH2=C",
+      "main_group": 2,
+      "subgroup": 7,
+      "connections": 2,
+      "smarts": [
+        "[CH2]=[C]"
+      ],
+      "name": "CH2=C"
+    },
+    {
+      "id": 8,
+      "unifac_id": "CH=C",
+      "main_group": 2,
+      "subgroup": 8,
+      "connections": 3,
+      "smarts": [
+        "[CH]=[CH0]"
+      ],
+      "name": "CH=C"
+    },
+    {
+      "id": 9,
+      "unifac_id": "C=C",
+      "main_group": 2,
+      "subgroup": 9,
+      "connections": 4,
+      "smarts": [
+        "[CH0]=[CH0]"
+      ],
+      "name": "C=C"
+    },
+    {
+      "id": 10,
+      "unifac_id": "ACH",
+      "main_group": 3,
+      "subgroup": 10,
+      "connections": 2,
+      "smarts": [
+        "[cH]"
+      ],
+      "name": "ACH"
+    },
+    {
+      "id": 11,
+      "unifac_id": "AC",
+      "main_group": 3,
+      "subgroup": 11,
+      "connections": 3,
+      "smarts": [
+        "[cH0]"
+      ],
+      "name": "AC"
+    },
+    {
+      "id": 12,
+      "unifac_id": "ACCH3",
+      "main_group": 4,
+      "subgroup": 12,
+      "connections": 2,
+      "smarts": [
+        "[c][CH3;X4]"
+      ],
+      "name": "ACCH3"
+    },
+    {
+      "id": 13,
+      "unifac_id": "ACCH2",
+      "main_group": 4,
+      "subgroup": 13,
+      "connections": 3,
+      "smarts": [
+        "[c][CH2;X4]"
+      ],
+      "name": "ACCH2"
+    },
+    {
+      "id": 14,
+      "unifac_id": "ACCH",
+      "main_group": 4,
+      "subgroup": 14,
+      "connections": 4,
+      "smarts": [
+        "[c][CH;X4]"
+      ],
+      "name": "ACCH"
+    },
+    {
+      "id": 15,
+      "unifac_id": "OH",
+      "main_group": 5,
+      "subgroup": 15,
+      "connections": 1,
+      "smarts": [
+        "[OH]"
+      ],
+      "name": "OH"
+    },
+    {
+      "id": 16,
+      "unifac_id": "CH3OH",
+      "main_group": 6,
+      "subgroup": 16,
+      "connections": 0,
+      "smarts": [
+        "[CH3][OH]"
+      ],
+      "name": "CH3OH"
+    },
+    {
+      "id": 17,
+      "unifac_id": "H2O",
+      "main_group": 7,
+      "subgroup": 17,
+      "connections": 0,
+      "smarts": [
+        "[OH2]"
+      ],
+      "name": "H2O"
+    },
+    {
+      "id": 18,
+      "unifac_id": "ACOH",
+      "main_group": 8,
+      "subgroup": 18,
+      "connections": 2,
+      "smarts": [
+        "[c][OH]"
+      ],
+      "name": "ACOH"
+    },
+    {
+      "id": 19,
+      "unifac_id": "CH3CO",
+      "main_group": 9,
+      "subgroup": 19,
+      "connections": 1,
+      "smarts": [
+        "[CH3][CH0]=O"
+      ],
+      "name": "CH3CO"
+    },
+    {
+      "id": 20,
+      "unifac_id": "CH2CO",
+      "main_group": 9,
+      "subgroup": 20,
+      "connections": 2,
+      "smarts": [
+        "[CH2][CH0]=O"
+      ],
+      "name": "CH2CO"
+    },
+    {
+      "id": 21,
+      "unifac_id": "HCO",
+      "main_group": 10,
+      "subgroup": 21,
+      "connections": 1,
+      "smarts": [
+        "[CH]=O"
+      ],
+      "name": "HCO"
+    },
+    {
+      "id": 22,
+      "unifac_id": "CH3COO",
+      "main_group": 11,
+      "subgroup": 22,
+      "connections": 1,
+      "smarts": [
+        "[CH3]C(=O)[OH0]"
+      ],
+      "name": "CH3COO"
+    },
+    {
+      "id": 23,
+      "unifac_id": "CH2COO",
+      "main_group": 11,
+      "subgroup": 23,
+      "connections": 2,
+      "smarts": [
+        "[CH2]C(=O)[OH0]"
+      ],
+      "name": "CH2COO"
+    },
+    {
+      "id": 24,
+      "unifac_id": "HCOO",
+      "main_group": 12,
+      "subgroup": 24,
+      "connections": 1,
+      "smarts": [
+        "[CH](=O)[OH0]"
+      ],
+      "name": "HCOO"
+    },
+    {
+      "id": 25,
+      "unifac_id": "CH3O",
+      "main_group": 13,
+      "subgroup": 25,
+      "connections": 1,
+      "smarts": [
+        "[CH3][OH0]"
+      ],
+      "name": "CH3O"
+    },
+    {
+      "id": 26,
+      "unifac_id": "CH2O",
+      "main_group": 13,
+      "subgroup": 26,
+      "connections": 2,
+      "smarts": [
+        "[CH2][OH0]"
+      ],
+      "name": "CH2O"
+    },
+    {
+      "id": 27,
+      "unifac_id": "CHO",
+      "main_group": 13,
+      "subgroup": 27,
+      "connections": 3,
+      "smarts": [
+        "[CH][OH0]"
+      ],
+      "name": "CHO"
+    },
+    {
+      "id": 28,
+      "unifac_id": "THF",
+      "main_group": 13,
+      "subgroup": 28,
+      "connections": 0,
+      "smarts": [
+        "[CH2;R][OH0]"
+      ],
+      "name": "THF"
+    },
+    {
+      "id": 29,
+      "unifac_id": "CH3NH2",
+      "main_group": 14,
+      "subgroup": 29,
+      "connections": 0,
+      "smarts": [
+        "[CH3][NH2]"
+      ],
+      "name": "CH3NH2"
+    },
+    {
+      "id": 30,
+      "unifac_id": "CH2NH2",
+      "main_group": 14,
+      "subgroup": 30,
+      "connections": 1,
+      "smarts": [
+        "[CH2][NH2]"
+      ],
+      "name": "CH2NH2"
+    },
+    {
+      "id": 31,
+      "unifac_id": "CHNH2",
+      "main_group": 14,
+      "subgroup": 31,
+      "connections": 2,
+      "smarts": [
+        "[CH][NH2]"
+      ],
+      "name": "CHNH2"
+    },
+    {
+      "id": 32,
+      "unifac_id": "CH3NH",
+      "main_group": 15,
+      "subgroup": 32,
+      "connections": 1,
+      "smarts": [
+        "[CH3][NH]"
+      ],
+      "name": "CH3NH"
+    },
+    {
+      "id": 33,
+      "unifac_id": "CH2NH",
+      "main_group": 15,
+      "subgroup": 33,
+      "connections": 2,
+      "smarts": [
+        "[CH2][NH]"
+      ],
+      "name": "CH2NH"
+    },
+    {
+      "id": 34,
+      "unifac_id": "CHNH",
+      "main_group": 15,
+      "subgroup": 34,
+      "connections": 3,
+      "smarts": [
+        "[CH][NH]"
+      ],
+      "name": "CHNH"
+    },
+    {
+      "id": 35,
+      "unifac_id": "CH3N",
+      "main_group": 16,
+      "subgroup": 35,
+      "connections": 2,
+      "smarts": [
+        "[CH3][N]"
+      ],
+      "name": "CH3N"
+    },
+    {
+      "id": 36,
+      "unifac_id": "CH2N",
+      "main_group": 16,
+      "subgroup": 36,
+      "connections": 3,
+      "smarts": [
+        "[CH2][N]"
+      ],
+      "name": "CH2N"
+    },
+    {
+      "id": 37,
+      "unifac_id": "ACNH2",
+      "main_group": 17,
+      "subgroup": 37,
+      "connections": 2,
+      "smarts": [
+        "[c][NH2]"
+      ],
+      "name": "ACNH2"
+    },
+    {
+      "id": 38,
+      "unifac_id": "C5H5N",
+      "main_group": 18,
+      "subgroup": 38,
+      "connections": 0,
+      "smarts": [
+        "n1[cH][cH][cH][cH][cH]1"
+      ],
+      "name": "C5H5N"
+    },
+    {
+      "id": 39,
+      "unifac_id": "C5H4N",
+      "main_group": 18,
+      "subgroup": 39,
+      "connections": 1,
+      "smarts": [
+        "n1[c][cH][cH][cH][cH]1",
+        "n1[cH][c][cH][cH][cH]1",
+        "n1[cH][cH][c][cH][cH]1"
+      ],
+      "name": "C5H4N"
+    },
+    {
+      "id": 40,
+      "unifac_id": "C5H3N",
+      "main_group": 18,
+      "subgroup": 40,
+      "connections": 2,
+      "smarts": [
+        "n1[c][c][cH][cH][cH]1",
+        "n1[c][cH][c][cH][cH]1",
+        "n1[c][cH][cH][c][cH]1",
+        "n1[c][cH][cH][cH][c]1",
+        "n1[cH][c][c][cH][cH]1\"",
+        "n1[cH][c][cH][c][cH]1"
+      ],
+      "name": "C5H3N"
+    },
+    {
+      "id": 41,
+      "unifac_id": "CH3CN",
+      "main_group": 19,
+      "subgroup": 41,
+      "connections": 0,
+      "smarts": [
+        "[CH3]C#N"
+      ],
+      "name": "CH3CN"
+    },
+    {
+      "id": 42,
+      "unifac_id": "CH2CN",
+      "main_group": 19,
+      "subgroup": 42,
+      "connections": 1,
+      "smarts": [
+        "[CH2]C#N"
+      ],
+      "name": "CH2CN"
+    },
+    {
+      "id": 43,
+      "unifac_id": "COOH",
+      "main_group": 20,
+      "subgroup": 43,
+      "connections": 1,
+      "smarts": [
+        "C(=O)[OH]"
+      ],
+      "name": "COOH"
+    },
+    {
+      "id": 44,
+      "unifac_id": "HCOOH",
+      "main_group": 20,
+      "subgroup": 44,
+      "connections": 0,
+      "smarts": [
+        "[CH](=O)[OH]"
+      ],
+      "name": "HCOOH"
+    },
+    {
+      "id": 45,
+      "unifac_id": "CH2Cl",
+      "main_group": 21,
+      "subgroup": 45,
+      "connections": 1,
+      "smarts": [
+        "[CH2]Cl"
+      ],
+      "name": "CH2Cl"
+    },
+    {
+      "id": 46,
+      "unifac_id": "CHCl",
+      "main_group": 21,
+      "subgroup": 46,
+      "connections": 2,
+      "smarts": [
+        "[CH]Cl"
+      ],
+      "name": "CHCl"
+    },
+    {
+      "id": 47,
+      "unifac_id": "CCl",
+      "main_group": 21,
+      "subgroup": 47,
+      "connections": 3,
+      "smarts": [
+        "[CH0]Cl"
+      ],
+      "name": "CCl"
+    },
+    {
+      "id": 48,
+      "unifac_id": "CH2Cl2",
+      "main_group": 22,
+      "subgroup": 48,
+      "connections": 0,
+      "smarts": [
+        "[CH2](Cl)Cl"
+      ],
+      "name": "CH2Cl2"
+    },
+    {
+      "id": 49,
+      "unifac_id": "CHCl2",
+      "main_group": 22,
+      "subgroup": 49,
+      "connections": 1,
+      "smarts": [
+        "[CH](Cl)Cl"
+      ],
+      "name": "CHCl2"
+    },
+    {
+      "id": 50,
+      "unifac_id": "CCl2",
+      "main_group": 22,
+      "subgroup": 50,
+      "connections": 2,
+      "smarts": [
+        "C(Cl)Cl"
+      ],
+      "name": "CCl2"
+    },
+    {
+      "id": 51,
+      "unifac_id": "CHCl3",
+      "main_group": 23,
+      "subgroup": 51,
+      "connections": 0,
+      "smarts": [
+        "[CH](Cl)(Cl)Cl"
+      ],
+      "name": "CHCl3"
+    },
+    {
+      "id": 52,
+      "unifac_id": "CCl3",
+      "main_group": 23,
+      "subgroup": 52,
+      "connections": 1,
+      "smarts": [
+        "C(Cl)(Cl)(Cl)"
+      ],
+      "name": "CCl3"
+    },
+    {
+      "id": 53,
+      "unifac_id": "CCl4",
+      "main_group": 24,
+      "subgroup": 53,
+      "connections": 0,
+      "smarts": [
+        "C(Cl)(Cl)(Cl)(Cl)"
+      ],
+      "name": "CCl4"
+    },
+    {
+      "id": 54,
+      "unifac_id": "ACCl",
+      "main_group": 25,
+      "subgroup": 54,
+      "connections": 2,
+      "smarts": [
+        "[c]Cl"
+      ],
+      "name": "ACCl"
+    },
+    {
+      "id": 55,
+      "unifac_id": "CH3NO2",
+      "main_group": 26,
+      "subgroup": 55,
+      "connections": 0,
+      "smarts": [
+        "[CH3][N+](=O)[O-]"
+      ],
+      "name": "CH3NO2"
+    },
+    {
+      "id": 56,
+      "unifac_id": "CH2NO2",
+      "main_group": 26,
+      "subgroup": 56,
+      "connections": 1,
+      "smarts": [
+        "[CH2][N+](=O)[O-]"
+      ],
+      "name": "CH2NO2"
+    },
+    {
+      "id": 57,
+      "unifac_id": "CHNO2",
+      "main_group": 26,
+      "subgroup": 57,
+      "connections": 2,
+      "smarts": [
+        "[CH][N+](=O)[O-]"
+      ],
+      "name": "CHNO2"
+    },
+    {
+      "id": 58,
+      "unifac_id": "ACNO2",
+      "main_group": 27,
+      "subgroup": 58,
+      "connections": 2,
+      "smarts": [
+        "[c][N+](=O)[O-]"
+      ],
+      "name": "ACNO2"
+    },
+    {
+      "id": 59,
+      "unifac_id": "CS2",
+      "main_group": 28,
+      "subgroup": 59,
+      "connections": 0,
+      "smarts": [
+        "C(=S)=S"
+      ],
+      "name": "CS2"
+    },
+    {
+      "id": 60,
+      "unifac_id": "CH3SH",
+      "main_group": 29,
+      "subgroup": 60,
+      "connections": 0,
+      "smarts": [
+        "[CH3][SH]"
+      ],
+      "name": "CH3SH"
+    },
+    {
+      "id": 61,
+      "unifac_id": "CH2SH",
+      "main_group": 29,
+      "subgroup": 61,
+      "connections": 1,
+      "smarts": [
+        "[CH2][SH]"
+      ],
+      "name": "CH2SH"
+    },
+    {
+      "id": 62,
+      "unifac_id": "furfural",
+      "main_group": 30,
+      "subgroup": 62,
+      "connections": 0,
+      "smarts": [
+        "O=[CH]c1[cH][cH][cH]o1"
+      ],
+      "name": "furfural"
+    },
+    {
+      "id": 63,
+      "unifac_id": "DOH",
+      "main_group": 31,
+      "subgroup": 63,
+      "connections": 0,
+      "smarts": [
+        "[OH][CH2][CH2][OH]"
+      ],
+      "name": "DOH"
+    },
+    {
+      "id": 64,
+      "unifac_id": "I",
+      "main_group": 32,
+      "subgroup": 64,
+      "connections": 1,
+      "smarts": [
+        "[IH0]"
+      ],
+      "name": "I"
+    },
+    {
+      "id": 65,
+      "unifac_id": "Br",
+      "main_group": 33,
+      "subgroup": 65,
+      "connections": 1,
+      "smarts": [
+        "[BrH0]"
+      ],
+      "name": "Br"
+    },
+    {
+      "id": 66,
+      "unifac_id": "CH{triple}C",
+      "main_group": 34,
+      "subgroup": 66,
+      "connections": 1,
+      "smarts": [
+        "[CH]#C"
+      ],
+      "name": "CH{triple}C"
+    },
+    {
+      "id": 67,
+      "unifac_id": "C{triple}C",
+      "main_group": 34,
+      "subgroup": 67,
+      "connections": 2,
+      "smarts": [
+        "[C]#C"
+      ],
+      "name": "C{triple}C"
+    },
+    {
+      "id": 68,
+      "unifac_id": "DMSO",
+      "main_group": 35,
+      "subgroup": 68,
+      "connections": 0,
+      "smarts": [
+        "[CH3]S(=O)[CH3]"
+      ],
+      "name": "DMSO"
+    },
+    {
+      "id": 69,
+      "unifac_id": "acrylnitrile",
+      "main_group": 36,
+      "subgroup": 69,
+      "connections": 0,
+      "smarts": [
+        "[CH2]=[CH1][C]#N"
+      ],
+      "name": "acrylnitrile"
+    },
+    {
+      "id": 70,
+      "unifac_id": "Cl-C=C",
+      "main_group": 37,
+      "subgroup": 70,
+      "connections": 1,
+      "smarts": [
+        "[$(Cl[C]=[C])]"
+      ],
+      "name": "Cl-C=C"
+    },
+    {
+      "id": 71,
+      "unifac_id": "ACF",
+      "main_group": 38,
+      "subgroup": 71,
+      "connections": 2,
+      "smarts": [
+        "[c]F"
+      ],
+      "name": "ACF"
+    },
+    {
+      "id": 72,
+      "unifac_id": "DMF",
+      "main_group": 39,
+      "subgroup": 72,
+      "connections": 0,
+      "smarts": [
+        "[CH](=O)N([CH3])[CH3]"
+      ],
+      "name": "DMF"
+    },
+    {
+      "id": 73,
+      "unifac_id": "HCON(CH2)2",
+      "main_group": 39,
+      "subgroup": 73,
+      "connections": 2,
+      "smarts": [
+        "[CH](=O)N([CH2])[CH2]"
+      ],
+      "name": "HCON(CH2)2"
+    },
+    {
+      "id": 74,
+      "unifac_id": "CF3",
+      "main_group": 40,
+      "subgroup": 74,
+      "connections": 1,
+      "smarts": [
+        "C(F)(F)F"
+      ],
+      "name": "CF3"
+    },
+    {
+      "id": 75,
+      "unifac_id": "CF2",
+      "main_group": 40,
+      "subgroup": 75,
+      "connections": 2,
+      "smarts": [
+        "C(F)F"
+      ],
+      "name": "CF2"
+    },
+    {
+      "id": 76,
+      "unifac_id": "CF",
+      "main_group": 40,
+      "subgroup": 76,
+      "connections": 3,
+      "smarts": [
+        "[C]F"
+      ],
+      "name": "CF"
+    },
+    {
+      "id": 77,
+      "unifac_id": "COO",
+      "main_group": 41,
+      "subgroup": 77,
+      "connections": 2,
+      "smarts": [
+        "[CH0](=O)[OH0]"
+      ],
+      "name": "COO"
+    },
+    {
+      "id": 78,
+      "unifac_id": "SiH3",
+      "main_group": 42,
+      "subgroup": 78,
+      "connections": 1,
+      "smarts": [
+        "[SiH3]"
+      ],
+      "name": "SiH3"
+    },
+    {
+      "id": 79,
+      "unifac_id": "SiH2",
+      "main_group": 42,
+      "subgroup": 79,
+      "connections": 2,
+      "smarts": [
+        "[SiH2]"
+      ],
+      "name": "SiH2"
+    },
+    {
+      "id": 80,
+      "unifac_id": "SiH",
+      "main_group": 42,
+      "subgroup": 80,
+      "connections": 3,
+      "smarts": [
+        "[SiH]"
+      ],
+      "name": "SiH"
+    },
+    {
+      "id": 81,
+      "unifac_id": "Si",
+      "main_group": 42,
+      "subgroup": 81,
+      "connections": 4,
+      "smarts": [
+        "[Si]"
+      ],
+      "name": "Si"
+    },
+    {
+      "id": 82,
+      "unifac_id": "SiH2O",
+      "main_group": 43,
+      "subgroup": 82,
+      "connections": 2,
+      "smarts": [
+        "[SiH2][OH0]"
+      ],
+      "name": "SiH2O"
+    },
+    {
+      "id": 83,
+      "unifac_id": "SiHO",
+      "main_group": 43,
+      "subgroup": 83,
+      "connections": 3,
+      "smarts": [
+        "[SiH][OH0]"
+      ],
+      "name": "SiHO"
+    },
+    {
+      "id": 84,
+      "unifac_id": "SiO",
+      "main_group": 43,
+      "subgroup": 84,
+      "connections": 4,
+      "smarts": [
+        "[Si][OH0]"
+      ],
+      "name": "SiO"
+    },
+    {
+      "id": 85,
+      "unifac_id": "NMP",
+      "main_group": 44,
+      "subgroup": 85,
+      "connections": 0,
+      "smarts": [
+        "[CH3]N1[CH2][CH2][CH2]C(=O)1"
+      ],
+      "name": "NMP"
+    },
+    {
+      "id": 86,
+      "unifac_id": "CCl3F",
+      "main_group": 45,
+      "subgroup": 86,
+      "connections": 0,
+      "smarts": [
+        "C(Cl)(Cl)(Cl)F"
+      ],
+      "name": "CCl3F"
+    },
+    {
+      "id": 87,
+      "unifac_id": "CCl2F",
+      "main_group": 45,
+      "subgroup": 87,
+      "connections": 1,
+      "smarts": [
+        "C(Cl)(Cl)F"
+      ],
+      "name": "CCl2F"
+    },
+    {
+      "id": 88,
+      "unifac_id": "HCCl2F",
+      "main_group": 45,
+      "subgroup": 88,
+      "connections": 0,
+      "smarts": [
+        "[CH](Cl)(Cl)F"
+      ],
+      "name": "HCCl2F"
+    },
+    {
+      "id": 89,
+      "unifac_id": "HCClF",
+      "main_group": 45,
+      "subgroup": 89,
+      "connections": 1,
+      "smarts": [
+        "[CH](Cl)F"
+      ],
+      "name": "HCClF"
+    },
+    {
+      "id": 90,
+      "unifac_id": "CClF2",
+      "main_group": 45,
+      "subgroup": 90,
+      "connections": 1,
+      "smarts": [
+        "C(Cl)(F)F"
+      ],
+      "name": "CClF2"
+    },
+    {
+      "id": 91,
+      "unifac_id": "HCClF2",
+      "main_group": 45,
+      "subgroup": 91,
+      "connections": 0,
+      "smarts": [
+        "[CH](Cl)(F)F"
+      ],
+      "name": "HCClF2"
+    },
+    {
+      "id": 92,
+      "unifac_id": "CClF3",
+      "main_group": 45,
+      "subgroup": 92,
+      "connections": 0,
+      "smarts": [
+        "C(Cl)(F)(F)F\""
+      ],
+      "name": "CClF3"
+    },
+    {
+      "id": 93,
+      "unifac_id": "CCl2F2",
+      "main_group": 45,
+      "subgroup": 93,
+      "connections": 0,
+      "smarts": [
+        "C(Cl)(Cl)(F)F"
+      ],
+      "name": "CCl2F2"
+    },
+    {
+      "id": 94,
+      "unifac_id": "CONH2",
+      "main_group": 46,
+      "subgroup": 94,
+      "connections": 1,
+      "smarts": [
+        "C(=O)[NH2]"
+      ],
+      "name": "CONH2"
+    },
+    {
+      "id": 95,
+      "unifac_id": "CONHCH3",
+      "main_group": 46,
+      "subgroup": 95,
+      "connections": 1,
+      "smarts": [
+        "C(=O)[NH][CH3]"
+      ],
+      "name": "CONHCH3"
+    },
+    {
+      "id": 96,
+      "unifac_id": "CONHCH2",
+      "main_group": 46,
+      "subgroup": 96,
+      "connections": 2,
+      "smarts": [
+        "C(=O)[NH][CH2]"
+      ],
+      "name": "CONHCH2"
+    },
+    {
+      "id": 97,
+      "unifac_id": "CON(CH3)2",
+      "main_group": 46,
+      "subgroup": 97,
+      "connections": 1,
+      "smarts": [
+        "C(=O)N([CH3])[CH3]"
+      ],
+      "name": "CON(CH3)2"
+    },
+    {
+      "id": 98,
+      "unifac_id": "CONCH3CH2",
+      "main_group": 46,
+      "subgroup": 98,
+      "connections": 2,
+      "smarts": [
+        "C(=O)N([CH3])[CH2]"
+      ],
+      "name": "CONCH3CH2"
+    },
+    {
+      "id": 99,
+      "unifac_id": "CON(CH2)2",
+      "main_group": 46,
+      "subgroup": 99,
+      "connections": 3,
+      "smarts": [
+        "C(=O)N([CH2])[CH2]"
+      ],
+      "name": "CON(CH2)2"
+    },
+    {
+      "id": 100,
+      "unifac_id": "C2H5O2",
+      "main_group": 47,
+      "subgroup": 100,
+      "connections": 1,
+      "smarts": [
+        "[OH0;!$(OC=O);!R][CH2;!R][CH2;!R][OH]"
+      ],
+      "name": "C2H5O2"
+    },
+    {
+      "id": 101,
+      "unifac_id": "C2H4O2",
+      "main_group": 47,
+      "subgroup": 101,
+      "connections": 2,
+      "smarts": [
+        "[OH0;!$(OC=O);!R][CH;!R][CH2;!R][OH]",
+        "[OH0;!$(OC=O);!R][CH2;!R][CH;!R][OH]"
+      ],
+      "name": "C2H4O2"
+    },
+    {
+      "id": 102,
+      "unifac_id": "CH3S",
+      "main_group": 48,
+      "subgroup": 102,
+      "connections": 1,
+      "smarts": [
+        "[CH3]S"
+      ],
+      "name": "CH3S"
+    },
+    {
+      "id": 103,
+      "unifac_id": "CH2S",
+      "main_group": 48,
+      "subgroup": 103,
+      "connections": 2,
+      "smarts": [
+        "[CH2]S"
+      ],
+      "name": "CH2S"
+    },
+    {
+      "id": 104,
+      "unifac_id": "CHS",
+      "main_group": 48,
+      "subgroup": 104,
+      "connections": 3,
+      "smarts": [
+        "[CH]S"
+      ],
+      "name": "CHS"
+    },
+    {
+      "id": 105,
+      "unifac_id": "morpholine",
+      "main_group": 49,
+      "subgroup": 105,
+      "connections": 0,
+      "smarts": [
+        "[CH2]1[CH2][NH][CH2][CH2]O1"
+      ],
+      "name": "morpholine"
+    },
+    {
+      "id": 106,
+      "unifac_id": "C4H4S",
+      "main_group": 50,
+      "subgroup": 106,
+      "connections": 0,
+      "smarts": [
+        "[cH]1[cH][s;X2][cH][cH]1"
+      ],
+      "name": "C4H4S"
+    },
+    {
+      "id": 107,
+      "unifac_id": "C4H3S",
+      "main_group": 50,
+      "subgroup": 107,
+      "connections": 1,
+      "smarts": [
+        "[c]1[cH][s;X2][cH][cH]1",
+        "[cH]1[c][s;X2][cH][cH]1"
+      ],
+      "name": "C4H3S"
+    },
+    {
+      "id": 108,
+      "unifac_id": "C4H2S",
+      "main_group": 50,
+      "subgroup": 108,
+      "connections": 2,
+      "smarts": [
+        "[c]1[c][s;X2][cH][cH]1",
+        "[c]1[cH][s;X2][cH][c]1",
+        "[cH]1[c][s;X2][c][cH]1",
+        "[cH]1[c][s;X2][cH][c]1"
+      ],
+      "name": "C4H2S"
+    },
+    {
+      "id": 109,
+      "unifac_id": "CH2OCH2",
+      "main_group": 51,
+      "subgroup": 109,
+      "connections": 0,
+      "smarts": [
+        "[CH2]1[CH2]O1"
+      ],
+      "name": "CH2OCH2"
+    },
+    {
+      "id": 110,
+      "unifac_id": "CH2OCH",
+      "main_group": 51,
+      "subgroup": 110,
+      "connections": 1,
+      "smarts": [
+        "[CH2]1[CH]O1"
+      ],
+      "name": "CH2OCH"
+    },
+    {
+      "id": 111,
+      "unifac_id": "CH2OC",
+      "main_group": 51,
+      "subgroup": 111,
+      "connections": 2,
+      "smarts": [
+        "[CH2]1[CH0]O1"
+      ],
+      "name": "CH2OC"
+    },
+    {
+      "id": 112,
+      "unifac_id": "CHOCH",
+      "main_group": 51,
+      "subgroup": 112,
+      "connections": 3,
+      "smarts": [
+        "[CH]1[CH]O1"
+      ],
+      "name": "CHOCH"
+    },
+    {
+      "id": 113,
+      "unifac_id": "CHOC",
+      "main_group": 51,
+      "subgroup": 113,
+      "connections": 3,
+      "smarts": [
+        "C1[CH]O1"
+      ],
+      "name": "CHOC"
+    },
+    {
+      "id": 114,
+      "unifac_id": "COC",
+      "main_group": 51,
+      "subgroup": 114,
+      "connections": 4,
+      "smarts": [
+        "C1[C]O1"
+      ],
+      "name": "COC"
+    },
+    {
+      "id": 115,
+      "unifac_id": "O=COC=O",
+      "main_group": 52,
+      "subgroup": 115,
+      "connections": 2,
+      "smarts": [
+        "C(=O)OC(=O)"
+      ],
+      "name": "O=COC=O"
+    },
+    {
+      "id": 116,
+      "unifac_id": "AC-CN",
+      "main_group": 53,
+      "subgroup": 116,
+      "connections": 2,
+      "smarts": [
+        "[cH0][C]#[N]"
+      ],
+      "name": "AC-CN"
+    },
+    {
+      "id": 117,
+      "unifac_id": "AC-Br",
+      "main_group": 54,
+      "subgroup": 117,
+      "connections": 2,
+      "smarts": [
+        "[cH0][Br]"
+      ],
+      "name": "AC-Br"
+    },
+    {
+      "id": 118,
+      "unifac_id": "CH2SuCH2",
+      "main_group": 55,
+      "subgroup": 118,
+      "connections": 2,
+      "smarts": [
+        "[CH2]S(=O)(=O)[CH2]"
+      ],
+      "name": "CH2SuCH2"
+    },
+    {
+      "id": 119,
+      "unifac_id": "CH2SuCH",
+      "main_group": 55,
+      "subgroup": 119,
+      "connections": 3,
+      "smarts": [
+        "CH2]S(=O)(=O)[CH]"
+      ],
+      "name": "CH2SuCH"
+    }
+  ],
+  "metadata": {
+    "source": "unifac_groups.xlsx",
+    "version": "original",
+    "date": "2025-11-17",
+    "scope": "acyclic_only",
+    "total_groups": 119,
+    "description": "UNIFAC functional groups for molecular fragment assembly"
+  }
+}
