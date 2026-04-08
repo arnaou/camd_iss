@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "source_file": "data/data_unifac.xlsx",
+    "sheet_name": "scalars",
+    "export_timestamp": "2025-08-09T19:48:53.564296",
+    "rows": 9,
+    "constant_column": "const",
+    "value_column": "val",
+    "sample_entries": {
+      "Tm0": 102.425,
+      "Tb0": 204.359,
+      "Tc0": 181.128
+    }
+  },
+  "data": {
+    "Tm0": 102.425,
+    "Tb0": 204.359,
+    "Tc0": 181.128,
+    "Pc01": 1.3705,
+    "Pc02": 0.10022,
+    "w01": 0.4085,
+    "w02": 0.505,
+    "w03": 1.1507,
+    "hv0": 6.829
+  }
+}

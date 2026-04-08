@@ -1,15 +1,13 @@
 """
 Property estimation methods module.
 
-Contains different group contribution and estimation methods for pure component properties.
+Contains group contribution methods for pure component property estimation.
 """
 
 from .base_method import PropertyMethod
 from .constantinou_gani import ConstantinouGani
-from .joback_reid import JobackReid
 
 __all__ = [
     'PropertyMethod',
-    'ConstantinouGani', 
-    'JobackReid'
+    'ConstantinouGani',
 ]

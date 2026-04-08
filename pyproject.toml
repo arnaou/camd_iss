@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "camd-iss"
+version = "0.1.0"
+description = "Computer-Aided Molecular Design for Extractive Distillation using the Infinitely Sharp Split (ISS) Method"
+readme = "README.md"
+license = "GPL-3.0-only"
+requires-python = ">=3.9"
+authors = [
+    { name = "Adem R.N. Aouichaoui", email = "ademoui@kt.dtu.dk" },
+]
+keywords = ["CAMD", "extractive distillation", "UNIFAC", "molecular design", "entrainer", "ISS"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+dependencies = [
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "pandas>=1.3.0",
+    "pyomo>=6.4.0",
+    "matplotlib>=3.5.0",
+    "seaborn>=0.11.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
+notebooks = [
+    "jupyter>=1.0.0",
+    "ipykernel>=6.0.0",
+    "notebook>=6.4.0",
+]
+
+[project.urls]
+Repository = "https://github.com/arnaou/camd_iss"
+Issues = "https://github.com/arnaou/camd_iss/issues"
+
+[tool.setuptools.packages.find]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

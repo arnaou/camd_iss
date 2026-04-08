@@ -22,12 +22,26 @@ import numpy as np
 import pyomo.environ as pyo
 from pathlib import Path
 from typing import Dict, Optional, Union
-import sys
 import os
 
-# Add utils to path for pyomo utilities
-sys.path.append(str(Path(__file__).parent.parent.parent / "utils"))
-from pyom import parse_pyomo_log, ensure_file_exists_in_cwd
+
+def _parse_pyomo_log(file_path: str) -> int:
+    """Parse Pyomo/IPOPT log file and return the number of iterations."""
+    iters = 0
+    with open(file_path, 'r') as f:
+        for line in f:
+            if line.startswith('Number of Iterations....'):
+                tokens = line.split()
+                iters = int(tokens[3])
+    return iters
+
+
+def _ensure_file_exists_in_cwd(filename: str, content: str = ''):
+    """Ensure a file exists in the current working directory, creating it if needed."""
+    file_path = os.path.join(os.getcwd(), filename)
+    if not os.path.exists(file_path):
+        with open(file_path, 'w') as f:
+            f.write(content)
 
 
 class AntoineCalculator:
@@ -192,7 +206,7 @@ class AntoineCalculator:
 
         # Parse iterations from log file
         try:
-            num_iter = parse_pyomo_log(logfile)
+            num_iter = _parse_pyomo_log(logfile)
         except:
             num_iter = None
 
@@ -309,7 +323,7 @@ class AntoineCalculator:
 
         # Parse iterations from log file
         try:
-            num_iter = parse_pyomo_log(logfile)
+            num_iter = _parse_pyomo_log(logfile)
         except:
             num_iter = None
 

@@ -5,33 +5,7 @@ Handles single points or arrays of equal length T and x with consistent output s
 """
 import numpy as np
 from .equations import unifac_equations
-
-
-def _convert_mixture_format(mixture):
-    """
-    Convert mixture from compound format to group format.
-    
-    Args:
-        mixture: Compound format {compound_name: {group: count}}
-    
-    Returns:
-        Group format {group: [counts for each component]}
-    """
-    # Extract compounds (the nested dicts)
-    compounds = list(mixture.values())
-    
-    # Get all unique groups across all compounds
-    all_groups = set()
-    for compound in compounds:
-        all_groups.update(compound.keys())
-    all_groups = sorted(all_groups)
-    
-    # Build group format: {group: [count_in_comp1, count_in_comp2, ...]}
-    group_format = {}
-    for group in all_groups:
-        group_format[group] = [compound.get(group, 0) for compound in compounds]
-    
-    return group_format
+from .utils import convert_mixture_format as _convert_mixture_format
 
 
 def unifac(mixture, x, T, rk_data, qk_data, interaction_data):

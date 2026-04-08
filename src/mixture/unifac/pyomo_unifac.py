@@ -8,33 +8,7 @@ the specific variable naming convention (tau, s, eta, G, etc.).
 import pyomo.environ as pyo
 import numpy as np
 from typing import Dict, List, Optional, Tuple
-
-
-def _convert_mixture_format(mixture):
-    """
-    Convert mixture from compound format to group format.
-    
-    Args:
-        mixture: Compound format {compound_name: {group: count}}
-    
-    Returns:
-        Group format {group: [counts for each component]}
-    """
-    # Extract compounds (the nested dicts)
-    compounds = list(mixture.values())
-    
-    # Get all unique groups across all compounds
-    all_groups = set()
-    for compound in compounds:
-        all_groups.update(compound.keys())
-    all_groups = sorted(all_groups)
-    
-    # Build group format: {group: [count_in_comp1, count_in_comp2, ...]}
-    group_format = {}
-    for group in all_groups:
-        group_format[group] = [compound.get(group, 0) for compound in compounds]
-    
-    return group_format
+from .utils import convert_mixture_format as _convert_mixture_format
 
 
 def pyo_unifac(x, T, mixture, rk_data, qk_data, interaction_data, verbose=False):
@@ -235,6 +209,9 @@ def pyo_unifac(x, T, mixture, rk_data, qk_data, interaction_data, verbose=False)
     opt.options["halt_on_ampl_error"] = "yes"
     opt.options["max_iter"] = 10000
     opt.options["tol"] = 1e-8
+    opt.options["acceptable_tol"] = 1e-6
+    opt.options["mu_init"] = 1e-2
+    opt.options["bound_push"] = 1e-8
     # solve the optimization problem
     solution = opt.solve(model, tee=verbose, symbolic_solver_labels=True)
     

@@ -1,185 +1,162 @@
-<h1 align="center">
-  <a href="https://github.com/arnaou/camd_iss">
-    <!-- Please provide path to your logo here -->
-    <img src="docs/images/logo.svg" alt="Logo" width="100" height="100">
-  </a>
-</h1>
+# CAMD-ISS
 
-<div align="center">
-  Computer-Aided Molecular Design and Screening for Extractive Distillation Entrainers using Infinitely Sharp Split (ISS) Method
-  <br />
-  <a href="#about"><strong>Explore the screenshots »</strong></a>
-  <br />
-  <br />
-  <a href="https://github.com/arnaou/camd_iss/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
-  ·
-  <a href="https://github.com/arnaou/camd_iss/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feat%3A+">Request a Feature</a>
-  .<a href="https://github.com/arnaou/camd_iss/discussions">Ask a Question</a>
-</div>
+**Computer-Aided Molecular Design for Extractive Distillation using the Infinitely Sharp Split (ISS) Method**
 
-<div align="center">
-<br />
-
-[![Project license](https://img.shields.io/badge/License-GPLv3-blue.svg?style=flat-square)](LICENSE)
-
-[![Pull Requests welcome](https://img.shields.io/badge/PRs-welcome-ff69b4.svg?style=flat-square)](https://github.com/arnaou/camd_iss/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22)
-[![made with love by arnaou](https://img.shields.io/badge/made%20with%20%E2%99%A5%20by-arnaou-ff1414.svg?style=flat-square)](https://github.com/arnaou)
-
-</div>
-
-<details open="open">
-<summary>Table of Contents</summary>
-
-- [About](#about)
-  - [Built With](#built-with)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [Usage](#usage)
-- [Roadmap](#roadmap)
-- [Support](#support)
-- [Project assistance](#project-assistance)
-- [Contributing](#contributing)
-- [Authors & contributors](#authors--contributors)
-- [Security](#security)
-- [License](#license)
-- [Acknowledgements](#acknowledgements)
-
-</details>
-
----
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ## About
 
-<table><tr><td>
+Extractive distillation separates azeotropic mixtures by introducing an entrainer that alters relative volatilities. Traditional entrainer selection evaluates selectivity and capacity at infinite dilution but neglects recovery column dynamics.
 
-> Extractive distillation allows the separation of mixtures beyond their azeotropic composition.
-> This is done by introducing a third component called entrainer that alters the relative volatility in the system.
-> Most entrainer selection criteria are based on evaluating the selectivity and capacity at infinite dilution.
-> Furtheremore, they only focus on the dynamics in the extractive column, while neglecting the recovery column.
-> This work introduces a **computer-aided molecular design (CAMD) framework** for entrainer selection using a set of new
-> criteria including the infinitely sharp split concept (ISS), which provides insight into the column performance
+CAMD-ISS provides a framework that:
 
+- **Designs** new entrainer candidates using MILP-based molecular generation with UNIFAC group contributions
+- **Screens** predefined entrainer databases against thermodynamic criteria
+- Evaluates entrainers using the **Infinitely Sharp Split (ISS)** method, which accounts for both extractive and recovery column performance
+- Performs **miscibility screening**, **VLE calculations**, and **azeotrope detection** using Pyomo-based UNIFAC models
 
-[//]: # (<details>)
-
-[//]: # (<summary>Screenshots</summary>)
-
-[//]: # (<br>)
-
-[//]: # ()
-[//]: # (> **[?]**)
-
-[//]: # (> Please provide your screenshots here.)
-
-[//]: # ()
-[//]: # (|                               Home Page                               |                               Login Page                               |)
-
-[//]: # (| :-------------------------------------------------------------------: | :--------------------------------------------------------------------: |)
-
-[//]: # (| <img src="docs/images/screenshot.png" title="Home Page" width="100%"> | <img src="docs/images/screenshot.png" title="Login Page" width="100%"> |)
-
-[//]: # ()
-[//]: # (</details>)
-
-[//]: # ()
-[//]: # (</td></tr></table>)
-
-### Built With
-
-> **[1]**
-> Pandas
-
-> **[2]**
-> Numpy
-
-> **[3]**
-> Pyomo
-
-
-## Getting Started
+## Installation
 
 ### Prerequisites
 
-> **[?]**
-> What are the project requirements/dependencies?
+- Python >= 3.9
+- [IPOPT](https://coin-or.github.io/Ipopt/) solver (required for VLE/ISS optimization)
 
-### Installation
+```bash
+# Install IPOPT via conda (recommended)
+conda install -c conda-forge ipopt
 
-> **[?]**
-> Describe how to install and get started with the project.
+# Install the package
+pip install -e .
+```
+
+Or install dependencies directly:
+
+```bash
+pip install -r requirements.txt
+```
 
 ## Usage
 
-> **[?]**
-> How does one go about using it?
-> Provide various use cases and code examples here.
+CAMD-ISS operates in two modes, both driven by YAML configuration files.
 
-## Roadmap
+### Design Mode
 
-See the [open issues](https://github.com/arnaou/camd_iss/issues) for a list of proposed features (and known issues).
+Automatically generate and screen entrainer candidates:
 
-- [Top Feature Requests](https://github.com/arnaou/camd_iss/issues?q=label%3Aenhancement+is%3Aopen+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
-- [Top Bugs](https://github.com/arnaou/camd_iss/issues?q=is%3Aissue+is%3Aopen+label%3Abug+sort%3Areactions-%2B1-desc) (Add your votes using the 👍 reaction)
-- [Newest Bugs](https://github.com/arnaou/camd_iss/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+```bash
+python camd_iss.py config/example_design.yaml -v
+```
 
-## Support
+The design config specifies the binary mixture (as UNIFAC groups), allowed design groups, structural constraints, and screening thresholds:
 
-> **[?]**
-> Provide additional ways to contact the project maintainer/maintainers.
+```yaml
+mode: "design"
 
-Reach out to the maintainer at one of the following places:
+mixture:
+  component_a:
+    groups: {CH3: 1, CH3CO: 1}  # acetone
+  component_b:
+    groups: {CH3OH: 1}          # methanol
 
-- [GitHub Discussions](https://github.com/arnaou/camd_iss/discussions)
-- Contact options listed on [this GitHub profile](https://github.com/arnaou)
+design:
+  groups: ["CH3", "CH2", "CH", "C", "OH", "HCO", "DMSO", "DOH"]
+  constraints:
+    min_groups: 3
+    max_groups: 6
+    min_func_groups: 1
+    max_func_groups: 2
+    molecular_type: 1  # acyclic
+```
 
-## Project assistance
+### Screen Mode
 
-If you want to say **thank you** or/and support active development of camd_iss:
+Evaluate a predefined set of entrainers:
 
-- Add a [GitHub Star](https://github.com/arnaou/camd_iss) to the project.
-- Tweet about the camd_iss.
-- Write interesting articles about the project on [Dev.to](https://dev.to/), [Medium](https://medium.com/) or your personal blog.
+```bash
+python screen_iss.py config/example_screen.yaml -v
+```
 
-Together, we can make camd_iss **better**!
+```yaml
+mode: "screen"
 
-## Contributing
+mixture:
+  component_a:
+    groups: {CH3: 1, CH3CO: 1}
+  component_b:
+    groups: {CH3OH: 1}
 
-First off, thanks for taking the time to contribute! Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make will benefit everybody else and are **greatly appreciated**.
+screen:
+  entrainers:
+    - name: "ethylene_glycol"
+      groups: {DOH: 1}
+    - name: "DMSO"
+      groups: {DMSO: 1}
+```
 
+### Workflow
 
-Please read [our contribution guidelines](docs/CONTRIBUTING.md), and thank you for being involved!
+Both modes follow the same pipeline:
 
-## Authors & contributors
+1. Validate binary mixture and check UNIFAC parameter availability
+2. Calculate pure component properties (Constantinou-Gani method)
+3. Calculate Antoine parameters via optimization
+4. Generate candidates (design) or load predefined entrainers (screen)
+5. Screen by pure component property constraints
+6. Miscibility screening over temperature range
+7. VLE calculations (bubble point)
+8. Screen by mixture property constraints (selectivity, azeotropes)
+9. ISS calculation for surviving candidates
 
-The original setup of this repository is by [Adem R.N. Aouichaoui](https://github.com/arnaou).
+Results are saved as CSV and JSON in the configured output directory.
 
-For a full list of all authors and contributors,
-see [the contributors page](https://github.com/arnaou/camd_iss/contributors).
+### Analyzing Results
 
-## Security
+Use the screening log analyzer to understand why candidates were eliminated:
 
-camd_iss follows good practices of security, but 100% security cannot be assured.
-camd_iss is provided **"as is"** without any **warranty**. Use at your own risk.
+```bash
+python analyze_screening_log.py results/design/camd_run_YYYYMMDD_HHMMSS.log
+```
 
-_For more information and to report security issues, please refer to our [security documentation](docs/SECURITY.md)._
+## Project Structure
 
-## License
+```
+camd_iss/
+  camd_iss.py          # Design mode entry point
+  screen_iss.py        # Screen mode entry point
+  config/              # YAML configuration examples
+  data/                # UNIFAC parameters and property data
+    json/              # JSON parameter files (rk, qk, Tc, Tb, etc.)
+  src/                 # Core library
+    molecules/         # Structure validation and MILP generation
+    pure/              # Property estimation (Constantinou-Gani)
+    mixture/unifac/    # UNIFAC activity coefficients, VLE, ISS (Pyomo)
+    data/              # Parameter loading and compatibility checking
+    camd/              # CAMD engine
+  tutorials/           # Jupyter notebooks with examples
+  tests/               # Unit tests
+```
 
-This project is licensed under the **GNU General Public License v3**.
+## Built With
 
-See [LICENSE](LICENSE) for more information.
+- [Pyomo](https://www.pyomo.org/) - Optimization modeling
+- [IPOPT](https://coin-or.github.io/Ipopt/) - Nonlinear optimization solver
+- [NumPy](https://numpy.org/) / [SciPy](https://scipy.org/) / [Pandas](https://pandas.pydata.org/)
 
 ## Acknowledgements
 
-> This work was initially conducted as an M.Sc. thesis for Adem R.N. Aouichaoui under
-> the supervision of Assoc. Prof. Jens Abildskov at the process systems engineering center (PROSYS) at the
-> Technical University of Denmark (DTU) between Aug. 2018-Jan 2019.
-> 
-> The work is the fruits of collaboration with:
-> 
-> **[+]** Ivonne Rodriguez-Donis, Laboratoire de Chimie Agro-industrielle, LCA, Université de Toulouse, INRA, Toulouse, France
->
-> **[+]** Nataliya Shcherbakova, Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS Toulouse, France
->
-> **[+]** Vincent Gerbaud, Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS Toulouse, France
+This work originated as an M.Sc. thesis by Adem R.N. Aouichaoui under the supervision of Assoc. Prof. Jens Abildskov at the Process Systems Engineering Center (PROSYS), Technical University of Denmark (DTU).
+
+Collaborators:
+
+- Ivonne Rodriguez-Donis, Laboratoire de Chimie Agro-industrielle (LCA), Universite de Toulouse, INRA
+- Nataliya Shcherbakova, Laboratoire de Genie Chimique, Universite de Toulouse, CNRS, INP, UPS
+- Vincent Gerbaud, Laboratoire de Genie Chimique, Universite de Toulouse, CNRS, INP, UPS
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+
+## License
+
+This project is licensed under the GNU General Public License v3. See [LICENSE](LICENSE) for details.

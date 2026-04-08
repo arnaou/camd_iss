@@ -8,56 +8,8 @@ the specific variable naming convention (tau, s, eta, G, etc.).
 import pyomo.environ as pyo
 import numpy as np
 from typing import Dict, List, Optional, Tuple
-
-
-def _convert_mixture_format(mixture):
-    """
-    Convert mixture from compound format to group format.
-    
-    Args:
-        mixture: Compound format {compound_name: {group: count}}
-    
-    Returns:
-        Group format {group: [counts for each component]}
-    """
-    # Extract compounds (the nested dicts)
-    compounds = list(mixture.values())
-    
-    # Get all unique groups across all compounds
-    all_groups = set()
-    for compound in compounds:
-        all_groups.update(compound.keys())
-    all_groups = sorted(all_groups)
-    
-    # Build group format: {group: [count_in_comp1, count_in_comp2, ...]}
-    group_format = {}
-    for group in all_groups:
-        group_format[group] = [compound.get(group, 0) for compound in compounds]
-    
-    return group_format
-
-
-def _convert_antoine_format(antoine_params):
-    """
-    Convert Antoine parameters from nested dict to array format.
-    
-    Args:
-        antoine_params: Dict format {compound_name: {'A': val, 'B': val, 'C': val}}
-    
-    Returns:
-        Array format (n_components, 3) with [A, B, C] for each component
-    """
-    compounds = list(antoine_params.keys())
-    n_comp = len(compounds)
-    
-    # Build array: [[A1, B1, C1], [A2, B2, C2], ...]
-    antoine_array = np.zeros((n_comp, 3))
-    for i, compound in enumerate(compounds):
-        antoine_array[i, 0] = antoine_params[compound]['A']
-        antoine_array[i, 1] = antoine_params[compound]['B'] 
-        antoine_array[i, 2] = antoine_params[compound]['C']
-    
-    return antoine_array
+from .utils import convert_mixture_format as _convert_mixture_format
+from .utils import convert_antoine_format as _convert_antoine_format
 
 
 def pyo_azeo(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, verbose=False):
@@ -305,6 +257,9 @@ def pyo_azeo(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, 
     opt.options["halt_on_ampl_error"] = "yes"
     opt.options["max_iter"] = 10000
     opt.options["tol"] = 1e-8
+    opt.options["acceptable_tol"] = 1e-6
+    opt.options["mu_init"] = 1e-2
+    opt.options["bound_push"] = 1e-8
     # solve the optimization problem
     solution = opt.solve(model, tee=verbose, symbolic_solver_labels=True)
     

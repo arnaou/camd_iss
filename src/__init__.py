@@ -1,35 +1,32 @@
 """
-CAMD - Computer-Aided Molecular Design for Solvent Screening
+CAMD-ISS: Computer-Aided Molecular Design for Extractive Distillation
 
-Modular package for molecular design with clean separation of concerns:
-- molecules: Molecule representation and validation
-- pure: Pure component property calculations  
-- mixture: Mixture properties and thermodynamics
-- data: Data loading and management
-- camd: CAMD optimization and screening
+Modular package for entrainer design and screening using the Infinitely Sharp
+Split (ISS) method with UNIFAC-based thermodynamic calculations.
+
+Modules:
+    molecules: Molecule representation, validation, and generation
+    pure: Pure component property estimation (Constantinou-Gani)
+    mixture: Mixture thermodynamics (UNIFAC activity coefficients, VLE, ISS)
+    data: UNIFAC parameter loading and compatibility checking
+    camd: CAMD optimization and screening engine
 """
 
-# Submodule imports
 from . import molecules
-from . import pure  
+from . import pure
 from . import mixture
 from . import data
 from . import camd
 
-# Convenience imports for common functionality
 from .camd import CAMD
-#from .mixture import unifac, unifac_equations, UNIFACCalculator
 from .pure import PropertyCalculator, AntoineCalculator
 from .data import load_unifac_data, DataExporter
 from .molecules import StructuralValidator
 
 __all__ = [
-    # Submodules
     'molecules', 'pure', 'mixture', 'data', 'camd',
-    # Main classes
-    'CAMD', 'PropertyCalculator', 'AntoineCalculator',# 'UNIFACCalculator', 
+    'CAMD', 'PropertyCalculator', 'AntoineCalculator',
     'DataExporter', 'StructuralValidator',
-    # Functions
-     'load_unifac_data', #'unifac', 'unifac_wrapper',
+    'load_unifac_data',
 ]
 __version__ = '0.1.0'
