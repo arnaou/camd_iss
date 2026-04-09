@@ -28,7 +28,7 @@ from src.pipeline import (
     calculate_mixture_properties, override_mixture_properties,
     calculate_mixture_antoine, load_and_validate_candidates,
     run_screening_pipeline, save_results, save_detailed_results,
-    _build_mixture_info,
+    print_results_table, _build_mixture_info,
 )
 
 
@@ -113,17 +113,7 @@ def main():
             verbose=verbose
         )
 
-        if verbose:
-            print("\n" + "="*60)
-            print("TOP ENTRAINERS")
-            print("="*60)
-            sorted_entrainers = sorted(iss_results.items(), key=lambda x: x[1]['ED'])
-            for i, (name, data) in enumerate(sorted_entrainers[:5], 1):
-                groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
-                print(f"{i}. {name}")
-                print(f"   Groups: {groups_str}")
-                print(f"   ED: {data['ED']:.6f}, R: {data['R']:.6f}")
-            print(f"\nTotal: {len(iss_results)} entrainers evaluated")
+        print_results_table(results_list, label='entrainer')
 
         print("\n" + "="*60)
         print("Screen-ISS COMPLETE")

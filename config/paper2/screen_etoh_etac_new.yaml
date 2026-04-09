@@ -90,6 +90,6 @@ iss:
   x_min: 0.40
 
 output:
-  dir: "results/screen"
+  dir: "results/paper2/screen_etoh_etac_new"
   formats: ["csv", "json"]
   verbose: true

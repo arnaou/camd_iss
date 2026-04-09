@@ -6,31 +6,31 @@
 
 ## About
 
-Extractive distillation separates azeotropic mixtures by introducing an entrainer that alters relative volatilities. Traditional entrainer selection evaluates selectivity and capacity at infinite dilution but neglects recovery column dynamics.
+Extractive distillation separates azeotropic and close-boiling mixtures by adding an entrainer that modifies relative volatilities. Classical entrainer selection criteria — selectivity and capacity at infinite dilution — ignore the recovery column and can miss feasibility constraints.
 
-CAMD-ISS provides a framework that:
+CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp Split (ISS) method, which simultaneously accounts for the extractive and recovery columns. The framework:
 
-- **Designs** new entrainer candidates using MILP-based molecular generation with UNIFAC group contributions
-- **Screens** predefined entrainer databases against thermodynamic criteria
-- Evaluates entrainers using the **Infinitely Sharp Split (ISS)** method, which accounts for both extractive and recovery column performance
-- Performs **miscibility screening**, **VLE calculations**, and **azeotrope detection** using Pyomo-based UNIFAC models
+- **Designs** new entrainer candidates via MILP-based molecular generation (UNIFAC group contributions)
+- **Screens** predefined entrainer sets against thermodynamic and structural constraints
+- Evaluates candidates using the **ISS objective** (entrainer-to-distillate ratio *ED*), computed via Pyomo/IPOPT optimization
+- Performs **miscibility screening**, **bubble-point VLE**, and **azeotrope detection** along the way
 
 ## Installation
 
 ### Prerequisites
 
-- Python >= 3.9
-- [IPOPT](https://coin-or.github.io/Ipopt/) solver (required for VLE/ISS optimization)
+- Python ≥ 3.9
+- [IPOPT](https://coin-or.github.io/Ipopt/) nonlinear solver
 
 ```bash
 # Install IPOPT via conda (recommended)
 conda install -c conda-forge ipopt
 
-# Install the package
+# Install package and dependencies
 pip install -e .
 ```
 
-Or install dependencies directly:
+Or install dependencies only:
 
 ```bash
 pip install -r requirements.txt
@@ -38,26 +38,24 @@ pip install -r requirements.txt
 
 ## Usage
 
-CAMD-ISS operates in two modes, both driven by YAML configuration files.
+Both modes are driven by YAML configuration files and produce CSV/JSON output.
 
-### Design Mode
-
-Automatically generate and screen entrainer candidates:
+### Design Mode — generate candidates
 
 ```bash
-python camd_iss.py config/example_design.yaml -v
+python camd_iss.py config/paper1/design_acetone_methanol.yaml -v
 ```
 
-The design config specifies the binary mixture (as UNIFAC groups), allowed design groups, structural constraints, and screening thresholds:
+The config specifies the binary mixture, allowed UNIFAC groups, structural constraints, and screening thresholds:
 
 ```yaml
 mode: "design"
 
 mixture:
   component_a:
-    groups: {CH3: 1, CH3CO: 1}  # acetone
+    groups: {CH3: 1, CH3CO: 1}   # acetone
   component_b:
-    groups: {CH3OH: 1}          # methanol
+    groups: {CH3OH: 1}            # methanol
 
 design:
   groups: ["CH3", "CH2", "CH", "C", "OH", "HCO", "DMSO", "DOH"]
@@ -66,15 +64,13 @@ design:
     max_groups: 6
     min_func_groups: 1
     max_func_groups: 2
-    molecular_type: 1  # acyclic
+    molecular_type: 1   # 1 = acyclic
 ```
 
-### Screen Mode
-
-Evaluate a predefined set of entrainers:
+### Screen Mode — evaluate predefined entrainers
 
 ```bash
-python screen_iss.py config/example_screen.yaml -v
+python screen_iss.py config/paper2/screen_homo_acetone_methanol.yaml -v
 ```
 
 ```yaml
@@ -94,53 +90,72 @@ screen:
       groups: {DMSO: 1}
 ```
 
-### Workflow
+### Pipeline
 
-Both modes follow the same pipeline:
+Both modes run the same 14-step screening pipeline:
 
-1. Validate binary mixture and check UNIFAC parameter availability
-2. Calculate pure component properties (Constantinou-Gani method)
-3. Calculate Antoine parameters via optimization
-4. Generate candidates (design) or load predefined entrainers (screen)
-5. Screen by pure component property constraints
-6. Miscibility screening over temperature range
-7. VLE calculations (bubble point)
-8. Screen by mixture property constraints (selectivity, azeotropes)
-9. ISS calculation for surviving candidates
+| Step | Description |
+|------|-------------|
+| 1 | Validate binary mixture (structural check) |
+| 2 | Check UNIFAC parameter availability |
+| 3 | Calculate pure component properties (Constantinou-Gani) |
+| 4 | Apply user property overrides |
+| 5 | Calculate Antoine parameters (Pyomo optimization) |
+| 6 | Generate candidates (design) or load entrainers (screen) |
+| 7 | Check UNIFAC parameters for all candidates |
+| 8 | Calculate pure properties for candidates |
+| 9 | Screen by pure property constraints (Tb, Tc, Pc, …) |
+| 10 | Calculate Antoine parameters for candidates |
+| 11 | Miscibility screening over temperature range |
+| 12 | Bubble-point VLE calculations (ternary) |
+| 13 | Screen by mixture property constraints (selectivity, azeotropes) |
+| 14 | ISS calculation — minimize entrainer-to-distillate ratio *ED* |
 
-Results are saved as CSV and JSON in the configured output directory.
-
-### Analyzing Results
-
-Use the screening log analyzer to understand why candidates were eliminated:
-
-```bash
-python analyze_screening_log.py results/design/camd_run_YYYYMMDD_HHMMSS.log
-```
+Results are written to the configured `output.dir` as `results.csv` and `results.json`.
 
 ## Project Structure
 
 ```
 camd_iss/
-  camd_iss.py          # Design mode entry point
-  screen_iss.py        # Screen mode entry point
-  config/              # YAML configuration examples
-  data/                # UNIFAC parameters and property data
-    json/              # JSON parameter files (rk, qk, Tc, Tb, etc.)
-  src/                 # Core library
-    molecules/         # Structure validation and MILP generation
-    pure/              # Property estimation (Constantinou-Gani)
-    mixture/unifac/    # UNIFAC activity coefficients, VLE, ISS (Pyomo)
-    data/              # Parameter loading and compatibility checking
-    camd/              # CAMD engine
-  tutorials/           # Jupyter notebooks with examples
-  tests/               # Unit tests
+├── camd_iss.py          # Design mode entry point
+├── screen_iss.py        # Screen mode entry point
+├── config/
+│   ├── camd_minimal.yaml         # Minimal working config template
+│   ├── paper1/                   # Acetone/methanol study
+│   └── paper2/                   # Multi-system study
+├── data/
+│   └── json/            # UNIFAC parameters (rk, qk, interactions, Tc, Tb, …)
+├── src/
+│   ├── pipeline.py      # Shared 14-step pipeline
+│   ├── molecules/       # Structure validation and MILP generation
+│   ├── pure/            # Property estimation and Antoine calculation
+│   ├── mixture/unifac/  # UNIFAC, VLE, ISS (Pyomo/IPOPT)
+│   └── data/            # Parameter loading and UNIFAC compatibility
+├── case_studies/        # Analysis notebooks (paper 1)
+├── tutorials/           # Step-by-step Jupyter notebooks (01–09)
+└── tests/               # Unit tests
 ```
+
+## Tutorials
+
+The `tutorials/` folder contains nine notebooks covering the full workflow:
+
+| Notebook | Topic |
+|----------|-------|
+| `01_structures.ipynb` | UNIFAC group structures and validation |
+| `02_pure_properties.ipynb` | Constantinou-Gani property estimation |
+| `03_antoine.ipynb` | Antoine parameter determination (three methods) |
+| `04_unifac.ipynb` | UNIFAC activity coefficient model |
+| `05_vle_binary.ipynb` | Binary VLE calculations |
+| `06_vle_ternary.ipynb` | Ternary VLE calculations |
+| `07_azeotrope.ipynb` | Azeotrope detection |
+| `08_iss.ipynb` | ISS optimization |
+| `09_analyze_screening.ipynb` | Screening results analysis |
 
 ## Built With
 
-- [Pyomo](https://www.pyomo.org/) - Optimization modeling
-- [IPOPT](https://coin-or.github.io/Ipopt/) - Nonlinear optimization solver
+- [Pyomo](https://www.pyomo.org/) — optimization modeling
+- [IPOPT](https://coin-or.github.io/Ipopt/) — nonlinear optimization solver
 - [NumPy](https://numpy.org/) / [SciPy](https://scipy.org/) / [Pandas](https://pandas.pydata.org/)
 
 ## Acknowledgements
@@ -149,14 +164,14 @@ This work originated as an M.Sc. thesis by Adem R.N. Aouichaoui under the superv
 
 Collaborators:
 
-- Ivonne Rodriguez-Donis, Laboratoire de Chimie Agro-industrielle (LCA), Universite de Toulouse, INRA
-- Nataliya Shcherbakova, Laboratoire de Genie Chimique, Universite de Toulouse, CNRS, INP, UPS
-- Vincent Gerbaud, Laboratoire de Genie Chimique, Universite de Toulouse, CNRS, INP, UPS
+- Ivonne Rodriguez-Donis — Laboratoire de Chimie Agro-industrielle (LCA), Université de Toulouse, INRA
+- Nataliya Shcherbakova — Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS
+- Vincent Gerbaud — Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS
 
 ## Contributing
 
-Contributions are welcome. Please read [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
 
 ## License
 
-This project is licensed under the GNU General Public License v3. See [LICENSE](LICENSE) for details.
+GNU General Public License v3. See [LICENSE](LICENSE) for details.

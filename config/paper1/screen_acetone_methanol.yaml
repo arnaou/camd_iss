@@ -21,26 +21,26 @@ pure_properties:
 # Predefined entrainers to evaluate
 screen:
   entrainers:
+    - name: "ethylene_glycol"
+      groups: {DOH: 1}
+
+    - name: "DMSO"
+      groups: {DMSO: 1}
+
+    - name: "water"
+      groups: {H2O: 1}
+    
     - name: "ethanol"
       groups: {CH3: 1, CH2: 1, OH: 1}
-
-    - name: "Proponal"
-      groups: {CH3: 1, CH2: 2, OH: 1}
-
-    - name: "butanol"
-      groups: {CH3: 1, CH2: 3, OH: 1}
     
-    - name: "pentanol"
-      groups: {CH3: 1, CH2: 4, OH: 1}
-    
-    - name: "hexanol"
-      groups: {CH3: 1, CH2: 5, OH: 1}
+    - name: "2-Proponal"
+      groups: {CH3: 2, CH: 1, OH: 1}
 
 
 # Property screening
 screening:
   pure:
-    tb: [368.0, 5000.0]  # K
+    tb: [368.0, 500.0]  # K
     tm: [0.0, 298.0]    # K
     hv: [-9999.0, 67.0] # kJ/mol
 
@@ -48,7 +48,7 @@ screening:
     no_azeotrope_AE: true
     no_azeotrope_BE: true
     miscibility: true
-    selectivity_min: 1.01
+    selectivity_min: 1.2
 
 # ISS settings
 iss:
@@ -57,6 +57,6 @@ iss:
 
 # Output
 output:
-  dir: "results/screen"
+  dir: "results/paper1/screen_acetone_methanol"
   formats: ["csv", "json"]
   verbose: true

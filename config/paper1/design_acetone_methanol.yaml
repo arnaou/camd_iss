@@ -1,14 +1,14 @@
 # CAMD-ISS Configuration - DESIGN MODE
 # Automatically generate and screen solvent candidates
 
-mode: "iss: acetone + n-heptane"
+mode: "design"
 
-# Binary mixture: Acetone/n-heptane separation
+# Binary mixture: Acetone/Methanol separation
 mixture:
   component_a:
     groups: {CH3: 1, CH3CO: 1}  # acetone
   component_b:
-    groups: {CH3: 2, CH2: 5}  # n-heptane
+    groups: {CH3OH: 1}  # methanol
 
 # Override with experimental data
 pure_properties:
@@ -16,12 +16,6 @@ pure_properties:
     tc: 508.1  # K
     pc: 48.0   # bar
     tb: 329.3  # K
-  component_b:
-    tc: 540.2  # K
-    pc: 27.4   # bar
-    tb: 371.5  # K
-    hv: 36.3  # kJ/mol
-
 
 # Solvent design settings
 design:
@@ -35,12 +29,12 @@ design:
     max_func_groups: 2
     molecular_type: 1  # acyclic
 
-  max_candidates: 10000
+  max_candidates: 1000
 
 # Property screening
 screening:
   pure:
-    tb: [401.0, 550.0]  # K
+    tb: [368.0, 500.0]  # K
     tm: [0.0, 298.0]    # K
     hv: [-9999.0, 67.0] # kJ/mol
 
@@ -48,7 +42,7 @@ screening:
     no_azeotrope_AE: true
     no_azeotrope_BE: true
     miscibility: true
-    selectivity_min: 0.5
+    selectivity_min: 2.0
 
 # ISS settings
 iss:
@@ -57,6 +51,6 @@ iss:
 
 # Output
 output:
-  dir: "results/design"
+  dir: "results/paper1/design_acetone_methanol"
   formats: ["csv", "json"]
   verbose: true

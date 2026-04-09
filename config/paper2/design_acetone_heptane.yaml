@@ -56,6 +56,6 @@ iss:
 
 # Output
 output:
-  dir: "results/design"
+  dir: "results/paper2/design_acetone_heptane"
   formats: ["csv", "json"]
   verbose: true

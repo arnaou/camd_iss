@@ -23,10 +23,12 @@ Steps:
 
 import sys
 import os
+import time
 import yaml
 import json
 import csv
 import numpy as np
+import pyomo.environ as pyo
 from pathlib import Path
 from datetime import datetime
 
@@ -76,11 +78,18 @@ def setup_output_dir(config):
 
 
 def print_step(step_num, title, verbose):
-    """Print step header."""
+    """Print step header and return start time."""
     if verbose:
         print("\n" + "="*60)
         print(f"STEP {step_num}: {title}")
         print("="*60)
+    return time.time()
+
+
+def print_step_done(t0, verbose):
+    """Print step elapsed time."""
+    if verbose:
+        print(f"  [{time.time() - t0:.1f}s]")
 
 
 # ---------------------------------------------------------------------------
@@ -89,7 +98,7 @@ def print_step(step_num, title, verbose):
 
 def validate_mixture(config, verbose=False):
     """Check defined mixture for structural validity."""
-    print_step(1, "Validate Binary Mixture", verbose)
+    t0 = print_step(1, "Validate Binary Mixture", verbose)
 
     mixture = {
         'A': config['mixture']['component_a']['groups'],
@@ -113,6 +122,7 @@ def validate_mixture(config, verbose=False):
     if not (is_valid_A and is_valid_B):
         raise ValueError("Binary mixture validation failed")
 
+    print_step_done(t0, verbose)
     return mixture
 
 
@@ -122,7 +132,7 @@ def validate_mixture(config, verbose=False):
 
 def check_mixture_parameters(mixture, verbose=False):
     """Check UNIFAC parameters for binary mixture."""
-    print_step(2, "Check Binary Mixture Parameters", verbose)
+    t0 = print_step(2, "Check Binary Mixture Parameters", verbose)
 
     result = check_unifac_parameters(mixture=mixture)
 
@@ -133,6 +143,7 @@ def check_mixture_parameters(mixture, verbose=False):
             print("✗ Missing UNIFAC parameters")
         print(f"\nSummary: {'Compatible' if result['compatible'] else 'Missing parameters'}")
 
+    print_step_done(t0, verbose)
     return result['compatible']
 
 
@@ -142,7 +153,7 @@ def check_mixture_parameters(mixture, verbose=False):
 
 def calculate_mixture_properties(mixture, verbose=False):
     """Calculate pure component properties for binary mixture."""
-    print_step(3, "Calculate Pure Component Properties (Mixture)", verbose)
+    t0 = print_step(3, "Calculate Pure Component Properties (Mixture)", verbose)
 
     prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
     pure_calc = PropertyCalculator()
@@ -160,6 +171,7 @@ def calculate_mixture_properties(mixture, verbose=False):
             print(f"  Hv: {props['hv']:.2f} kJ/mol")
         print(f"\nSummary: Calculated {len(prop_list)} properties for {len(pure_props)} components")
 
+    print_step_done(t0, verbose)
     return pure_props
 
 
@@ -169,7 +181,7 @@ def calculate_mixture_properties(mixture, verbose=False):
 
 def override_mixture_properties(pure_props, config, verbose=False):
     """Apply user-provided property overrides."""
-    print_step(4, "Override Mixture Properties (if provided)", verbose)
+    t0 = print_step(4, "Override Mixture Properties (if provided)", verbose)
 
     overrides_applied = 0
 
@@ -191,6 +203,7 @@ def override_mixture_properties(pure_props, config, verbose=False):
         else:
             print("\nSummary: No overrides (using calculated values)")
 
+    print_step_done(t0, verbose)
     return pure_props
 
 
@@ -200,7 +213,7 @@ def override_mixture_properties(pure_props, config, verbose=False):
 
 def calculate_mixture_antoine(mixture, pure_props, verbose=False):
     """Calculate Antoine parameters for mixture components."""
-    print_step(5, "Calculate Antoine Parameters (Mixture)", verbose)
+    t0 = print_step(5, "Calculate Antoine Parameters (Mixture)", verbose)
 
     antoine_calc = AntoineCalculator()
     antoine_params = {}
@@ -231,6 +244,7 @@ def calculate_mixture_antoine(mixture, pure_props, verbose=False):
     if len(antoine_params) != len(pure_props):
         raise ValueError("Antoine parameter calculation failed for mixture components")
 
+    print_step_done(t0, verbose)
     return antoine_params
 
 
@@ -248,7 +262,7 @@ def load_and_validate_candidates(config, config_key='screen', list_key='entraine
         list_key: Key within config_key for the candidate list
                   ('entrainers' or 'solvents').
     """
-    print_step(6, "Load and Validate Candidates", verbose)
+    t0 = print_step(6, "Load and Validate Candidates", verbose)
 
     screen_config = config[config_key]
     candidates = []
@@ -282,6 +296,7 @@ def load_and_validate_candidates(config, config_key='screen', list_key='entraine
     if verbose:
         print(f"\nSummary: {valid_count} valid, {invalid_count} invalid")
 
+    print_step_done(t0, verbose)
     return candidates, candidate_names
 
 
@@ -291,7 +306,7 @@ def load_and_validate_candidates(config, config_key='screen', list_key='entraine
 
 def check_candidate_parameters(candidates, mixture, verbose=False):
     """Check UNIFAC parameters for candidates."""
-    print_step(7, "Check Candidate Parameters (UNIFAC)", verbose)
+    t0 = print_step(7, "Check Candidate Parameters (UNIFAC)", verbose)
 
     result = check_unifac_parameters(mixture=mixture, solvent_candidates=candidates)
 
@@ -304,6 +319,7 @@ def check_candidate_parameters(candidates, mixture, verbose=False):
         print(f"Incompatible: {len(candidates) - len(compatible)}")
         print(f"\nSummary: {len(compatible)}/{len(candidates)} have complete UNIFAC parameters")
 
+    print_step_done(t0, verbose)
     return compatible, compatible_indices
 
 
@@ -320,7 +336,7 @@ def calculate_candidate_properties(candidates, config, prefix='candidate', verbo
         config: Parsed YAML config (unused currently, kept for interface consistency).
         prefix: Name prefix for internal labelling ('candidate', 'solvent', 'entrainer').
     """
-    print_step(8, "Calculate Pure Component Properties (Candidates)", verbose)
+    t0 = print_step(8, "Calculate Pure Component Properties (Candidates)", verbose)
 
     prop_calc = PropertyCalculator()
     compounds = {f"{prefix}_{i+1}": sol for i, sol in enumerate(candidates)}
@@ -337,6 +353,7 @@ def calculate_candidate_properties(candidates, config, prefix='candidate', verbo
             print(f"Dropped: {dropped} (missing group contributions)")
         print(f"\nSummary: {len(props)}/{len(candidates)} properties calculated")
 
+    print_step_done(t0, verbose)
     return props
 
 
@@ -346,7 +363,7 @@ def calculate_candidate_properties(candidates, config, prefix='candidate', verbo
 
 def screen_pure_properties(candidates, candidate_props, config, verbose=False):
     """Screen candidates based on pure property constraints."""
-    print_step(9, "Screen Pure Properties", verbose)
+    t0 = print_step(9, "Screen Pure Properties", verbose)
 
     constraints = config['screening']['pure']
     screened = {}
@@ -403,6 +420,7 @@ def screen_pure_properties(candidates, candidate_props, config, verbose=False):
 
         print(f"\nSummary: {len(screened)}/{len(candidate_props)} passed pure property screening")
 
+    print_step_done(t0, verbose)
     return screened
 
 
@@ -412,7 +430,7 @@ def screen_pure_properties(candidates, candidate_props, config, verbose=False):
 
 def calculate_candidate_antoine(screened_candidates, verbose=False):
     """Calculate Antoine parameters for screened candidates."""
-    print_step(10, "Calculate Antoine Parameters (Candidates)", verbose)
+    t0 = print_step(10, "Calculate Antoine Parameters (Candidates)", verbose)
 
     antoine_calc = AntoineCalculator()
     antoine_params = {}
@@ -445,6 +463,7 @@ def calculate_candidate_antoine(screened_candidates, verbose=False):
         print(f"Failed: {failed}")
         print(f"\nSummary: {len(antoine_params)}/{len(screened_candidates)} calculated")
 
+    print_step_done(t0, verbose)
     return antoine_params
 
 
@@ -467,11 +486,14 @@ def screen_miscibility(screened_candidates, mixture, binary_props,
 
     Removes candidates that show phase splitting or instability at any temperature.
     """
-    print_step(11, "Screen Miscibility (Temperature Range)", verbose)
+    t0 = print_step(11, "Screen Miscibility (Temperature Range)", verbose)
 
     n_data = 100
-    x1 = np.linspace(0.0, 1.0, n_data)
     T_step = 1.0
+
+    # Composition grid — fixed for all candidates and temperatures, built once
+    x1 = np.linspace(0.0, 1.0, n_data)
+    x_binary = np.column_stack([x1, 1 - x1])  # (n_data, 2)
 
     passed_miscibility = {}
     failed_miscibility = {}
@@ -485,82 +507,60 @@ def screen_miscibility(screened_candidates, mixture, binary_props,
         try:
             tb_E = cand_data['properties']['tb']
 
-            # Determine temperature ranges for A-E and B-E pairs
-            T_min_AE = min(tb_A, tb_E)
-            T_max_AE = max(tb_A, tb_E)
-            T_range_AE = np.arange(T_min_AE, T_max_AE + T_step, T_step)
+            T_range_AE = np.arange(min(tb_A, tb_E), max(tb_A, tb_E) + T_step, T_step)
+            T_range_BE = np.arange(min(tb_B, tb_E), max(tb_B, tb_E) + T_step, T_step)
 
-            T_min_BE = min(tb_B, tb_E)
-            T_max_BE = max(tb_B, tb_E)
-            T_range_BE = np.arange(T_min_BE, T_max_BE + T_step, T_step)
+            def _check_miscibility_batched(comp_key, comp_groups, T_range):
+                """
+                Batch all temperature steps into a single unifac() call.
+                Returns (is_miscible, failing_temps).
+                """
+                N_T = len(T_range)
+                # Stack composition and temperature arrays across all T steps
+                x_batch = np.tile(x_binary, (N_T, 1))          # (N_T*n_data, 2)
+                T_batch = np.repeat(T_range, n_data)            # (N_T*n_data,)
 
-            miscible_for_all_temps = True
-            failing_pair = None
-            failing_temps = []
-
-            # Test A-E miscibility
-            for T_test in T_range_AE:
-                x_AE = np.column_stack([x1, 1 - x1])
-
-                results = unifac(
-                    {'A': mixture['A'], 'E': cand_data['groups']},
-                    x_AE,
-                    np.full(n_data, T_test),
-                    rk_data, qk_data, interaction_data
+                res = unifac(
+                    {comp_key: comp_groups, 'E': cand_data['groups']},
+                    x_batch, T_batch, rk_data, qk_data, interaction_data
                 )
+                gamma_batch = res['gamma'].reshape(N_T, n_data, 2)   # (N_T, n_data, 2)
+                x_3d = x_binary[np.newaxis, :, :]                    # (1, n_data, 2)
 
-                gamma = results['gamma']
+                # G_mix for each T slice: shape (N_T, n_data)
+                G_mix_all = (np.sum(x_3d * np.log(gamma_batch), axis=2) +
+                             np.sum(np.ma.log(x_3d).filled(0) * x_3d, axis=2))
 
-                G_mix = (np.sum(x_AE * np.log(gamma), axis=1) +
-                         np.sum(np.ma.log(x_AE).filled(0) * x_AE, axis=1))
-
-                if len(G_mix) > 2:
-                    G2_mix = np.diff(np.diff(G_mix))
-
-                    G_mix_check = np.all(G_mix[1:-1] <= 0)
-                    G2_mix_check = np.all(G2_mix >= 0)
-
-                    if not (G_mix_check and G2_mix_check):
-                        miscible_for_all_temps = False
-                        failing_pair = "A-E"
-                        failing_temps.append(T_test)
-
-            if miscible_for_all_temps:
                 failing_temps = []
-                # Test B-E miscibility (only if A-E passed)
-                for T_test in T_range_BE:
-                    x_BE = np.column_stack([x1, 1 - x1])
-
-                    results = unifac(
-                        {'B': mixture['B'], 'E': cand_data['groups']},
-                        x_BE,
-                        np.full(n_data, T_test),
-                        rk_data, qk_data, interaction_data
-                    )
-
-                    gamma = results['gamma']
-
-                    G_mix = (np.sum(x_BE * np.log(gamma), axis=1) +
-                             np.sum(np.ma.log(x_BE).filled(0) * x_BE, axis=1))
-
+                for t_idx, T_test in enumerate(T_range):
+                    G_mix = G_mix_all[t_idx]
                     if len(G_mix) > 2:
                         G2_mix = np.diff(np.diff(G_mix))
-
-                        G_mix_check = np.all(G_mix[1:-1] <= 0)
-                        G2_mix_check = np.all(G2_mix >= 0)
-
-                        if not (G_mix_check and G2_mix_check):
-                            miscible_for_all_temps = False
-                            failing_pair = "B-E"
+                        if not (np.all(G_mix[1:-1] <= 0) and np.all(G2_mix >= 0)):
                             failing_temps.append(T_test)
 
-            if miscible_for_all_temps:
+                return len(failing_temps) == 0, failing_temps
+
+            # Test A-E then B-E (B-E only if A-E passes)
+            miscible_AE, failing_AE = _check_miscibility_batched(
+                'A', mixture['A'], T_range_AE
+            )
+
+            if not miscible_AE:
+                failing_temps = failing_AE
+                failing_pair = "A-E"
+            else:
+                miscible_BE, failing_BE = _check_miscibility_batched(
+                    'B', mixture['B'], T_range_BE
+                )
+                failing_temps = failing_BE
+                failing_pair = "B-E" if failing_BE else None
+
+            if not failing_temps:
                 passed_miscibility[cand_name] = cand_data
             else:
                 if len(failing_temps) > 1:
-                    T_min = failing_temps[0]
-                    T_max = failing_temps[-1]
-                    temp_range_str = f"{T_min:.1f}-{T_max:.1f}K"
+                    temp_range_str = f"{failing_temps[0]:.1f}-{failing_temps[-1]:.1f}K"
                 else:
                     temp_range_str = f"{failing_temps[0]:.1f}K"
                 failed_miscibility[cand_name] = {
@@ -586,6 +586,7 @@ def screen_miscibility(screened_candidates, mixture, binary_props,
 
         print(f"\nSummary: {len(passed_miscibility)}/{len(screened_candidates)} passed miscibility screening")
 
+    print_step_done(t0, verbose)
     return passed_miscibility
 
 
@@ -594,11 +595,11 @@ def screen_miscibility(screened_candidates, mixture, binary_props,
 # ---------------------------------------------------------------------------
 
 def perform_vle(screened_candidates, candidate_antoine, mixture,
-                binary_antoine, binary_props, verbose=False):
+                binary_antoine, binary_props,
+                rk_data, qk_data, interaction_data, verbose=False):
     """Perform VLE calculations for candidates."""
-    print_step(12, "Perform VLE Calculations", verbose)
+    t0 = print_step(12, "Perform VLE Calculations", verbose)
 
-    rk_data, qk_data, interaction_data = load_unifac_data()
     P = 1.01325  # bar
     n_data = 50
 
@@ -744,6 +745,7 @@ def perform_vle(screened_candidates, candidate_antoine, mixture,
 
         print(f"\nSummary: {len(successful)}/{total} VLE calculations successful")
 
+    print_step_done(t0, verbose)
     return vle_results, successful
 
 
@@ -753,7 +755,7 @@ def perform_vle(screened_candidates, candidate_antoine, mixture,
 
 def screen_mixture_properties(vle_results, successful, screened_candidates, config, verbose=False):
     """Screen candidates based on mixture property constraints."""
-    print_step(13, "Screen Mixture Properties", verbose)
+    t0 = print_step(13, "Screen Mixture Properties", verbose)
 
     mixture_config = config['screening']['mixture']
     passed = {}
@@ -807,6 +809,7 @@ def screen_mixture_properties(vle_results, successful, screened_candidates, conf
 
         print(f"\nSummary: {len(passed)}/{len(successful)} passed mixture screening")
 
+    print_step_done(t0, verbose)
     return passed
 
 
@@ -815,7 +818,8 @@ def screen_mixture_properties(vle_results, successful, screened_candidates, conf
 # ---------------------------------------------------------------------------
 
 def perform_iss(screened_mixture, compatible_candidates, mixture, binary_antoine,
-                candidate_antoine, binary_props, config, verbose=False, detailed=False):
+                candidate_antoine, binary_props, config,
+                rk_data, qk_data, interaction_data, verbose=False, detailed=False):
     """
     Perform ISS calculations.
 
@@ -823,9 +827,7 @@ def perform_iss(screened_mixture, compatible_candidates, mixture, binary_antoine
         detailed: If True, extract full gamma/K/x/y arrays per operating point
                   (used by screen mode for detailed JSON output).
     """
-    print_step(14, "Perform ISS Calculations", verbose)
-
-    rk_data, qk_data, interaction_data = load_unifac_data()
+    t0 = print_step(14, "Perform ISS Calculations", verbose)
 
     iss_config = config['iss']
     x_iso = iss_config['x_iso']
@@ -873,7 +875,6 @@ def perform_iss(screened_mixture, compatible_candidates, mixture, binary_antoine
                 }
                 continue
 
-            import pyomo.environ as pyo
             ED = pyo.value(model.obj)
             R_value = pyo.value(model.R)
 
@@ -928,6 +929,7 @@ def perform_iss(screened_mixture, compatible_candidates, mixture, binary_antoine
 
         print(f"\nSummary: {len(iss_results)}/{len(screened_mixture)} ISS calculations successful")
 
+    print_step_done(t0, verbose)
     return iss_results
 
 
@@ -1118,6 +1120,80 @@ def save_detailed_results(iss_results, screened_mixture, output_dir, mixture_inf
 
 
 # ---------------------------------------------------------------------------
+# Results table
+# ---------------------------------------------------------------------------
+
+def print_results_table(results_list, label='candidate', top_n=None):
+    """
+    Print a single-line-per-entry summary table of screening results.
+
+    Columns: rank, groups, ED, R, S, C, SxC, alpha,
+             Tb, Tc, Pc, Tm, ac, Hv, Antoine A/B/C
+
+    Args:
+        results_list: List of result dicts from save_results (sorted by ED).
+        label: Header label used in title ('solvent', 'entrainer', 'candidate').
+        top_n: If set, only print the top N entries.
+    """
+    if not results_list:
+        return
+
+    entries = results_list[:top_n] if top_n else results_list
+    count = len(results_list)
+
+    def _fv(v, w, d):
+        """Format a float value with given width and decimals, or 'n/a'."""
+        return f"{v:{w}.{d}f}" if v is not None else f"{'n/a':>{w}}"
+
+    # Column widths
+    G = 30   # groups
+    W = 140  # total separator line width
+
+    header = (
+        f"{'#':>3}  {'Groups':<{G}}  "
+        f"{'ED':>8}  {'R':>6}  {'S':>6}  {'C':>6}  {'SxC':>6}  {'alpha':>6}  "
+        f"{'Tb(K)':>6}  {'Tc(K)':>6}  {'Pc(b)':>5}  {'Tm(K)':>6}  "
+        f"{'ac':>6}  {'Hv(kJ)':>6}  {'Ant-A':>7}  {'Ant-B':>8}  {'Ant-C':>7}"
+    )
+
+    title = f"TOP {label.upper()}S" if top_n is None else f"TOP {top_n} {label.upper()}S"
+    print("\n" + "=" * W)
+    print(f"{title} (sorted by ED)".center(W))
+    print("=" * W)
+    print(header)
+    print("-" * W)
+
+    for i, entry in enumerate(entries, 1):
+        groups = entry.get('groups', 'n/a')
+        if len(groups) > G:
+            groups = groups[:G - 3] + "..."
+
+        line = (
+            f"{i:>3}  {groups:<{G}}  "
+            f"{_fv(entry.get('ED'),    8, 4)}  "
+            f"{_fv(entry.get('R'),     6, 3)}  "
+            f"{_fv(entry.get('S'),     6, 3)}  "
+            f"{_fv(entry.get('C'),     6, 3)}  "
+            f"{_fv(entry.get('SxC'),   6, 3)}  "
+            f"{_fv(entry.get('alpha'), 6, 3)}  "
+            f"{_fv(entry.get('tb'),    6, 1)}  "
+            f"{_fv(entry.get('tc'),    6, 1)}  "
+            f"{_fv(entry.get('pc'),    5, 2)}  "
+            f"{_fv(entry.get('tm'),    6, 1)}  "
+            f"{_fv(entry.get('ac'),    6, 4)}  "
+            f"{_fv(entry.get('hv'),    6, 2)}  "
+            f"{_fv(entry.get('ant_A'), 7, 4)}  "
+            f"{_fv(entry.get('ant_B'), 8, 3)}  "
+            f"{_fv(entry.get('ant_C'), 7, 3)}"
+        )
+        print(line)
+
+    print("=" * W)
+    print(f"Total: {count} {label}(s) evaluated")
+    print("=" * W)
+
+
+# ---------------------------------------------------------------------------
 # Full screening pipeline (steps 7-14)
 # ---------------------------------------------------------------------------
 
@@ -1156,8 +1232,10 @@ def run_screening_pipeline(candidates, mixture, binary_props, binary_antoine,
         print("\n⚠ No candidates have valid Antoine parameters")
         return None
 
-    # Step 11: Miscibility screening
+    # Load UNIFAC data once — shared by steps 11, 12, 14
     rk_data, qk_data, interaction_data = load_unifac_data()
+
+    # Step 11: Miscibility screening
     screened_miscibility = screen_miscibility(
         screened_pure, mixture, binary_props,
         rk_data, qk_data, interaction_data, verbose
@@ -1173,7 +1251,7 @@ def run_screening_pipeline(candidates, mixture, binary_props, binary_antoine,
     # Step 12: VLE
     vle_results, successful = perform_vle(
         screened_miscibility, antoine_filtered, mixture,
-        binary_antoine, binary_props, verbose
+        binary_antoine, binary_props, rk_data, qk_data, interaction_data, verbose
     )
     if not successful:
         print("\n⚠ No successful VLE calculations")
@@ -1190,7 +1268,8 @@ def run_screening_pipeline(candidates, mixture, binary_props, binary_antoine,
     # Step 14: ISS calculation
     iss_results = perform_iss(
         screened_mixture, screened_miscibility, mixture, binary_antoine,
-        antoine_filtered, binary_props, config, verbose, detailed=detailed_iss
+        antoine_filtered, binary_props, config,
+        rk_data, qk_data, interaction_data, verbose, detailed=detailed_iss
     )
 
     return {

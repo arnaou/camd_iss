@@ -27,7 +27,7 @@ from src.pipeline import (
     validate_mixture, check_mixture_parameters,
     calculate_mixture_properties, override_mixture_properties,
     calculate_mixture_antoine, load_and_validate_candidates,
-    run_screening_pipeline, save_results,
+    run_screening_pipeline, save_results, print_results_table,
 )
 
 
@@ -131,7 +131,7 @@ def main():
         screened_mixture = pipeline_result['screened_mixture']
 
         # Save results
-        save_results(
+        results_list, _ = save_results(
             iss_results, screened_mixture, output_dir, config, verbose,
             binary_props=binary_props, binary_antoine=binary_antoine,
             binary_mixture=mixture,
@@ -140,17 +140,7 @@ def main():
             label='solvent'
         )
 
-        if verbose:
-            print("\n" + "="*60)
-            print("TOP SOLVENTS")
-            print("="*60)
-            sorted_solvents = sorted(iss_results.items(), key=lambda x: x[1]['ED'])
-            for i, (name, data) in enumerate(sorted_solvents[:5], 1):
-                groups_str = ", ".join([f"{k}:{v}" for k, v in data['groups'].items()])
-                print(f"{i}. {name}")
-                print(f"   Groups: {groups_str}")
-                print(f"   ED: {data['ED']:.6f}, R: {data['R']:.6f}")
-            print(f"\nTotal: {len(iss_results)} solvents found")
+        print_results_table(results_list, label='solvent')
 
         print("\n" + "="*60)
         print("CAMD-ISS COMPLETE")

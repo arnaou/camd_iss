@@ -7,7 +7,6 @@ Minimal implementation focusing on essential compatibility information:
 - Clean, focused output
 """
 
-import pickle
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Any
 from .load_unifac import load_unifac_data
@@ -108,17 +107,19 @@ def _check_groups(
     try:
         rk_data, qk_data, interaction_data = load_unifac_data(data_path)
 
-        # Load main group mapping
+        # Load main group mapping from unifac_ly.json
         if data_path is None:
             data_path = Path(__file__).parent.parent.parent / "data"
 
-        with open(Path(data_path) / "unifac_groups.pkl", 'rb') as f:
-            unifac_dict = pickle.load(f)
+        import json as _json
+        with open(Path(data_path) / "json" / "unifac_ly.json", 'r') as f:
+            ly_data = _json.load(f)
 
-        group_to_main = {}
-        for entry in unifac_dict.values():
-            if 'grp' in entry and 'main_g' in entry:
-                group_to_main[entry['grp']] = entry['main_g']
+        group_to_main = {
+            entry['unifac_id']: entry['main_group']
+            for entry in ly_data.get('unifac_groups', [])
+            if 'unifac_id' in entry and 'main_group' in entry
+        }
 
     except Exception:
         return {

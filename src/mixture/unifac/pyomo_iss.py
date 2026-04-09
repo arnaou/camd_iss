@@ -8,73 +8,15 @@ from typing import Dict, List, Optional, Tuple
 from .interface import unifac
 from .utils import convert_mixture_format as _convert_mixture_format
 from .utils import convert_antoine_format as _convert_antoine_format
+from .utils import generate_initialization_values as _generate_init_base
 
 
 def _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params):
-    """
-    Generate initialization values using the UNIFAC interface for better convergence.
-    
-    Args:
-        x: liquid composition array (n_data, n_components)
-        T: temperature array (n_data,) in Kelvin
-        mixture: compound format {compound_name: {group: count}}
-        rk_data, qk_data, interaction_data: UNIFAC parameter dictionaries
-        antoine_params: Antoine parameters dict
-    
-    Returns:
-        Dict with initialization values for all variables
-    """
-    try:
-        # Calculate UNIFAC values using the interface
-        results = unifac(mixture, x, T, rk_data, qk_data, interaction_data)
-        
-        # Convert Antoine parameters
-        antoine_array = _convert_antoine_format(antoine_params)
-        n_data, n_comp = x.shape
-        
-        # Calculate vapor pressures using Antoine equation
-        psat_init = np.zeros((n_data, n_comp))
-        for j in range(n_data):
-            for i in range(n_comp):
-                A, B, C = antoine_array[i]
-                psat_init[j, i] = 10**(A - B / (C + T[j]))
-        
-        # Calculate initial vapor compositions using VLE equilibrium
-        P = 1.01325  # Default pressure in bar
-        y_init = np.zeros((n_data, n_comp))
-        K_init = np.zeros((n_data, n_comp))
-        for j in range(n_data):
-            for i in range(n_comp):
-                K_init[j, i] = results['gamma'][j, i] * psat_init[j, i] / P
-                y_init[j, i] = K_init[j, i] * x[j, i]
-            # Normalize y to sum to 1
-            y_init[j, :] = y_init[j, :] / np.sum(y_init[j, :])
-        
-        # Create initialization dictionary
-        init_values = {
-            'r': results['r'],
-            'q': results['q'], 
-            'J': results['J'],
-            'L': results['L'],
-            'e': results['e'],
-            'theta': results['theta'],
-            'psi': results['psi'],
-            'beta': results['beta'],
-            'omega': results['omega'],
-            'log_gamma_c': results['log_gamma_c'],
-            'log_gamma_r': results['log_gamma_r'],
-            'gamma': results['gamma'],
-            'psat': psat_init,
-            'y': y_init,
-            'K': K_init
-        }
-        
-        return init_values
-        
-    except Exception as e:
-        print(f"Warning: Failed to generate initialization values: {e}")
-        print("Using default initialization values instead.")
-        return None
+    """Wrapper that requests K-value initialization for the ISS model."""
+    return _generate_init_base(
+        x, T, mixture, rk_data, qk_data, interaction_data, antoine_params,
+        include_K=True
+    )
 
 
 def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, P=1.01325, verbose=False):
@@ -423,9 +365,6 @@ def pyo_iss(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, P
     opt.options["halt_on_ampl_error"] = "yes"
     opt.options["max_iter"] = 100000
     opt.options["tol"] = 1e-8
-    opt.options["acceptable_tol"] = 1e-6
-    opt.options["mu_init"] = 1e-2
-    opt.options["bound_push"] = 1e-8
     # solve the optimization problem
     solution = opt.solve(model, tee=verbose, symbolic_solver_labels=True)
     
