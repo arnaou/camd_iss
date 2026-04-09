@@ -91,6 +91,7 @@ target/
 trash/
 old_code/
 old_files/
+old_files/
 src/mixture/unifac_backup_20250912_085147/
 resources/
 pyomo_antoine_log

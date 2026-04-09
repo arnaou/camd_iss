@@ -934,6 +934,95 @@ def perform_iss(screened_mixture, compatible_candidates, mixture, binary_antoine
 
 
 # ---------------------------------------------------------------------------
+# Step 15: Resolve SMILES (experimental)
+# ---------------------------------------------------------------------------
+
+# Single-group molecules that are complete structures — the assembler
+# cannot handle these since they have no free valences to connect.
+_SINGLE_GROUP_SMILES = {
+    'CH3OH': 'CO',
+    'H2O':   'O',
+    'DMSO':  'CS(C)=O',
+    'DOH':   'OCCO',
+    'THF':   'C1CCCO1',
+}
+
+
+def resolve_smiles(iss_results, compatible_candidates, verbose=False):
+    """
+    [Experimental] Resolve UNIFAC group compositions to SMILES strings.
+
+    Uses src.unifac_reverse for multi-group molecules and a hardcoded
+    fallback table for single-group whole-molecule groups (DOH, DMSO,
+    CH3OH, H2O, THF).
+
+    Args:
+        iss_results: Dict of ISS results (keys = candidate names).
+        compatible_candidates: Dict with 'groups' per candidate.
+
+    Returns:
+        Dict mapping candidate name -> SMILES string (or None if failed).
+    """
+    t0 = print_step(15, "Resolve SMILES [experimental]", verbose)
+
+    smiles_map = {}
+    ok = 0
+    failed = 0
+
+    try:
+        from .unifac_reverse import load_unifac_groups, reverse_engineer_by_name
+        data_path = Path(__file__).parent.parent / "data" / "json" / "unifac_ly.json"
+        db = load_unifac_groups(str(data_path))
+        assembler_available = True
+    except Exception as e:
+        if verbose:
+            print(f"Warning: could not load unifac_reverse ({e})")
+        assembler_available = False
+        db = None
+
+    for name in iss_results:
+        groups = compatible_candidates[name]['groups']
+
+        # Single-group whole-molecule fallback
+        if len(groups) == 1:
+            group_name = next(iter(groups))
+            if group_name in _SINGLE_GROUP_SMILES:
+                smiles_map[name] = _SINGLE_GROUP_SMILES[group_name]
+                ok += 1
+                continue
+
+        # Multi-group: use assembler
+        if assembler_available:
+            try:
+                smiles_list = reverse_engineer_by_name(groups, db)
+                if smiles_list:
+                    smiles_map[name] = smiles_list[0]
+                    ok += 1
+                else:
+                    smiles_map[name] = None
+                    failed += 1
+            except Exception:
+                smiles_map[name] = None
+                failed += 1
+        else:
+            smiles_map[name] = None
+            failed += 1
+
+    if verbose:
+        print(f"Resolved: {ok}/{len(iss_results)}")
+        if failed:
+            unresolved = [n for n, s in smiles_map.items() if s is None]
+            print(f"Unresolved: {', '.join(unresolved)}")
+        for name, smi in smiles_map.items():
+            if smi:
+                groups_str = ", ".join(f"{k}:{v}" for k, v in compatible_candidates[name]['groups'].items())
+                print(f"  {groups_str} -> {smi}")
+
+    print_step_done(t0, verbose)
+    return smiles_map
+
+
+# ---------------------------------------------------------------------------
 # Save results
 # ---------------------------------------------------------------------------
 
@@ -964,7 +1053,7 @@ def _build_mixture_info(binary_mixture, binary_props, binary_antoine):
 def save_results(iss_results, screened_mixture, output_dir, config, verbose=False,
                  binary_props=None, binary_antoine=None, binary_mixture=None,
                  candidate_props_map=None, candidate_antoine=None,
-                 label='solvent'):
+                 smiles_map=None, label='solvent'):
     """
     Save results to CSV and JSON files.
 
@@ -1011,6 +1100,10 @@ def save_results(iss_results, screened_mixture, output_dir, config, verbose=Fals
             entry['ant_A'] = ant.get('A')
             entry['ant_B'] = ant.get('B')
             entry['ant_C'] = ant.get('C')
+
+        # Add SMILES (experimental)
+        if smiles_map and name in smiles_map:
+            entry['smiles'] = smiles_map[name]
 
         results_list.append(entry)
 
@@ -1149,9 +1242,13 @@ def print_results_table(results_list, label='candidate', top_n=None):
     G = 30   # groups
     W = 140  # total separator line width
 
+    has_smiles = any(e.get('smiles') for e in entries)
+    S = 30  # smiles column width
+
     header = (
         f"{'#':>3}  {'Groups':<{G}}  "
-        f"{'ED':>8}  {'R':>6}  {'S':>6}  {'C':>6}  {'SxC':>6}  {'alpha':>6}  "
+        + (f"{'SMILES':<{S}}  " if has_smiles else "")
+        + f"{'ED':>8}  {'R':>6}  {'S':>6}  {'C':>6}  {'SxC':>6}  {'alpha':>6}  "
         f"{'Tb(K)':>6}  {'Tc(K)':>6}  {'Pc(b)':>5}  {'Tm(K)':>6}  "
         f"{'ac':>6}  {'Hv(kJ)':>6}  {'Ant-A':>7}  {'Ant-B':>8}  {'Ant-C':>7}"
     )
@@ -1168,9 +1265,14 @@ def print_results_table(results_list, label='candidate', top_n=None):
         if len(groups) > G:
             groups = groups[:G - 3] + "..."
 
+        smi = entry.get('smiles') or ''
+        if has_smiles and len(smi) > S:
+            smi = smi[:S - 3] + "..."
+
         line = (
             f"{i:>3}  {groups:<{G}}  "
-            f"{_fv(entry.get('ED'),    8, 4)}  "
+            + (f"{smi:<{S}}  " if has_smiles else "")
+            + f"{_fv(entry.get('ED'),    8, 4)}  "
             f"{_fv(entry.get('R'),     6, 3)}  "
             f"{_fv(entry.get('S'),     6, 3)}  "
             f"{_fv(entry.get('C'),     6, 3)}  "
@@ -1272,9 +1374,13 @@ def run_screening_pipeline(candidates, mixture, binary_props, binary_antoine,
         rk_data, qk_data, interaction_data, verbose, detailed=detailed_iss
     )
 
+    # Step 15: Resolve SMILES [experimental]
+    smiles_map = resolve_smiles(iss_results, screened_miscibility, verbose)
+
     return {
         'iss_results': iss_results,
         'screened_mixture': screened_mixture,
         'screened_miscibility': screened_miscibility,
         'antoine_filtered': antoine_filtered,
+        'smiles_map': smiles_map,
     }

@@ -102,6 +102,7 @@ def main():
             binary_mixture=mixture,
             candidate_props_map=pipeline_result['screened_miscibility'],
             candidate_antoine=pipeline_result['antoine_filtered'],
+            smiles_map=pipeline_result.get('smiles_map'),
             label='entrainer'
         )
 
