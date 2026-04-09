@@ -1,0 +1,51 @@
+mode: "design"
+
+# Binary mixture: ethanol (A) / water (B)
+mixture:
+  component_a:        # Ethanol (C2H5OH)
+    groups: {CH3: 1, CH2: 1, OH: 1}
+
+  component_b:        # Water (H2O)
+    groups: {H2O: 1} 
+
+# Override with experimental data so we DON'T rely on UNIFAC here
+pure_properties:
+  component_a:   
+    tc: 514.7    
+    pc: 63.0 
+    tb: 351.5  
+
+# Solvent design settings
+design:
+  groups: ["CH3", "CH2", "CH", "C", "OH", "CHO", "HCO", "CH3COO", "CH2COO",
+           "HCOO", "CH3CO", "CH2O", "COOH", "COO", "H2O","DMSO", "DOH"]
+
+  constraints:
+    min_groups: 3
+    max_groups: 6
+    min_func_groups: 1
+    max_func_groups: 2
+    molecular_type: 1  # acyclic
+
+  max_candidates: 10000
+
+screening:
+  pure:
+    tb: [380.0, 550.0]
+    tm: [0.0, 298.0]
+    hv: [-9999.0, 1500.0]
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: true
+    selectivity_min: 1.3
+
+iss:
+  x_iso: 0.70
+  x_min: 0.60
+
+output:
+  dir: "results/paper2/design_ethanol_water"
+  formats: ["csv", "json"]
+  verbose: true

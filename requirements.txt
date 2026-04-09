@@ -27,6 +27,11 @@ notebook>=6.4.0
 # For conda: conda install -c conda-forge ipopt
 # For pip: pip install cyipopt (requires system IPOPT)
 
+# Optional: Gurobi (required for design mode / molecule generation)
+# Requires a valid Gurobi license (free academic license available)
+# pip install gurobipy
+# grbgetkey <your-license-key>
+
 # Optional: Additional utilities
 pathlib2>=2.3.0  # For Python < 3.4 compatibility (usually not needed)
 

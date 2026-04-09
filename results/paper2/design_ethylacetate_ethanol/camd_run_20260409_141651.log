@@ -1,0 +1,680 @@
+============================================================
+CAMD-ISS: Computer-Aided Molecular Design
+============================================================
+Timestamp: 2026-04-09 14:16:51
+Mode: DESIGN
+Config: config/paper2/design_ethylacetate_ethanol.yaml
+Log file: results/paper2/design_ethylacetate_ethanol/camd_run_20260409_141651.log
+
+============================================================
+STEP 1: Validate Binary Mixture
+============================================================
+Component A: CH3:1, CH2:1, CH3COO:1
+  ✓ Valid
+Component B: CH3:1, CH2:1, OH:1
+  ✓ Valid
+
+Summary: Both components valid
+  [0.0s]
+
+============================================================
+STEP 2: Check Binary Mixture Parameters
+============================================================
+✓ All UNIFAC parameters available
+
+Summary: Compatible
+  [0.0s]
+
+============================================================
+STEP 3: Calculate Pure Component Properties (Mixture)
+============================================================
+
+A (CH3:1, CH2:1, CH3COO:1):
+  Tc: 521.16 K
+  Pc: 40.58 bar
+  Tb: 346.44 K
+  Tm: 174.07 K
+  Ac: 0.4109
+  Hv: 38.30 kJ/mol
+
+B (CH3:1, CH2:1, OH:1):
+  Tc: 489.28 K
+  Pc: 55.57 bar
+  Tb: 330.01 K
+  Tm: 164.57 K
+  Ac: 0.5267
+  Hv: 40.12 kJ/mol
+
+Summary: Calculated 6 properties for 2 components
+  [0.0s]
+
+============================================================
+STEP 4: Override Mixture Properties (if provided)
+============================================================
+Override A.tc = 530.0
+Override A.pc = 38.83
+Override A.tb = 350.0
+Override B.tc = 514.0
+Override B.pc = 63.0
+Override B.tb = 351.5
+
+Summary: 6 property overrides applied
+  [0.0s]
+
+✓ Boiling point validation: Tb_A (350.00K) < Tb_B (351.50K)
+
+============================================================
+STEP 5: Calculate Antoine Parameters (Mixture)
+============================================================
+✓ A: A=3.774, B=936.2, C=-101.6
+✓ B: A=5.323, B=1697.4, C=-32.3
+
+Summary: 2/2 successful
+  [0.2s]
+
+============================================================
+STEP 6: Generate Solvent Candidates
+============================================================
+Design groups: CH3, CH2, CH, C, OH, CHO, HCO, CH3COO, CH2COO, HCOO, CH3CO, CH2O, COOH, COO, H2O, DMSO, DOH
+Constraints: 3-6 total groups, 1-2 functional groups
+Loaded noc data for 119 groups from /Users/arnaou/projects/dtu_chemeng/camd_iss/data/json/noc.json
+Set design groups: 17 groups
+Set structural constraints:
+  Groups: 3-6
+  Functional groups: 1-2
+  Molecular type: 1 (acyclic)
+Generating compounds using MILP approach...
+Design groups: 17 groups
+Molecular type: 1 (acyclic)
+Functional groups: 1-2
+Excluding complete molecule H2O (noc=0) from MILP
+Excluding complete molecule DMSO (noc=0) from MILP
+Excluding complete molecule DOH (noc=0) from MILP
+Restricted license - for non-production use only - expires 2026-11-23
+Set parameter PoolSolutions to value 10000
+Set parameter PoolSearchMode to value 2
+Number of feasible compounds found: 476
+Generated 476 unique compounds
+
+Summary: Generated 477 candidates
+
+============================================================
+STEP 7: Check Candidate Parameters (UNIFAC)
+============================================================
+Checked: 477
+Compatible: 477
+Incompatible: 0
+
+Summary: 477/477 have complete UNIFAC parameters
+  [0.9s]
+
+============================================================
+STEP 8: Calculate Pure Component Properties (Candidates)
+============================================================
+
+Summary: 477/477 properties calculated
+  [0.0s]
+
+============================================================
+STEP 9: Screen Pure Properties
+============================================================
+Initial: 477
+Passed: 409
+Rejected: 68
+
+Rejection reasons:
+  solvent_7 (CH3:4, CHO:2): tb=361.7 outside [368.0, 650.0]
+  solvent_8 (CH3:2, CH2COO:1): tb=335.9 outside [368.0, 650.0]
+  solvent_17 (CH3:3, CHO:1): tb=274.1 outside [368.0, 650.0]
+  solvent_19 (CH3:4, CH:1, CHO:1): tb=341.4 outside [368.0, 650.0]
+  solvent_20 (CH3:4, C:1, CH2O:1): tb=347.3 outside [368.0, 650.0]
+  solvent_34 (CH3:2, CHO:1, HCO:1): tb=358.8 outside [368.0, 650.0]
+  solvent_46 (CH3:2, CH2COO:2): Tb (439.0K) >= Tc (434.0K)
+  solvent_50 (CH2:1, COOH:2): tm=325.7 outside [0.0, 298.0]
+  solvent_51 (CH3:1, CH2:1, HCO:1): tb=314.7 outside [368.0, 650.0]
+  solvent_57 (CH3:1, OH:1, CH2O:1): tb=356.7 outside [368.0, 650.0]
+  solvent_73 (CH3:3, CHO:1, CH2O:1): tb=346.5 outside [368.0, 650.0]
+  solvent_74 (CH3:2, CH2:2, CHO:1, COOH:1): tm=298.2 outside [0.0, 298.0]
+  solvent_86 (CH3:3, CH2:1, CH:1, CH2O:1): tb=359.9 outside [368.0, 650.0]
+  solvent_94 (CH3:3, C:1, HCO:1): tb=359.5 outside [368.0, 650.0]
+  solvent_110 (CH3:2, CH2:1, C:1, OH:1, COOH:1): tm=299.7 outside [0.0, 298.0]
+  solvent_115 (CH3:2, CH2:1, C:1, HCO:1, COOH:1): tm=303.5 outside [0.0, 298.0]
+  solvent_146 (CH3:1, CH2:2, OH:1): tb=364.4 outside [368.0, 650.0]
+  solvent_173 (CH3:2, CH:2, COOH:2): tm=328.7 outside [0.0, 298.0]
+  solvent_189 (CH3:2, C:1, HCOO:1, COOH:1): tm=298.1 outside [0.0, 298.0]
+  solvent_191 (CH3:2, C:1, COOH:2): tm=332.5 outside [0.0, 298.0]
+  solvent_193 (CH3:2, C:1, CH3CO:1, COOH:1): tm=301.7 outside [0.0, 298.0]
+  solvent_195 (CH3:3, CH2:2, CHO:1): tb=354.6 outside [368.0, 650.0]
+  solvent_197 (CH3:3, CH2:1, CHO:1): tb=318.3 outside [368.0, 650.0]
+  solvent_213 (CH2:3, HCO:1, COOH:1): tm=299.6 outside [0.0, 298.0]
+  solvent_215 (CH2:4, HCO:1, COOH:1): tm=304.5 outside [0.0, 298.0]
+  solvent_217 (CH3:2, CH2:1, C:1, HCOO:1, COOH:1): tm=303.1 outside [0.0, 298.0]
+  solvent_219 (CH3:2, CH2:1, C:1, COOH:2): tm=336.1 outside [0.0, 298.0]
+  solvent_220 (CH3:2, CH2:1, C:1, CH3CO:1, COOH:1): tm=306.5 outside [0.0, 298.0]
+  solvent_226 (CH3:2, CH:1, HCO:1): tb=338.3 outside [368.0, 650.0]
+  solvent_230 (CH3:2, CH:1, CH3COO:1): tb=366.8 outside [368.0, 650.0]
+  solvent_238 (CH3:2, CH2O:1): tb=250.3 outside [368.0, 650.0]
+  solvent_239 (CH3:2, CH2O:2): tb=330.1 outside [368.0, 650.0]
+  solvent_241 (CH3:2, CH2O:1, COO:1): tb=367.8 outside [368.0, 650.0]
+  solvent_243 (CH3:2, CH2:2, CH2O:1): tb=338.8 outside [368.0, 650.0]
+  solvent_249 (CH3:2, CH2:1, C:1, CH3COO:1, COOH:1): tm=302.4 outside [0.0, 298.0]
+  solvent_260 (CH2:4, OH:1, COOH:1): tm=300.8 outside [0.0, 298.0]
+  solvent_265 (CH3:2, CH:1, OH:1): tb=352.0 outside [368.0, 650.0]
+  solvent_290 (CH2:3, CH3COO:1, COOH:1): tm=298.4 outside [0.0, 298.0]
+  solvent_292 (CH2:4, CH3COO:1, COOH:1): tm=303.4 outside [0.0, 298.0]
+  solvent_296 (CH3:1, CH2:2, CH:1, HCO:1, COOH:1): tm=299.0 outside [0.0, 298.0]
+  solvent_307 (CH3:2, C:1, HCO:1, COOH:1): tm=298.5 outside [0.0, 298.0]
+  solvent_308 (CH3:2, CH2:1, CH2O:2): tb=364.5 outside [368.0, 650.0]
+  solvent_309 (CH3:3, CH:1, CH2O:1): tb=324.6 outside [368.0, 650.0]
+  solvent_316 (CH3:2, CH2:1, CH2O:1): tb=299.3 outside [368.0, 650.0]
+  solvent_319 (CH3:1, CH2:1, HCOO:1): tb=327.2 outside [368.0, 650.0]
+  solvent_325 (CH3:1, HCOO:1, CH2O:1): tb=354.2 outside [368.0, 650.0]
+  solvent_326 (CH3:1, CH2:2, CH:1, HCOO:1, COOH:1): tm=298.6 outside [0.0, 298.0]
+  solvent_340 (CH3:1, CH2:3, CH2COO:1, COOH:1): tm=298.1 outside [0.0, 298.0]
+  solvent_353 (CH3:1, CH2:1, CH3CO:1): tb=343.8 outside [368.0, 650.0]
+  solvent_360 (CH2:3, COOH:2): tm=333.3 outside [0.0, 298.0]
+  solvent_362 (CH2:4, COOH:2): tm=336.9 outside [0.0, 298.0]
+  solvent_363 (CH2:2, COOH:2): tm=329.6 outside [0.0, 298.0]
+  solvent_370 (CH3:1, CH2:2, HCOO:1): tb=362.0 outside [368.0, 650.0]
+  solvent_372 (CH3:2, CH:1, HCOO:1): tb=349.4 outside [368.0, 650.0]
+  solvent_375 (CH2:3, CH3CO:1, COOH:1): tm=302.7 outside [0.0, 298.0]
+  solvent_376 (CH2:4, CH3CO:1, COOH:1): tm=307.5 outside [0.0, 298.0]
+  solvent_386 (CH3:1, CH2:2, CH:1, COOH:2): tm=332.9 outside [0.0, 298.0]
+  solvent_387 (CH3:1, CH2:2, CH:1, CH3CO:1, COOH:1): tm=302.2 outside [0.0, 298.0]
+  solvent_388 (CH3:1, HCO:1, CH2O:1): tb=343.4 outside [368.0, 650.0]
+  solvent_429 (CH3:2, COO:1): tb=303.9 outside [368.0, 650.0]
+  solvent_434 (CH3:2, CH2:1, COO:1): tb=342.6 outside [368.0, 650.0]
+  solvent_435 (CH3:2, CH:1, CH3CO:1): tb=364.4 outside [368.0, 650.0]
+  solvent_440 (CH3:3, CH:1, COO:1): tb=363.3 outside [368.0, 650.0]
+  solvent_446 (CH2:3, HCOO:1, COOH:1): tm=299.2 outside [0.0, 298.0]
+  solvent_448 (CH2:4, HCOO:1, COOH:1): tm=304.2 outside [0.0, 298.0]
+  solvent_456 (CH3:1, CH2:2, HCO:1): tb=351.6 outside [368.0, 650.0]
+  solvent_459 (CH3:1, CH2:1, CH:1, COOH:2): tm=329.2 outside [0.0, 298.0]
+  solvent_471 (CH3:1, CH:1, COOH:2): tm=325.3 outside [0.0, 298.0]
+
+Summary: 409/477 passed pure property screening
+  [0.0s]
+
+============================================================
+STEP 10: Calculate Antoine Parameters (Candidates)
+============================================================
+Successful: 409
+Failed: 0
+
+Summary: 409/409 calculated
+  [23.1s]
+
+============================================================
+STEP 11: Screen Miscibility (Temperature Range)
+============================================================
+Input: 409
+Passed: 405
+Failed: 4
+
+Failed miscibility:
+  solvent_1 (H2O:1): Phase instability A-E T=350.0-374.0K
+  solvent_13 (CH2:1, OH:2): Phase instability A-E T=350.0-408.0K
+  solvent_15 (CH3:1, CH:1, OH:2): Phase instability A-E T=350.0-363.0K
+  solvent_23 (CH2:2, OH:2): Phase instability A-E T=350.0-363.0K
+
+Summary: 405/409 passed miscibility screening
+  [185.1s]
+
+============================================================
+STEP 12: Perform VLE Calculations
+============================================================
+Total: 405
+Successful: 405
+Failed: 0
+
+Summary: 405/405 VLE calculations successful
+  [297.6s]
+
+============================================================
+STEP 13: Screen Mixture Properties
+============================================================
+Input: 405
+Passed: 4
+Rejected: 401
+
+Rejection reasons:
+  solvent_3 (DOH:1): Low selectivity (S=2.66 < 3.0)
+  solvent_4 (CH2:1, HCO:2): Low selectivity (S=0.58 < 3.0)
+  solvent_5 (CH3:2, CH2:1, C:1, CH3CO:2): Low selectivity (S=0.76 < 3.0)
+  solvent_6 (CH3:2, COO:2): Low selectivity (S=0.70 < 3.0)
+  solvent_9 (CH3:3, CH:2, COOH:1): Low selectivity (S=1.04 < 3.0)
+  solvent_10 (CH3:3, CH:1, CH2COO:1): Low selectivity (S=0.40 < 3.0)
+  solvent_11 (CH3:4, C:1, CH2COO:1): Low selectivity (S=0.42 < 3.0)
+  solvent_12 (CH3:2, CH:2, OH:2): Low selectivity (S=2.65 < 3.0)
+  solvent_14 (CH3:3, CH2:1, C:1, COOH:1): Low selectivity (S=1.05 < 3.0)
+  solvent_16 (CH3:3, CH:2, OH:1): Low selectivity (S=1.51 < 3.0)
+  solvent_18 (CH3:2, CH:2, HCO:2): Low selectivity (S=0.55 < 3.0)
+  solvent_21 (CH3:4, C:1, COO:1): Azeotrope B-E (az_BE=-0.062); Low selectivity (S=0.51 < 3.0)
+  solvent_22 (CH3:3, C:1, OH:1, CH2O:1): Low selectivity (S=1.39 < 3.0)
+  solvent_24 (CH3:3, CH2:1, C:1, OH:1): Low selectivity (S=1.53 < 3.0)
+  solvent_25 (CH3:2, CH2:1, C:1, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_26 (CH3:2, CH2:1, C:1, OH:1, HCO:1): Low selectivity (S=1.45 < 3.0)
+  solvent_28 (CH3:2, CH:2, OH:1, HCO:1): Low selectivity (S=1.43 < 3.0)
+  solvent_29 (CH3:2, CH:2, OH:1, CH3COO:1): Low selectivity (S=1.13 < 3.0)
+  solvent_30 (CH3:2, OH:1, CHO:1): Low selectivity (S=1.83 < 3.0)
+  solvent_31 (CH3:2, CH2:2, OH:1, CHO:1): Low selectivity (S=1.37 < 3.0)
+  solvent_32 (CH3:1, CH2:2, CH:1, OH:2): Low selectivity (S=2.61 < 3.0)
+  solvent_33 (CH3:2, CH2:1, C:1, OH:2): Low selectivity (S=2.69 < 3.0)
+  solvent_35 (CH3:2, CH2:2, CHO:1, HCO:1): Low selectivity (S=0.44 < 3.0)
+  solvent_36 (CH3:2, CHO:1, CH3COO:1): Low selectivity (S=0.48 < 3.0)
+  solvent_37 (CH3:3, CH:2, HCO:1): Low selectivity (S=0.41 < 3.0)
+  solvent_38 (CH3:2, CH:2, CH3COO:2): Low selectivity (S=0.59 < 3.0)
+  solvent_39 (CH3:2, CH:2, HCO:1, CH3COO:1): Low selectivity (S=0.63 < 3.0)
+  solvent_40 (CH3:3, CH:1, CHO:1, HCO:1): Low selectivity (S=0.43 < 3.0)
+  solvent_41 (CH3:3, CH2:1, CH:1, CH2COO:1): Low selectivity (S=0.42 < 3.0)
+  solvent_42 (CH3:3, C:1, OH:1, COO:1): Low selectivity (S=1.34 < 3.0)
+  solvent_43 (CH3:3, C:1, COOH:1): Low selectivity (S=1.12 < 3.0)
+  solvent_45 (CH3:3, C:1, OH:1): Low selectivity (S=1.86 < 3.0)
+  solvent_47 (CH3:2, CH2:2, CH2COO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_48 (CH3:2, CH2:1, C:1, OH:1, CH3COO:1): Low selectivity (S=1.15 < 3.0)
+  solvent_49 (CH3:1, CH2:1, COOH:1): Low selectivity (S=1.24 < 3.0)
+  solvent_52 (CH3:2, CH:2, OH:1, HCOO:1): Low selectivity (S=1.15 < 3.0)
+  solvent_53 (CH3:1, OH:1, CH2COO:1): Low selectivity (S=1.48 < 3.0)
+  solvent_54 (CH3:1, CH2:2, OH:1, CH2COO:1): Low selectivity (S=1.22 < 3.0)
+  solvent_55 (CH2:1, OH:1, COOH:1): Low selectivity (S=2.63 < 3.0)
+  solvent_56 (CH3:1, CH2:3, OH:1, CH2COO:1): Low selectivity (S=1.13 < 3.0)
+  solvent_58 (CH3:1, OH:1, COO:1): Low selectivity (S=1.77 < 3.0)
+  solvent_59 (CH3:1, CH2:2, OH:1, CH2O:1): Low selectivity (S=1.53 < 3.0)
+  solvent_60 (CH3:3, C:1, HCO:1, COO:1): Low selectivity (S=0.78 < 3.0)
+  solvent_61 (CH3:3, C:1, CH3COO:1, COO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_62 (CH3:2, CH2:2, CH:1, COOH:1): Low selectivity (S=1.04 < 3.0)
+  solvent_63 (CH3:1, CH2:2, CH:1, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_64 (CH3:2, CH2:2, CH:1, HCO:1): Low selectivity (S=0.42 < 3.0)
+  solvent_65 (CH3:2, CH2:2, CHO:1, CH3COO:1): Low selectivity (S=0.51 < 3.0)
+  solvent_66 (CH3:3, CHO:1, CH2COO:1): Low selectivity (S=0.47 < 3.0)
+  solvent_67 (CH3:3, CH2:1, CHO:1, CH2COO:1): Low selectivity (S=0.49 < 3.0)
+  solvent_68 (CH3:2, CHO:1, HCOO:1): Azeotrope B-E (az_BE=-1.218); Low selectivity (S=0.44 < 3.0)
+  solvent_69 (CH3:2, CH2:2, CHO:1, HCOO:1): Low selectivity (S=0.46 < 3.0)
+  solvent_70 (CH3:2, CHO:1, CH3CO:1): Low selectivity (S=0.55 < 3.0)
+  solvent_71 (CH3:2, CH2:2, CHO:1, CH3CO:1): Low selectivity (S=0.58 < 3.0)
+  solvent_72 (CH3:2, CHO:1, COOH:1): Low selectivity (S=1.22 < 3.0)
+  solvent_75 (CH3:3, CH2:1, CHO:1, CH2O:1): Azeotrope B-E (az_BE=-0.580); Low selectivity (S=0.40 < 3.0)
+  solvent_76 (CH3:2, CH:2, HCO:1, HCOO:1): Low selectivity (S=0.38 < 3.0)
+  solvent_77 (CH3:2, CH:2, HCO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_78 (CH3:2, CH:2, HCO:1, COOH:1): Low selectivity (S=1.15 < 3.0)
+  solvent_79 (CH3:3, CH:1, CHO:1, CH3COO:1): Low selectivity (S=0.50 < 3.0)
+  solvent_80 (CH3:2, CH:2, HCOO:2): Low selectivity (S=0.88 < 3.0)
+  solvent_81 (CH3:3, CH:2, HCOO:1): Azeotrope B-E (az_BE=-0.598); Low selectivity (S=0.35 < 3.0)
+  solvent_82 (CH3:2, CH:2, HCOO:1, CH3CO:1): Low selectivity (S=0.72 < 3.0)
+  solvent_83 (CH3:2, CH:2, CH3CO:2): Low selectivity (S=0.75 < 3.0)
+  solvent_84 (CH3:1, CH:1, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_85 (CH3:2, CH2:1, CH:1, HCO:1, CH2COO:1): Low selectivity (S=0.60 < 3.0)
+  solvent_87 (CH3:2, CH2:1, CH:1, CH3COO:1, CH2COO:1): Low selectivity (S=0.57 < 3.0)
+  solvent_88 (CH3:2, CH2:1, CH:1, CH2COO:1, HCOO:1): Low selectivity (S=0.63 < 3.0)
+  solvent_89 (CH3:2, CH2:1, CH:1, CH2COO:1, CH3CO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_90 (CH3:2, CH2:1, CH:1, CH2COO:1, COOH:1): Low selectivity (S=1.03 < 3.0)
+  solvent_92 (CH3:2, C:1, OH:1, HCO:1): Low selectivity (S=1.65 < 3.0)
+  solvent_93 (CH3:2, C:1, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_95 (CH3:2, C:1, HCO:1, CH3COO:1): Low selectivity (S=0.65 < 3.0)
+  solvent_96 (CH3:2, C:1, CH3COO:2): Low selectivity (S=0.59 < 3.0)
+  solvent_97 (CH3:3, C:1, CH3COO:1): Low selectivity (S=0.43 < 3.0)
+  solvent_98 (CH3:2, C:1, CH3COO:1, HCOO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_99 (CH3:2, C:1, HCOO:2): Azeotrope B-E (az_BE=-2.008); Low selectivity (S=1.04 < 3.0)
+  solvent_100 (CH3:2, CH2COO:1, CH2O:1): Low selectivity (S=0.51 < 3.0)
+  solvent_101 (CH3:2, CH2:2, CH2COO:1, CH2O:1): Low selectivity (S=0.53 < 3.0)
+  solvent_102 (CH3:2, CH2COO:1, COO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_103 (CH3:2, CH2:2, CH2COO:1, COO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_104 (CH3:2, CH2:2, CH2COO:1): Low selectivity (S=0.41 < 3.0)
+  solvent_105 (CH3:2, CH2:3, CH2COO:1): Low selectivity (S=0.43 < 3.0)
+  solvent_106 (CH3:2, CH2:1, CH2COO:1): Azeotrope B-E (az_BE=-0.467); Low selectivity (S=0.39 < 3.0)
+  solvent_107 (CH3:2, CH2:1, CH2COO:1, COO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_108 (CH3:2, CH2:1, C:1, OH:1, HCOO:1): Low selectivity (S=1.17 < 3.0)
+  solvent_109 (CH3:2, CH2:1, C:1, OH:1, CH3CO:1): Low selectivity (S=1.32 < 3.0)
+  solvent_111 (CH3:3, CH2:1, C:1, HCO:1): Low selectivity (S=0.42 < 3.0)
+  solvent_112 (CH3:2, CH2:1, C:1, HCO:1, CH3COO:1): Low selectivity (S=0.64 < 3.0)
+  solvent_113 (CH3:2, CH2:1, C:1, HCO:1, HCOO:1): Low selectivity (S=0.39 < 3.0)
+  solvent_114 (CH3:2, CH2:1, C:1, HCO:1, CH3CO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_116 (CH2:3, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_117 (CH3:1, HCO:1, CH2COO:1): Low selectivity (S=0.66 < 3.0)
+  solvent_118 (CH2:4, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_119 (CH2:1, HCO:1, COOH:1): Low selectivity (S=1.49 < 3.0)
+  solvent_120 (CH2:1, HCO:1, CH3COO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_121 (CH2:1, CH3COO:2): Low selectivity (S=0.59 < 3.0)
+  solvent_122 (CH2:3, HCO:1, CH3COO:1): Low selectivity (S=0.65 < 3.0)
+  solvent_123 (CH2:3, CH3COO:2): Low selectivity (S=0.60 < 3.0)
+  solvent_124 (CH2:4, HCO:1, CH3COO:1): Low selectivity (S=0.64 < 3.0)
+  solvent_125 (CH3:2, CH:2, OH:1, CH3CO:1): Low selectivity (S=1.30 < 3.0)
+  solvent_126 (CH3:2, CH:2, OH:1, COOH:1): Low selectivity (S=1.82 < 3.0)
+  solvent_127 (CH3:2, CH2:1, C:1, CH3COO:2): Low selectivity (S=0.60 < 3.0)
+  solvent_128 (CH3:3, CH2:1, C:1, CH3COO:1): Low selectivity (S=0.45 < 3.0)
+  solvent_129 (CH3:2, CH2:1, C:1, CH3COO:1, HCOO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_130 (CH3:2, CH2:1, C:1, HCOO:2): Low selectivity (S=0.88 < 3.0)
+  solvent_131 (CH3:3, CH2:1, C:1, HCOO:1): Azeotrope B-E (az_BE=-0.475); Low selectivity (S=0.36 < 3.0)
+  solvent_132 (CH3:2, CH2:1, C:1, CH3COO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_133 (CH3:2, CH2:1, C:1, HCOO:1, CH3CO:1): Low selectivity (S=0.73 < 3.0)
+  solvent_134 (CH3:1, CH2:1, OH:1, CH2COO:1): Low selectivity (S=1.33 < 3.0)
+  solvent_135 (CH3:3, C:1, OH:1, CH2COO:1): Low selectivity (S=1.15 < 3.0)
+  solvent_136 (CH3:3, C:1, HCO:1, CH2COO:1): Low selectivity (S=0.61 < 3.0)
+  solvent_137 (CH3:3, C:1, CH3COO:1, CH2COO:1): Low selectivity (S=0.58 < 3.0)
+  solvent_138 (CH3:3, C:1, CH2COO:1, HCOO:1): Low selectivity (S=0.63 < 3.0)
+  solvent_139 (CH3:3, C:1, CH2COO:1, CH3CO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_140 (CH3:1, CH2:2, OH:1, COO:1): Low selectivity (S=1.44 < 3.0)
+  solvent_141 (CH3:1, CH2:3, OH:1, CH2O:1): Low selectivity (S=1.36 < 3.0)
+  solvent_142 (CH3:1, CH2:3, OH:1, COO:1): Low selectivity (S=1.32 < 3.0)
+  solvent_143 (CH3:1, CH2:1, OH:1, COO:1): Low selectivity (S=1.58 < 3.0)
+  solvent_144 (CH3:1, CH2:3, OH:1): Low selectivity (S=1.74 < 3.0)
+  solvent_145 (CH3:1, CH2:4, OH:1): Low selectivity (S=1.46 < 3.0)
+  solvent_147 (CH3:3, C:1, HCOO:1, COO:1): Low selectivity (S=0.53 < 3.0)
+  solvent_148 (CH3:3, C:1, CH3CO:1, COO:1): Low selectivity (S=0.75 < 3.0)
+  solvent_149 (CH3:3, C:1, COOH:1, COO:1): Low selectivity (S=1.16 < 3.0)
+  solvent_150 (CH3:3, C:1, HCO:1, CH2O:1): Low selectivity (S=0.45 < 3.0)
+  solvent_151 (CH3:3, C:1, CH3COO:1, CH2O:1): Low selectivity (S=0.55 < 3.0)
+  solvent_152 (CH3:3, C:1, HCOO:1, CH2O:1): Low selectivity (S=0.50 < 3.0)
+  solvent_153 (CH3:3, C:1, CH3CO:1, CH2O:1): Low selectivity (S=0.60 < 3.0)
+  solvent_154 (CH3:1, CH2:2, CH:1, HCO:1, CH3COO:1): Low selectivity (S=0.63 < 3.0)
+  solvent_155 (CH3:1, CH2:2, CH:1, CH3COO:2): Low selectivity (S=0.59 < 3.0)
+  solvent_156 (CH3:2, CH2:2, CH:1, CH3COO:1): Low selectivity (S=0.45 < 3.0)
+  solvent_157 (CH3:1, CH2:2, CH:1, CH3COO:1, HCOO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_158 (CH3:1, CH2:2, CH:1, HCOO:2): Low selectivity (S=0.90 < 3.0)
+  solvent_159 (CH3:2, CH2:2, CH:1, HCOO:1): Low selectivity (S=0.37 < 3.0)
+  solvent_160 (CH3:1, CH2:2, CH:1, CH3COO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_161 (CH2:1, OH:1, CH3COO:1): Low selectivity (S=1.45 < 3.0)
+  solvent_162 (CH2:3, OH:1, CH3COO:1): Low selectivity (S=1.21 < 3.0)
+  solvent_163 (CH2:4, OH:1, CH3COO:1): Low selectivity (S=1.13 < 3.0)
+  solvent_164 (CH2:2, OH:1, CH3COO:1): Low selectivity (S=1.31 < 3.0)
+  solvent_165 (CH2:1, OH:1, HCOO:1): Low selectivity (S=1.73 < 3.0)
+  solvent_166 (CH2:1, OH:1, CH3CO:1): Low selectivity (S=1.71 < 3.0)
+  solvent_167 (CH2:3, OH:1, HCOO:1): Low selectivity (S=1.29 < 3.0)
+  solvent_168 (CH2:3, OH:1, CH3CO:1): Low selectivity (S=1.41 < 3.0)
+  solvent_169 (CH2:4, OH:1, HCOO:1): Low selectivity (S=1.18 < 3.0)
+  solvent_170 (CH2:4, OH:1, CH3CO:1): Low selectivity (S=1.30 < 3.0)
+  solvent_171 (CH3:3, CH:2, CH3CO:1): Low selectivity (S=0.54 < 3.0)
+  solvent_172 (CH3:2, CH:2, CH3CO:1, COOH:1): Low selectivity (S=1.15 < 3.0)
+  solvent_174 (CH3:2, CH2:1, CHO:1, COOH:1): Low selectivity (S=1.14 < 3.0)
+  solvent_175 (CH2:1, OH:1, HCO:1): Low selectivity (S=2.28 < 3.0)
+  solvent_176 (CH2:3, OH:1, HCO:1): Low selectivity (S=1.59 < 3.0)
+  solvent_177 (CH2:2, OH:1, HCO:1): Low selectivity (S=1.86 < 3.0)
+  solvent_178 (CH2:4, OH:1, HCO:1): Low selectivity (S=1.41 < 3.0)
+  solvent_179 (CH3:2, C:1, HCO:1, HCOO:1): Low selectivity (S=0.35 < 3.0)
+  solvent_180 (CH2:4, OH:2): Low selectivity (S=2.58 < 3.0)
+  solvent_181 (CH3:2, CH2:1, CHO:1, CH3CO:1): Low selectivity (S=0.57 < 3.0)
+  solvent_182 (CH3:1, CH2:1, OH:1, CH2O:1): Low selectivity (S=1.76 < 3.0)
+  solvent_183 (CH3:2, C:1, OH:1, HCOO:1): Low selectivity (S=1.27 < 3.0)
+  solvent_184 (CH3:2, C:1, OH:1, CH3CO:1): Low selectivity (S=1.43 < 3.0)
+  solvent_185 (CH3:2, C:1, OH:1, COOH:1): Low selectivity (S=2.05 < 3.0)
+  solvent_186 (CH3:3, C:1, HCOO:1): Azeotrope B-E (az_BE=-1.311); Low selectivity (S=0.33 < 3.0)
+  solvent_187 (CH3:2, C:1, CH3CO:2): Low selectivity (S=0.77 < 3.0)
+  solvent_188 (CH3:2, C:1, HCOO:1, CH3CO:1): Low selectivity (S=0.75 < 3.0)
+  solvent_190 (CH3:2, CH2:1, CHO:1, HCOO:1): Azeotrope B-E (az_BE=-0.270); Low selectivity (S=0.45 < 3.0)
+  solvent_192 (CH3:3, C:1, CH3CO:1): Low selectivity (S=0.53 < 3.0)
+  solvent_194 (CH3:3, CHO:1, COO:1): Low selectivity (S=0.56 < 3.0)
+  solvent_196 (CH3:3, CH2:1, CHO:1, COO:1): Low selectivity (S=0.57 < 3.0)
+  solvent_198 (CH2:1, CH3COO:1, COOH:1): Low selectivity (S=1.25 < 3.0)
+  solvent_199 (CH2:1, CH3COO:1, HCOO:1): Low selectivity (S=0.72 < 3.0)
+  solvent_200 (CH2:1, HCOO:2): Azeotrope A-E (az_AE=-0.477); Azeotrope B-E (az_BE=-5.325); Low selectivity (S=2.93 < 3.0)
+  solvent_201 (CH2:3, CH3COO:1, HCOO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_202 (CH3:2, C:1, CH3COO:1, CH3CO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_203 (CH3:2, C:1, CH3COO:1, COOH:1): Low selectivity (S=1.11 < 3.0)
+  solvent_204 (CH3:2, CH2:1, CHO:1, CH3COO:1): Low selectivity (S=0.50 < 3.0)
+  solvent_205 (CH2:4, CH3COO:2): Low selectivity (S=0.60 < 3.0)
+  solvent_206 (CH3:2, CH2:1, CH2COO:1, CH2O:1): Low selectivity (S=0.52 < 3.0)
+  solvent_207 (CH2:1, HCO:1, HCOO:1): Azeotrope B-E (az_BE=-1.120); Low selectivity (S=0.29 < 3.0)
+  solvent_208 (CH2:2, HCO:1, CH3COO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_209 (CH2:3, HCO:1, HCOO:1): Low selectivity (S=0.38 < 3.0)
+  solvent_210 (CH2:4, HCO:1, HCOO:1): Low selectivity (S=0.41 < 3.0)
+  solvent_211 (CH2:2, HCO:1, HCOO:1): Low selectivity (S=0.33 < 3.0)
+  solvent_212 (CH2:1, HCO:1, CH3CO:1): Low selectivity (S=0.77 < 3.0)
+  solvent_214 (CH2:3, HCO:1, CH3CO:1): Low selectivity (S=0.73 < 3.0)
+  solvent_216 (CH2:4, HCO:1, CH3CO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_218 (CH3:3, CH2:1, C:1, CH3CO:1): Low selectivity (S=0.54 < 3.0)
+  solvent_221 (CH3:2, CH2:1, CH:1, HCO:1, CH2O:1): Low selectivity (S=0.46 < 3.0)
+  solvent_222 (CH3:2, CH2:1, CH:1, CH3COO:1, CH2O:1): Low selectivity (S=0.55 < 3.0)
+  solvent_223 (CH3:2, CH2:1, CH:1, HCOO:1, CH2O:1): Low selectivity (S=0.51 < 3.0)
+  solvent_224 (CH3:2, CH2:1, CH:1, CH3CO:1, CH2O:1): Low selectivity (S=0.61 < 3.0)
+  solvent_225 (CH3:3, C:1, CH2COO:1, COOH:1): Low selectivity (S=1.04 < 3.0)
+  solvent_227 (CH3:1, CH:1, CH3COO:2): Low selectivity (S=0.58 < 3.0)
+  solvent_228 (CH3:1, CH:1, HCO:1, CH3COO:1): Low selectivity (S=0.66 < 3.0)
+  solvent_229 (CH3:2, CH:1, HCO:1, CH2COO:1): Low selectivity (S=0.62 < 3.0)
+  solvent_231 (CH3:2, CH:1, CH3COO:1, CH2COO:1): Low selectivity (S=0.57 < 3.0)
+  solvent_232 (CH3:3, CH:1, CH2COO:2): Low selectivity (S=0.55 < 3.0)
+  solvent_233 (CH3:1, CH:1, CH3COO:1, HCOO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_234 (CH3:2, CH:1, CH2COO:1, HCOO:1): Low selectivity (S=0.64 < 3.0)
+  solvent_235 (CH3:2, CH:2, HCOO:1, COOH:1): Low selectivity (S=0.82 < 3.0)
+  solvent_236 (CH3:2, CH2:1, CHO:1, HCO:1): Low selectivity (S=0.42 < 3.0)
+  solvent_237 (CH2:2, HCO:2): Low selectivity (S=0.57 < 3.0)
+  solvent_240 (CH3:2, CH2:2, CH2O:2): Low selectivity (S=0.47 < 3.0)
+  solvent_242 (CH3:2, CH2:2, CH2O:1, COO:1): Low selectivity (S=0.62 < 3.0)
+  solvent_244 (CH3:2, CH2:3, CH2O:1): Azeotrope B-E (az_BE=-1.477); Low selectivity (S=0.33 < 3.0)
+  solvent_245 (CH3:3, C:1, CH2O:1, COOH:1): Low selectivity (S=1.13 < 3.0)
+  solvent_246 (CH3:3, CH:1, CHO:1, HCOO:1): Low selectivity (S=0.44 < 3.0)
+  solvent_247 (CH3:3, CH:1, CHO:1, CH3CO:1): Low selectivity (S=0.57 < 3.0)
+  solvent_248 (CH3:3, CH:1, CHO:1, COOH:1): Low selectivity (S=1.08 < 3.0)
+  solvent_250 (CH3:1, CH2:2, CH:1, HCOO:1, CH3CO:1): Low selectivity (S=0.73 < 3.0)
+  solvent_251 (CH3:1, CH2:2, CH:1, CH3COO:1, COOH:1): Low selectivity (S=1.04 < 3.0)
+  solvent_252 (CH3:3, CH:2, CH3COO:1): Low selectivity (S=0.44 < 3.0)
+  solvent_253 (CH3:2, CH:2, CH3COO:1, HCOO:1): Low selectivity (S=0.66 < 3.0)
+  solvent_254 (CH3:2, CH:2, CH3COO:1, CH3CO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_255 (CH3:2, CH:2, CH3COO:1, COOH:1): Low selectivity (S=1.04 < 3.0)
+  solvent_256 (CH3:1, CH2:1, HCO:1, CH2COO:1): Low selectivity (S=0.64 < 3.0)
+  solvent_257 (CH3:2, CH2:1, CH2COO:2): Low selectivity (S=0.55 < 3.0)
+  solvent_258 (CH2:2, OH:1, CH3CO:1): Low selectivity (S=1.54 < 3.0)
+  solvent_259 (CH2:3, OH:1, COOH:1): Low selectivity (S=2.00 < 3.0)
+  solvent_261 (CH2:2, OH:1, COOH:1): Low selectivity (S=2.26 < 3.0)
+  solvent_262 (CH3:1, CH2:2, HCO:1, CH2COO:1): Low selectivity (S=0.62 < 3.0)
+  solvent_263 (CH3:1, CH2:3, HCO:1, CH2COO:1): Low selectivity (S=0.61 < 3.0)
+  solvent_264 (CH2:4, CH3COO:1, HCOO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_266 (CH3:3, CH:1, OH:1, CHO:1): Low selectivity (S=1.38 < 3.0)
+  solvent_267 (CH3:1, CH:1, OH:1, HCO:1): Low selectivity (S=1.88 < 3.0)
+  solvent_268 (CH3:1, CH2:2, CH:1, OH:1, HCO:1): Low selectivity (S=1.42 < 3.0)
+  solvent_269 (CH3:1, CH:1, OH:1, CH3COO:1): Low selectivity (S=1.31 < 3.0)
+  solvent_270 (CH3:1, CH2:2, CH:1, OH:1, CH3COO:1): Low selectivity (S=1.13 < 3.0)
+  solvent_271 (CH3:2, CH:1, OH:1, CH2COO:1): Low selectivity (S=1.22 < 3.0)
+  solvent_272 (CH3:2, CH2:1, CH:1, OH:1, CH2COO:1): Low selectivity (S=1.14 < 3.0)
+  solvent_273 (CH3:1, CH:1, OH:1, HCOO:1): Low selectivity (S=1.43 < 3.0)
+  solvent_274 (CH3:2, CH:1, CH2COO:1, CH3CO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_275 (CH2:2, HCOO:2): Azeotrope B-E (az_BE=-3.027); Low selectivity (S=1.53 < 3.0)
+  solvent_276 (CH2:2, CH3COO:2): Low selectivity (S=0.59 < 3.0)
+  solvent_277 (CH2:2, OH:1, HCOO:1): Low selectivity (S=1.46 < 3.0)
+  solvent_278 (CH2:1, HCOO:1, COOH:1): Low selectivity (S=0.85 < 3.0)
+  solvent_279 (CH2:1, CH3CO:2): Low selectivity (S=0.79 < 3.0)
+  solvent_280 (CH2:1, HCOO:1, CH3CO:1): Azeotrope B-E (az_BE=-0.281); Low selectivity (S=0.81 < 3.0)
+  solvent_281 (CH2:3, CH3CO:2): Low selectivity (S=0.78 < 3.0)
+  solvent_282 (CH2:3, HCOO:1, CH3CO:1): Low selectivity (S=0.76 < 3.0)
+  solvent_283 (CH2:4, CH3CO:2): Low selectivity (S=0.77 < 3.0)
+  solvent_284 (CH2:1, CH3CO:1, COOH:1): Low selectivity (S=1.38 < 3.0)
+  solvent_285 (CH2:1, CH3COO:1, CH3CO:1): Low selectivity (S=0.73 < 3.0)
+  solvent_286 (CH2:2, CH3COO:1, HCOO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_287 (CH2:3, CH3COO:1, CH3CO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_288 (CH2:4, CH3COO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_289 (CH2:2, CH3COO:1, CH3CO:1): Low selectivity (S=0.72 < 3.0)
+  solvent_291 (CH2:2, CH3COO:1, COOH:1): Low selectivity (S=1.16 < 3.0)
+  solvent_293 (CH2:2, HCO:1, CH3CO:1): Low selectivity (S=0.75 < 3.0)
+  solvent_294 (CH3:1, CH2:2, CH:1, HCO:1, HCOO:1): Low selectivity (S=0.40 < 3.0)
+  solvent_295 (CH3:1, CH2:2, CH:1, HCO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_297 (CH2:3, HCOO:2): Azeotrope B-E (az_BE=-0.414); Low selectivity (S=1.11 < 3.0)
+  solvent_298 (CH2:4, HCOO:2): Low selectivity (S=0.92 < 3.0)
+  solvent_299 (CH2:2, HCO:1, COOH:1): Low selectivity (S=1.34 < 3.0)
+  solvent_300 (CH3:1, CH:1, HCO:1, COOH:1): Low selectivity (S=1.34 < 3.0)
+  solvent_301 (CH3:1, CH:1, HCO:1, HCOO:1): Low selectivity (S=0.31 < 3.0)
+  solvent_302 (CH3:2, CH:1, HCO:1, CH2O:1): Low selectivity (S=0.42 < 3.0)
+  solvent_303 (CH3:2, CH:1, HCO:1, COO:1): Low selectivity (S=0.81 < 3.0)
+  solvent_304 (CH3:1, CH:1, HCO:1, CH3CO:1): Low selectivity (S=0.74 < 3.0)
+  solvent_305 (CH3:2, CH2:1, CH:1, CH2O:1, COOH:1): Low selectivity (S=1.12 < 3.0)
+  solvent_306 (CH3:2, C:1, HCO:1, CH3CO:1): Low selectivity (S=0.72 < 3.0)
+  solvent_310 (CH3:1, CH:1, HCOO:2): Azeotrope B-E (az_BE=-3.686); Low selectivity (S=1.50 < 3.0)
+  solvent_311 (CH3:2, CH:1, CH2COO:1, COOH:1): Low selectivity (S=1.08 < 3.0)
+  solvent_312 (CH3:3, CH:1, CH2COO:1, CH2O:1): Low selectivity (S=0.52 < 3.0)
+  solvent_313 (CH3:3, CH:1, CH2COO:1, COO:1): Low selectivity (S=0.66 < 3.0)
+  solvent_314 (CH3:1, CH2:2, CH:1, CH3CO:2): Low selectivity (S=0.76 < 3.0)
+  solvent_315 (CH3:2, CH2:2, CH:1, CH3CO:1): Low selectivity (S=0.55 < 3.0)
+  solvent_317 (CH3:2, CH2:1, CH2O:1, COO:1): Low selectivity (S=0.61 < 3.0)
+  solvent_318 (CH3:2, C:1, OH:1, CH3COO:1): Low selectivity (S=1.23 < 3.0)
+  solvent_320 (CH3:1, CH3COO:1, CH2COO:1): Low selectivity (S=0.56 < 3.0)
+  solvent_321 (CH3:1, CH2COO:1, HCOO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_322 (CH3:1, CH2:2, CH3COO:1, CH2COO:1): Low selectivity (S=0.58 < 3.0)
+  solvent_323 (CH3:1, CH2:2, CH2COO:1, HCOO:1): Low selectivity (S=0.65 < 3.0)
+  solvent_324 (CH3:1, CH2:3, CH2COO:1, HCOO:1): Low selectivity (S=0.64 < 3.0)
+  solvent_327 (CH3:3, CH2:1, CH:1, COO:1): Low selectivity (S=0.51 < 3.0)
+  solvent_328 (CH3:2, CH2:1, CH:1, COOH:1): Low selectivity (S=1.10 < 3.0)
+  solvent_329 (CH3:1, CH2:1, CH:1, HCO:2): Low selectivity (S=0.56 < 3.0)
+  solvent_330 (CH3:2, CH2:1, CH:1, HCO:1, COO:1): Low selectivity (S=0.77 < 3.0)
+  solvent_331 (CH3:2, CH2:1, CH:1, CH3COO:1, COO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_332 (CH3:2, CH2:1, CH:1, HCO:1): Low selectivity (S=0.41 < 3.0)
+  solvent_333 (CH3:1, CH2:1, CH:1, HCO:1, CH3COO:1): Low selectivity (S=0.64 < 3.0)
+  solvent_334 (CH3:1, CH2:2, CH:1, OH:1, HCOO:1): Low selectivity (S=1.17 < 3.0)
+  solvent_335 (CH3:2, CH2:1, OH:1, CHO:1): Low selectivity (S=1.56 < 3.0)
+  solvent_336 (CH3:1, CH2COO:1, COOH:1): Low selectivity (S=1.22 < 3.0)
+  solvent_337 (CH3:1, CH2O:1, COOH:1): Low selectivity (S=1.38 < 3.0)
+  solvent_338 (CH3:1, CH2:2, CH2COO:1, COOH:1): Low selectivity (S=1.08 < 3.0)
+  solvent_339 (CH3:1, CH2:2, CH2O:1, COOH:1): Low selectivity (S=1.19 < 3.0)
+  solvent_341 (CH3:1, CH2:3, CH2O:1, COOH:1): Low selectivity (S=1.12 < 3.0)
+  solvent_342 (CH3:1, CH2:1, CH2O:1, COOH:1): Low selectivity (S=1.27 < 3.0)
+  solvent_343 (CH3:1, COOH:1, COO:1): Low selectivity (S=1.39 < 3.0)
+  solvent_344 (CH3:1, CH:1, OH:1, CH3CO:1): Low selectivity (S=1.54 < 3.0)
+  solvent_345 (CH3:1, CH2:2, CH:1, OH:1, CH3CO:1): Low selectivity (S=1.30 < 3.0)
+  solvent_346 (CH3:1, CH:1, OH:1, COOH:1): Low selectivity (S=2.26 < 3.0)
+  solvent_347 (CH3:2, CH:1, OH:1, CH2O:1): Low selectivity (S=1.54 < 3.0)
+  solvent_348 (CH3:1, CH2:2, CH:1, OH:1, COOH:1): Low selectivity (S=1.81 < 3.0)
+  solvent_349 (CH3:2, CH2:1, CH:1, OH:1, CH2O:1): Low selectivity (S=1.37 < 3.0)
+  solvent_350 (CH3:1, CH2:1, CH:1, OH:1, COOH:1): Low selectivity (S=2.01 < 3.0)
+  solvent_351 (CH3:2, CH:1, OH:1, COO:1): Low selectivity (S=1.44 < 3.0)
+  solvent_352 (CH3:1, CH2:1, CH:1, OH:1, HCO:1): Low selectivity (S=1.61 < 3.0)
+  solvent_354 (CH3:1, CH2COO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_355 (CH3:1, CH3CO:1, CH2O:1): Azeotrope B-E (az_BE=-0.438); Low selectivity (S=0.55 < 3.0)
+  solvent_356 (CH3:1, CH2:2, CH2COO:1, CH3CO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_357 (CH3:1, CH2:2, CH3CO:1, CH2O:1): Low selectivity (S=0.61 < 3.0)
+  solvent_358 (CH3:1, CH2:3, CH2COO:1, CH3CO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_359 (CH3:1, CH2:3, CH3CO:1, CH2O:1): Low selectivity (S=0.62 < 3.0)
+  solvent_361 (CH2:2, CH3CO:1, COOH:1): Low selectivity (S=1.29 < 3.0)
+  solvent_364 (CH2:2, CH3CO:2): Low selectivity (S=0.79 < 3.0)
+  solvent_365 (CH3:1, CH:1, CH3COO:1, COOH:1): Low selectivity (S=1.16 < 3.0)
+  solvent_366 (CH3:1, CH:1, CH3COO:1, CH3CO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_367 (CH3:2, CH:1, CH3COO:1, CH2O:1): Low selectivity (S=0.54 < 3.0)
+  solvent_368 (CH3:2, CH:1, CH3COO:1, COO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_369 (CH3:1, CH2:3, HCOO:1): Azeotrope B-E (az_BE=-0.590); Low selectivity (S=0.37 < 3.0)
+  solvent_371 (CH3:1, CH2:4, HCOO:1): Low selectivity (S=0.39 < 3.0)
+  solvent_373 (CH3:1, CH:1, CH3CO:2): Low selectivity (S=0.77 < 3.0)
+  solvent_374 (CH3:1, CH:1, HCOO:1, CH3CO:1): Low selectivity (S=0.77 < 3.0)
+  solvent_377 (CH2:4, HCOO:1, CH3CO:1): Low selectivity (S=0.74 < 3.0)
+  solvent_378 (CH3:1, CH2:1, CH3COO:1, CH2COO:1): Low selectivity (S=0.57 < 3.0)
+  solvent_379 (CH3:1, CH2:1, CH:1, OH:1, HCOO:1): Low selectivity (S=1.27 < 3.0)
+  solvent_380 (CH3:1, CH3COO:1, CH2O:1): Azeotrope B-E (az_BE=-0.611); Low selectivity (S=0.52 < 3.0)
+  solvent_381 (CH3:1, CH3COO:1, COO:1): Low selectivity (S=0.73 < 3.0)
+  solvent_382 (CH3:1, CH2:2, CH3COO:1, CH2O:1): Low selectivity (S=0.55 < 3.0)
+  solvent_383 (CH3:1, CH2:2, CH3COO:1, COO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_384 (CH3:1, CH2:3, CH3COO:1, CH2O:1): Low selectivity (S=0.56 < 3.0)
+  solvent_385 (CH3:1, CH2:3, CH3COO:1, COO:1): Low selectivity (S=0.69 < 3.0)
+  solvent_389 (CH3:1, HCO:1, COO:1): Azeotrope B-E (az_BE=-0.088); Low selectivity (S=0.94 < 3.0)
+  solvent_390 (CH3:1, CH2:2, HCO:1, CH2O:1): Low selectivity (S=0.44 < 3.0)
+  solvent_391 (CH3:1, CH2:2, HCO:1, COO:1): Low selectivity (S=0.81 < 3.0)
+  solvent_392 (CH3:1, CH2:3, HCO:1, CH2O:1): Low selectivity (S=0.47 < 3.0)
+  solvent_393 (CH3:1, CH2:3, HCO:1, COO:1): Low selectivity (S=0.77 < 3.0)
+  solvent_394 (CH3:1, CH2:1, HCO:1, COO:1): Low selectivity (S=0.86 < 3.0)
+  solvent_395 (CH3:1, HCOO:1, COO:1): Azeotrope B-E (az_BE=-2.170); Low selectivity (S=0.45 < 3.0)
+  solvent_396 (CH3:1, CH2:2, HCOO:1, COO:1): Low selectivity (S=0.53 < 3.0)
+  solvent_397 (CH3:1, CH2:1, HCOO:1, COO:1): Low selectivity (S=0.50 < 3.0)
+  solvent_398 (CH3:1, CH2:3, HCOO:1, COO:1): Low selectivity (S=0.56 < 3.0)
+  solvent_399 (CH2:2, HCOO:1, CH3CO:1): Low selectivity (S=0.79 < 3.0)
+  solvent_400 (CH3:1, CH2:3, CH3COO:1, CH2COO:1): Low selectivity (S=0.58 < 3.0)
+  solvent_401 (CH3:1, CH2:2, HCOO:1, CH2O:1): Low selectivity (S=0.54 < 3.0)
+  solvent_402 (CH3:1, CH2:3, HCOO:1, CH2O:1): Low selectivity (S=0.53 < 3.0)
+  solvent_403 (CH3:1, CH2:1, HCOO:1, CH2O:1): Azeotrope B-E (az_BE=-1.000); Low selectivity (S=0.56 < 3.0)
+  solvent_404 (CH3:2, CH2:1, CH:1, HCOO:1, COO:1): Low selectivity (S=0.54 < 3.0)
+  solvent_405 (CH3:2, CH2:1, CH:1, CH3CO:1, COO:1): Low selectivity (S=0.75 < 3.0)
+  solvent_406 (CH3:2, CH2:1, CH:1, COOH:1, COO:1): Low selectivity (S=1.15 < 3.0)
+  solvent_407 (CH3:1, CH2:1, CH:1, CH3COO:2): Low selectivity (S=0.59 < 3.0)
+  solvent_408 (CH3:2, CH2:1, CH:1, CH3COO:1): Low selectivity (S=0.43 < 3.0)
+  solvent_409 (CH3:1, CH2:1, CH:1, HCO:1, HCOO:1): Low selectivity (S=0.36 < 3.0)
+  solvent_410 (CH3:1, CH2:1, CH:1, CH3COO:1, HCOO:1): Low selectivity (S=0.68 < 3.0)
+  solvent_411 (CH3:1, CH2:1, CH:1, CH3COO:1, CH3CO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_412 (CH3:1, CH2:1, CH:1, HCOO:2): Azeotrope B-E (az_BE=-1.445); Low selectivity (S=1.08 < 3.0)
+  solvent_413 (CH3:2, CH2:1, CH:1, HCOO:1): Azeotrope B-E (az_BE=-1.116); Low selectivity (S=0.35 < 3.0)
+  solvent_414 (CH3:1, CH2:1, CH:1, CH3COO:1, COOH:1): Low selectivity (S=1.09 < 3.0)
+  solvent_415 (CH3:1, CH2:3, COOH:1): Low selectivity (S=1.10 < 3.0)
+  solvent_416 (CH3:1, CH2:1, COOH:1, COO:1): Low selectivity (S=1.29 < 3.0)
+  solvent_417 (CH3:1, CH2:4, COOH:1): Low selectivity (S=1.04 < 3.0)
+  solvent_418 (CH3:1, CH2:2, COOH:1): Low selectivity (S=1.17 < 3.0)
+  solvent_419 (CH3:1, CH2:1, CH2COO:1, CH3CO:1): Low selectivity (S=0.70 < 3.0)
+  solvent_420 (CH3:2, CH2:2, CH:1, OH:1): Low selectivity (S=1.48 < 3.0)
+  solvent_421 (CH3:2, CH2:1, CH:1, OH:1): Low selectivity (S=1.78 < 3.0)
+  solvent_422 (CH3:1, CH2:1, CH3CO:1, CH2O:1): Low selectivity (S=0.58 < 3.0)
+  solvent_423 (CH3:1, CH2:3, CH3CO:1): Low selectivity (S=0.55 < 3.0)
+  solvent_424 (CH3:1, CH2:4, CH3CO:1): Low selectivity (S=0.56 < 3.0)
+  solvent_425 (CH3:1, CH2:2, CH3CO:1): Azeotrope B-E (az_BE=-0.111); Low selectivity (S=0.54 < 3.0)
+  solvent_426 (CH3:2, CH:1, HCOO:1, CH2O:1): Azeotrope B-E (az_BE=-0.168); Low selectivity (S=0.52 < 3.0)
+  solvent_427 (CH3:1, CH2:1, CH2COO:1, COOH:1): Low selectivity (S=1.14 < 3.0)
+  solvent_428 (CH3:2, CH:1, HCOO:1, COO:1): Low selectivity (S=0.51 < 3.0)
+  solvent_430 (CH3:2, CH2:2, COO:1): Azeotrope B-E (az_BE=-0.254); Low selectivity (S=0.51 < 3.0)
+  solvent_431 (CH3:2, CH2:2, COO:2): Low selectivity (S=0.72 < 3.0)
+  solvent_432 (CH3:2, CH2:3, COO:1): Low selectivity (S=0.53 < 3.0)
+  solvent_433 (CH3:2, CH2:1, COO:2): Low selectivity (S=0.71 < 3.0)
+  solvent_436 (CH3:2, CH:1, CH3CO:1, CH2O:1): Low selectivity (S=0.59 < 3.0)
+  solvent_437 (CH3:3, CH:1, CH2O:2): Azeotrope B-E (az_BE=-0.093); Low selectivity (S=0.45 < 3.0)
+  solvent_438 (CH3:2, CH:1, COOH:1): Low selectivity (S=1.17 < 3.0)
+  solvent_439 (CH3:3, CH:1, CH2O:1, COO:1): Low selectivity (S=0.61 < 3.0)
+  solvent_441 (CH3:3, CH:1, COO:2): Low selectivity (S=0.71 < 3.0)
+  solvent_442 (CH3:1, CH3CO:1, COO:1): Low selectivity (S=0.78 < 3.0)
+  solvent_443 (CH3:1, CH2:2, CH3CO:1, COO:1): Low selectivity (S=0.77 < 3.0)
+  solvent_444 (CH3:1, CH2:1, CH3CO:1, COO:1): Low selectivity (S=0.78 < 3.0)
+  solvent_445 (CH3:1, CH2:3, CH3CO:1, COO:1): Low selectivity (S=0.76 < 3.0)
+  solvent_447 (CH2:2, HCOO:1, COOH:1): Low selectivity (S=0.85 < 3.0)
+  solvent_449 (CH3:1, CH2:1, CH3COO:1, COO:1): Low selectivity (S=0.71 < 3.0)
+  solvent_450 (CH3:1, CH2:3, CH3COO:1): Low selectivity (S=0.44 < 3.0)
+  solvent_451 (CH3:1, CH2:4, CH3COO:1): Low selectivity (S=0.46 < 3.0)
+  solvent_452 (CH3:1, CH2:2, CH3COO:1): Azeotrope B-E (az_BE=-0.254); Low selectivity (S=0.42 < 3.0)
+  solvent_453 (CH3:1, CH2:1, CH3COO:1, CH2O:1): Low selectivity (S=0.54 < 3.0)
+  solvent_454 (CH3:1, CH2:3, HCO:1): Low selectivity (S=0.42 < 3.0)
+  solvent_455 (CH3:1, CH2:4, HCO:1): Low selectivity (S=0.43 < 3.0)
+  solvent_457 (CH3:2, CH2:1, CH:1, OH:1, COO:1): Low selectivity (S=1.32 < 3.0)
+  solvent_458 (CH3:1, CH2:1, CH:1, OH:1, CH3CO:1): Low selectivity (S=1.41 < 3.0)
+  solvent_460 (CH3:2, CH2:1, CH:1, CH3CO:1): Low selectivity (S=0.54 < 3.0)
+  solvent_461 (CH3:1, CH2:1, CH:1, CH3CO:2): Low selectivity (S=0.77 < 3.0)
+  solvent_462 (CH3:1, CH2:1, CH:1, CH3CO:1, COOH:1): Low selectivity (S=1.21 < 3.0)
+  solvent_463 (CH3:1, CH2:1, CH2COO:1, HCOO:1): Low selectivity (S=0.67 < 3.0)
+  solvent_464 (CH3:1, CH2:1, CH:1, HCOO:1, CH3CO:1): Low selectivity (S=0.75 < 3.0)
+  solvent_465 (CH3:1, CH2:2, COOH:1, COO:1): Low selectivity (S=1.21 < 3.0)
+  solvent_466 (CH3:1, CH2:3, COOH:1, COO:1): Low selectivity (S=1.15 < 3.0)
+  solvent_467 (CH3:1, CH2:1, CH:1, OH:1, CH3COO:1): Low selectivity (S=1.21 < 3.0)
+  solvent_468 (CH3:1, CH2:1, CH:1, HCO:1, CH3CO:1): Low selectivity (S=0.72 < 3.0)
+  solvent_469 (CH3:1, CH2:1, CH:1, HCO:1, COOH:1): Low selectivity (S=1.23 < 3.0)
+  solvent_470 (CH3:1, CH2:1, HCO:1, CH2O:1): Low selectivity (S=0.39 < 3.0)
+  solvent_472 (CH3:2, CH:1, CH2O:1, COOH:1): Low selectivity (S=1.19 < 3.0)
+  solvent_473 (CH3:2, CH:1, COOH:1, COO:1): Low selectivity (S=1.21 < 3.0)
+  solvent_474 (CH3:1, CH2:1, CH:1, HCOO:1, COOH:1): Low selectivity (S=0.83 < 3.0)
+  solvent_475 (CH3:1, CH:1, CH3CO:1, COOH:1): Low selectivity (S=1.28 < 3.0)
+  solvent_476 (CH3:2, CH:1, CH3CO:1, COO:1): Low selectivity (S=0.76 < 3.0)
+  solvent_477 (CH3:1, CH:1, HCOO:1, COOH:1): Low selectivity (S=0.83 < 3.0)
+
+Summary: 4/405 passed mixture screening
+  [0.0s]
+
+============================================================
+STEP 14: Perform ISS Calculations
+============================================================
+Input: 4
+Successful: 4
+Failed: 0
+
+Summary: 4/4 ISS calculations successful
+  [0.4s]
+
+============================================================
+SAVING RESULTS
+============================================================
+✓ Saved: results/paper2/design_ethylacetate_ethanol/results.csv
+✓ Saved: results/paper2/design_ethylacetate_ethanol/results.json
+
+Summary: Saved 4 results in 2 format(s)
+
+============================================================================================================================================
+                                                        TOP SOLVENTS (sorted by ED)                                                         
+============================================================================================================================================
+  #  Groups                                ED       R       S       C     SxC   alpha   Tb(K)   Tc(K)  Pc(b)   Tm(K)      ac  Hv(kJ)    Ant-A     Ant-B    Ant-C
+--------------------------------------------------------------------------------------------------------------------------------------------
+  1  DMSO:1                            1.1344   0.914   3.977   1.616   6.429   6.279   463.1   729.0  56.50   291.7  0.2806   52.47   4.2348  1598.695  -85.074
+  2  CH3:2, C:1, OH:2                  1.4284   1.148   3.264   1.038   3.389   4.571   437.3   601.6  52.45   233.5  0.9003   65.40   5.2643  1786.880  -97.469
+  3  CH3:1, CH2:1, CH:1, OH:2          1.4842   1.163   3.152   1.030   3.248   4.588   445.5   607.8  50.76   224.4  0.9355   67.42   5.3658  1873.289  -95.998
+  4  CH2:3, OH:2                       1.4931   1.156   3.103   1.031   3.201   4.687   453.5   615.7  50.83   235.5  0.9537   69.84   5.4501  1944.216  -96.363
+============================================================================================================================================
+Total: 4 solvent(s) evaluated
+============================================================================================================================================
+
+============================================================
+CAMD-ISS COMPLETE
+Output: results/paper2/design_ethylacetate_ethanol
+============================================================

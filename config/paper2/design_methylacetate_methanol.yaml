@@ -1,0 +1,51 @@
+mode: "design"
+
+# Binary mixture: Methyl acetate (A) / Methanol (B)
+mixture:
+  component_a:        # Methyl acetate (CH3–COO–CH3)
+    groups: {CH3: 1, CH3COO: 1}
+
+  component_b:        # Methanol (CH3–OH)
+    groups: {CH3OH: 1} 
+
+# Override with experimental data so we DON'T rely on UNIFAC here
+pure_properties:
+  component_a:   
+    tc: 506.6    
+    pc: 47.0     
+    tb: 330.0   
+
+# Solvent design settings
+design:
+  groups: ["CH3", "CH2", "CH", "C", "OH", "CHO", "HCO", "CH3COO", "CH2COO",
+           "HCOO", "CH3CO", "CH2O", "COOH", "COO", "H2O","DMSO", "DOH"]
+
+  constraints:
+    min_groups: 3
+    max_groups: 6
+    min_func_groups: 1
+    max_func_groups: 2
+    molecular_type: 1  # acyclic
+
+  max_candidates: 10000
+
+screening:
+  pure:
+    tb: [370.0, 650.0]
+    tm: [0.0, 298.0]
+    hv: [-9999.0, 1500.0]
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: true
+    selectivity_min: 2.0
+
+iss:
+  x_iso: 0.70
+  x_min: 0.60
+
+output:
+  dir: "results/paper2/design_methylacetate_methanol"
+  formats: ["csv", "json"]
+  verbose: true

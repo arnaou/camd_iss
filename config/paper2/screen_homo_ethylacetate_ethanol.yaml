@@ -18,7 +18,6 @@ pure_properties:
     tc: 514.0    
     pc: 63.0     
     tb: 351.5
-     # K   (~78 °C)
 
 # Predefined entrainers: linear diols
 screen:
@@ -75,7 +74,7 @@ screen:
 
 screening:
   pure:
-    tb: [370.0, 6000.0]
+    tb: [368.0, 650.0]
     tm: [0.0, 298.0]
     hv: [-9999.0, 1500.0]
 
@@ -90,6 +89,6 @@ iss:
   x_min: 0.40
 
 output:
-  dir: "results/paper2/screen_etoh_etac_new"
+  dir: "results/paper2/screen_homo_ethylacetate_ethanol"
   formats: ["csv", "json"]
   verbose: true

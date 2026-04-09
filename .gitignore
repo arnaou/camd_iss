@@ -46,8 +46,10 @@ coverage.xml
 *.mo
 *.pot
 
-# Log files
+# Log files (except paper results)
 *.log
+!results/paper1/**/*.log
+!results/paper2/**/*.log
 
 # Sphinx documentation
 docs/_build/
@@ -99,8 +101,14 @@ data/GreenSolvs.xlsx
 data/propred_calculation.xlsx
 data/unifac_groups.pkl
 
-# Results: generated output, not tracked
-results/
+# Results: ignore generated runs, but track paper results
+results/*
+!results/paper1
+!results/paper2
+# But ignore root-level results artifacts
+results/*.log
+results/*.png
+results/*.pdf
 
 # Claude Code
 .claude/

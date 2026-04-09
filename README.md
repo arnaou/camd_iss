@@ -19,12 +19,23 @@ CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp S
 
 ### Prerequisites
 
-- Python ≥ 3.9
-- [IPOPT](https://coin-or.github.io/Ipopt/) nonlinear solver
+| Solver | Required for | License |
+|--------|-------------|---------|
+| [IPOPT](https://coin-or.github.io/Ipopt/) | VLE, ISS, Antoine (all modes) | Open source |
+| [Gurobi](https://www.gurobi.com/) | Molecule generation (design mode only) | Commercial — free academic license available |
+
+**Screen mode** (`screen_iss.py`) only requires IPOPT.  
+**Design mode** (`camd_iss.py`) additionally requires a Gurobi license for the MILP-based candidate generation.
+
+A free academic license for Gurobi can be obtained at [gurobi.com/academia](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
 ```bash
 # Install IPOPT via conda (recommended)
 conda install -c conda-forge ipopt
+
+# Install Gurobi (design mode only)
+pip install gurobipy
+# Then activate your license: grbgetkey <your-key>
 
 # Install package and dependencies
 pip install -e .

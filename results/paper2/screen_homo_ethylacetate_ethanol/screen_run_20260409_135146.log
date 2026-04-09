@@ -1,0 +1,203 @@
+============================================================
+Screen-ISS: Entrainer Screening
+============================================================
+Timestamp: 2026-04-09 13:51:46
+Config: config/paper2/screen_homo_ethylacetate_ethanol.yaml
+Log file: results/paper2/screen_homo_ethylacetate_ethanol/screen_run_20260409_135146.log
+
+============================================================
+STEP 1: Validate Binary Mixture
+============================================================
+Component A: CH3:1, CH2:1, CH3COO:1
+  ✓ Valid
+Component B: CH3:1, CH2:1, OH:1
+  ✓ Valid
+
+Summary: Both components valid
+  [0.0s]
+
+============================================================
+STEP 2: Check Binary Mixture Parameters
+============================================================
+✓ All UNIFAC parameters available
+
+Summary: Compatible
+  [0.0s]
+
+============================================================
+STEP 3: Calculate Pure Component Properties (Mixture)
+============================================================
+
+A (CH3:1, CH2:1, CH3COO:1):
+  Tc: 521.16 K
+  Pc: 40.58 bar
+  Tb: 346.44 K
+  Tm: 174.07 K
+  Ac: 0.4109
+  Hv: 38.30 kJ/mol
+
+B (CH3:1, CH2:1, OH:1):
+  Tc: 489.28 K
+  Pc: 55.57 bar
+  Tb: 330.01 K
+  Tm: 164.57 K
+  Ac: 0.5267
+  Hv: 40.12 kJ/mol
+
+Summary: Calculated 6 properties for 2 components
+  [0.0s]
+
+============================================================
+STEP 4: Override Mixture Properties (if provided)
+============================================================
+Override A.tc = 530.0
+Override A.pc = 38.83
+Override A.tb = 350.0
+Override B.tc = 514.0
+Override B.pc = 63.0
+Override B.tb = 351.5
+
+Summary: 6 property overrides applied
+  [0.0s]
+
+✓ Boiling point validation: Tb_A (350.00K) < Tb_B (351.50K)
+
+============================================================
+STEP 5: Calculate Antoine Parameters (Mixture)
+============================================================
+✓ A: A=3.774, B=936.2, C=-101.6
+✓ B: A=5.323, B=1697.4, C=-32.3
+
+Summary: 2/2 successful
+  [0.1s]
+
+============================================================
+STEP 6: Load and Validate Candidates
+============================================================
+Validating predefined candidates:
+  ✓ 1-propanol: OH:1, CH3:1, CH2:2
+  ✓ 1-butanol: OH:1, CH3:1, CH2:3
+  ✓ 1-pentanol: OH:1, CH3:1, CH2:4
+  ✓ 1-hexanol: OH:1, CH3:1, CH2:5
+  ✓ 1-heptanol: OH:1, CH3:1, CH2:6
+  ✓ 1-octanol: OH:1, CH3:1, CH2:7
+  ✓ 1-nonanol: OH:1, CH3:1, CH2:8
+  ✓ 1-decanol: OH:1, CH3:1, CH2:9
+  ✓ 1-undecanol: OH:1, CH3:1, CH2:10
+
+Summary: 9 valid, 0 invalid
+  [0.0s]
+
+============================================================
+STEP 7: Check Candidate Parameters (UNIFAC)
+============================================================
+Checked: 9
+Compatible: 9
+Incompatible: 0
+
+Summary: 9/9 have complete UNIFAC parameters
+  [0.0s]
+
+============================================================
+STEP 8: Calculate Pure Component Properties (Candidates)
+============================================================
+
+Summary: 9/9 properties calculated
+  [0.0s]
+
+============================================================
+STEP 9: Screen Pure Properties
+============================================================
+Initial: 9
+Passed: 8
+Rejected: 1
+
+Rejection reasons:
+  entrainer_1 (OH:1, CH3:1, CH2:2): tb=364.4 outside [368.0, 650.0]
+
+Summary: 8/9 passed pure property screening
+  [0.0s]
+
+============================================================
+STEP 10: Calculate Antoine Parameters (Candidates)
+============================================================
+Successful: 8
+Failed: 0
+
+Summary: 8/8 calculated
+  [0.8s]
+
+============================================================
+STEP 11: Screen Miscibility (Temperature Range)
+============================================================
+Input: 8
+Passed: 8
+Failed: 0
+
+Summary: 8/8 passed miscibility screening
+  [4.0s]
+
+============================================================
+STEP 12: Perform VLE Calculations
+============================================================
+Total: 8
+Successful: 8
+Failed: 0
+
+Summary: 8/8 VLE calculations successful
+  [4.3s]
+
+============================================================
+STEP 13: Screen Mixture Properties
+============================================================
+Input: 8
+Passed: 4
+Rejected: 4
+
+Rejection reasons:
+  entrainer_6 (OH:1, CH3:1, CH2:7): Low selectivity (S=1.04 < 1.1)
+  entrainer_7 (OH:1, CH3:1, CH2:8): Low selectivity (S=0.97 < 1.1)
+  entrainer_8 (OH:1, CH3:1, CH2:9): Low selectivity (S=0.91 < 1.1)
+  entrainer_9 (OH:1, CH3:1, CH2:10): Low selectivity (S=0.87 < 1.1)
+
+Summary: 4/8 passed mixture screening
+  [0.0s]
+
+============================================================
+STEP 14: Perform ISS Calculations
+============================================================
+Input: 4
+Successful: 3
+Failed: 1
+
+Failure reasons:
+  entrainer_5 (OH:1, CH3:1, CH2:6): ISS solver: warning/infeasible
+
+Summary: 3/4 ISS calculations successful
+  [0.9s]
+
+============================================================
+SAVING RESULTS
+============================================================
+✓ Saved: results/paper2/screen_homo_ethylacetate_ethanol/results.csv
+✓ Saved: results/paper2/screen_homo_ethylacetate_ethanol/results.json
+
+Summary: Saved 3 results in 2 format(s)
+✓ Saved: results/paper2/screen_homo_ethylacetate_ethanol/results_detailed.json
+
+============================================================================================================================================
+                                                       TOP ENTRAINERS (sorted by ED)                                                        
+============================================================================================================================================
+  #  Groups                                ED       R       S       C     SxC   alpha   Tb(K)   Tc(K)  Pc(b)   Tm(K)      ac  Hv(kJ)    Ant-A     Ant-B    Ant-C
+--------------------------------------------------------------------------------------------------------------------------------------------
+  1  OH:1, CH3:1, CH2:3                9.2253   5.887   1.739   0.966   1.681   1.985   393.9   558.9  41.97   196.9  0.6126   49.42   4.6172  1408.930  -88.368
+  2  OH:1, CH3:1, CH2:4               23.9406   9.587   1.459   0.946   1.381   1.880   419.6   585.7  37.01   209.9  0.6550   54.07   4.6446  1516.783  -92.664
+  3  OH:1, CH3:1, CH2:5              147.8123  43.283   1.271   0.931   1.183   1.824   442.5   609.1  32.91   221.4  0.6969   58.72   4.6332  1588.962  -99.119
+============================================================================================================================================
+Total: 3 entrainer(s) evaluated
+============================================================================================================================================
+
+============================================================
+Screen-ISS COMPLETE
+Output: results/paper2/screen_homo_ethylacetate_ethanol
+============================================================
