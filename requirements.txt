@@ -32,9 +32,6 @@ notebook>=6.4.0
 # pip install gurobipy
 # grbgetkey <your-license-key>
 
-# Optional: Additional utilities
-pathlib2>=2.3.0  # For Python < 3.4 compatibility (usually not needed)
-
 # Development Dependencies (uncomment if needed)
 # black>=22.0.0  # Code formatting
 # flake8>=4.0.0  # Linting

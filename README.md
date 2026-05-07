@@ -179,9 +179,39 @@ Collaborators:
 - Nataliya Shcherbakova — Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS
 - Vincent Gerbaud — Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS
 
+## Citation
+
+If you use this software in your research, please cite the relevant paper(s):
+
+**Paper 1 — CAMD-ISS framework (acetone/methanol case study):**
+
+```bibtex
+@article{iss_camd2026,
+  author  = {Adem R. N. Aouichaoui and Ivonne Rodriguez-Donis and Nataliya Shcherbakova
+             and Edoardo Parascandolo and Vincent Gerbaud and Jens Abildskov},
+  title   = {Computer-Aided Entrainer Design for Extractive Distillation Using Infinitely Sharp Splits},
+  journal = {ChemRxiv},
+  year    = {2026},
+  doi     = {10.26434/chemrxiv.15002406/v1},
+  url     = {https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002406/v1},
+}
+```
+
+**Paper 2 — Extended case studies (placeholder):**
+
+```bibtex
+@article{iss_camd2_placeholder,
+  author  = {},
+  title   = {},
+  journal = {},
+  year    = {},
+  doi     = {},
+}
+```
+
 ## Contributing
 
-See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+Issues and pull requests are welcome. Please open an issue first to discuss proposed changes.
 
 ## License
 
