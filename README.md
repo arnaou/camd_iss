@@ -3,17 +3,37 @@
 **Computer-Aided Molecular Design for Extractive Distillation using the Infinitely Sharp Split (ISS) Method**
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![DOI](https://img.shields.io/badge/DOI-10.26434%2Fchemrxiv.15002406%2Fv1-blue)](https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002406/v1)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 
-## About
+<p align="center">
+  <img src="img/TOC.png" alt="CAMD-ISS overview" width="700"/>
+</p>
+
+## Overview
 
 Extractive distillation separates azeotropic and close-boiling mixtures by adding an entrainer that modifies relative volatilities. Classical entrainer selection criteria — selectivity and capacity at infinite dilution — ignore the recovery column and can miss feasibility constraints.
 
-CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp Split (ISS) method, which simultaneously accounts for the extractive and recovery columns. The framework:
+CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp Split (ISS) method, which simultaneously accounts for both the extractive and recovery columns. The framework:
 
 - **Designs** new entrainer candidates via MILP-based molecular generation (UNIFAC group contributions)
 - **Screens** predefined entrainer sets against thermodynamic and structural constraints
-- Evaluates candidates using the **ISS objective** (entrainer-to-distillate ratio *ED*), computed via Pyomo/IPOPT optimization
+- Evaluates candidates using the **ISS objective** (minimum entrainer-to-distillate ratio *E/D*), computed via Pyomo/IPOPT
 - Performs **miscibility screening**, **bubble-point VLE**, and **azeotrope detection** along the way
+
+## Quick Start
+
+```bash
+# 1. Install IPOPT and dependencies
+conda install -c conda-forge ipopt
+pip install -e .
+
+# 2. Run screening on the minimal example
+python screen_iss.py config/camd_minimal.yaml -v
+
+# 3. Or run the full design pipeline (requires Gurobi license)
+python camd_iss.py config/paper1/design_acetone_methanol.yaml -v
+```
 
 ## Installation
 
@@ -25,39 +45,30 @@ CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp S
 | [Gurobi](https://www.gurobi.com/) | Molecule generation (design mode only) | Commercial — free academic license available |
 
 **Screen mode** (`screen_iss.py`) only requires IPOPT.  
-**Design mode** (`camd_iss.py`) additionally requires a Gurobi license for the MILP-based candidate generation.
-
-A free academic license for Gurobi can be obtained at [gurobi.com/academia](https://www.gurobi.com/academia/academic-program-and-licenses/).
+**Design mode** (`camd_iss.py`) additionally requires a Gurobi license for MILP-based candidate generation.  
+A free academic license is available at [gurobi.com/academia](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
 ```bash
 # Install IPOPT via conda (recommended)
 conda install -c conda-forge ipopt
 
-# Install Gurobi (design mode only)
-pip install gurobipy
-# Then activate your license: grbgetkey <your-key>
-
 # Install package and dependencies
 pip install -e .
-```
 
-Or install dependencies only:
-
-```bash
-pip install -r requirements.txt
+# Install Gurobi (design mode only)
+pip install gurobipy
+grbgetkey <your-license-key>
 ```
 
 ## Usage
 
 Both modes are driven by YAML configuration files and produce CSV/JSON output.
 
-### Design Mode — generate candidates
+### Design Mode — generate and screen candidates
 
 ```bash
 python camd_iss.py config/paper1/design_acetone_methanol.yaml -v
 ```
-
-The config specifies the binary mixture, allowed UNIFAC groups, structural constraints, and screening thresholds:
 
 ```yaml
 mode: "design"
@@ -101,9 +112,9 @@ screen:
       groups: {DMSO: 1}
 ```
 
-### Pipeline
+### Screening Pipeline
 
-Both modes run the same 14-step screening pipeline:
+Both modes run the same 14-step pipeline:
 
 | Step | Description |
 |------|-------------|
@@ -111,7 +122,7 @@ Both modes run the same 14-step screening pipeline:
 | 2 | Check UNIFAC parameter availability |
 | 3 | Calculate pure component properties (Constantinou-Gani) |
 | 4 | Apply user property overrides |
-| 5 | Calculate Antoine parameters (Pyomo optimization) |
+| 5 | Calculate Antoine parameters (Pyomo/IPOPT) |
 | 6 | Generate candidates (design) or load entrainers (screen) |
 | 7 | Check UNIFAC parameters for all candidates |
 | 8 | Calculate pure properties for candidates |
@@ -120,7 +131,7 @@ Both modes run the same 14-step screening pipeline:
 | 11 | Miscibility screening over temperature range |
 | 12 | Bubble-point VLE calculations (ternary) |
 | 13 | Screen by mixture property constraints (selectivity, azeotropes) |
-| 14 | ISS calculation — minimize entrainer-to-distillate ratio *ED* |
+| 14 | ISS calculation — minimize entrainer-to-distillate ratio *E/D* |
 
 Results are written to the configured `output.dir` as `results.csv` and `results.json`.
 
@@ -132,8 +143,8 @@ camd_iss/
 ├── screen_iss.py        # Screen mode entry point
 ├── config/
 │   ├── camd_minimal.yaml         # Minimal working config template
-│   ├── paper1/                   # Acetone/methanol study
-│   └── paper2/                   # Multi-system study
+│   ├── paper1/                   # Acetone/methanol study configs
+│   └── paper2/                   # Multi-system study configs
 ├── data/
 │   └── json/            # UNIFAC parameters (rk, qk, interactions, Tc, Tb, …)
 ├── src/
@@ -162,22 +173,6 @@ The `tutorials/` folder contains nine notebooks covering the full workflow:
 | `07_azeotrope.ipynb` | Azeotrope detection |
 | `08_iss.ipynb` | ISS optimization |
 | `09_analyze_screening.ipynb` | Screening results analysis |
-
-## Built With
-
-- [Pyomo](https://www.pyomo.org/) — optimization modeling
-- [IPOPT](https://coin-or.github.io/Ipopt/) — nonlinear optimization solver
-- [NumPy](https://numpy.org/) / [SciPy](https://scipy.org/) / [Pandas](https://pandas.pydata.org/)
-
-## Acknowledgements
-
-This work originated as an M.Sc. thesis by Adem R.N. Aouichaoui under the supervision of Assoc. Prof. Jens Abildskov at the Process Systems Engineering Center (PROSYS), Technical University of Denmark (DTU).
-
-Collaborators:
-
-- Ivonne Rodriguez-Donis — Laboratoire de Chimie Agro-industrielle (LCA), Université de Toulouse, INRA
-- Nataliya Shcherbakova — Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS
-- Vincent Gerbaud — Laboratoire de Génie Chimique, Université de Toulouse, CNRS, INP, UPS
 
 ## Citation
 
@@ -208,6 +203,16 @@ If you use this software in your research, please cite the relevant paper(s):
   doi     = {},
 }
 ```
+
+## Acknowledgements
+
+This work originated as an M.Sc. thesis by Adem R.N. Aouichaoui under the supervision of Assoc. Prof. Jens Abildskov at the [Process Systems Engineering Center (PROSYS)](https://www.kt.dtu.dk/english/research/prosys), Technical University of Denmark (DTU).
+
+Collaborators:
+
+- Ivonne Rodriguez-Donis — [Laboratoire de Chimie Agro-industrielle (LCA)](https://lca.inp-toulouse.fr/), Université de Toulouse, INRA
+- Nataliya Shcherbakova — [Laboratoire de Génie Chimique (LGC)](https://www.lgc.cnrs.fr/), Université de Toulouse, CNRS, INP, UPS
+- Vincent Gerbaud — [Laboratoire de Génie Chimique (LGC)](https://www.lgc.cnrs.fr/), Université de Toulouse, CNRS, INP, UPS
 
 ## Contributing
 
