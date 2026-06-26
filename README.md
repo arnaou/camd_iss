@@ -135,6 +135,14 @@ Both modes run the same 14-step pipeline:
 
 Results are written to the configured `output.dir` as `results.csv` and `results.json`.
 
+### Post-run Analysis
+
+```bash
+python analyze_screening_log.py results/paper1/design_acetone_methanol/camd_run_*.log
+```
+
+Parses a screening log and prints a funnel table showing how many candidates were eliminated at each step, useful for understanding bottlenecks and tuning thresholds.
+
 ## Project Structure
 
 ```
