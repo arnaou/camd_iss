@@ -365,7 +365,7 @@ def screen_pure_properties(candidates, candidate_props, config, verbose=False):
     """Screen candidates based on pure property constraints."""
     t0 = print_step(9, "Screen Pure Properties", verbose)
 
-    constraints = config['screening']['pure']
+    constraints = config['screening'].get('pure') or {}
     screened = {}
     rejected = {}
 

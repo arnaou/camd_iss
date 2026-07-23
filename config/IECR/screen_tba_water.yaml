@@ -1,0 +1,60 @@
+# Screen-ISS Configuration
+# Evaluate a predefined set of entrainers for ISS performance
+# (No molecule generation, only screening)
+
+mode: "screen"
+
+# Binary mixture: Methyl acetate (A) / Methanol (B)
+mixture:
+  component_a:        # ter-butyl alcohol (C4H10O)
+    groups: {CH3: 3, C: 1, OH: 1}
+
+  component_b:        # Water (H2O)
+    groups: {H2O: 1} 
+
+# Override with experimental data so we DON'T rely on UNIFAC here
+pure_properties:
+  component_a:   
+    tc: 506.2    
+    pc: 39.7  
+    tb: 355.5  
+
+# Predefined entrainers to evaluate
+screen:
+  entrainers:
+    - name: "3-Octanone"
+      groups: {CH3: 2, CH2: 4, CH2CO: 1}
+
+    - name: "Hexyl acetate"
+      groups: {CH3COO: 1, CH2: 5, CH3: 1}
+
+    - name: "2-Heptanone"
+      groups: {CH3CO: 1, CH2: 4, CH3: 1}
+
+
+
+
+
+# Property screening
+screening:
+  pure:
+    #tb: [36.0, 500.0]  # K
+    #tm: [0.0, 298.0]    # K
+    #hv: [-9999.0, 67.0] # kJ/mol
+
+  mixture:
+    no_azeotrope_AE: true
+    no_azeotrope_BE: true
+    miscibility: false
+    selectivity_min: 0.5
+
+# ISS settings
+iss:
+  x_iso: 0.6
+  x_min: 0.2
+
+# Output
+output:
+  dir: "results/IECR/screen_thf_water"
+  formats: ["csv", "json"]
+  verbose: true
