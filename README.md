@@ -55,8 +55,14 @@ conda install -c conda-forge ipopt
 # Install package and dependencies
 pip install -e .
 
-# Install Gurobi (design mode only)
-pip install gurobipy
+# Optional: SMILES resolution for results (experimental resolve_smiles step)
+pip install -e ".[smiles]"
+
+# Optional: Jupyter notebooks (tutorials/, case_studies/)
+pip install -e ".[notebooks]"
+
+# Design mode only: Gurobi (requires a license)
+pip install -e ".[design]"
 grbgetkey <your-license-key>
 ```
 
@@ -143,12 +149,21 @@ python analyze_screening_log.py results/IECR/design_acetone_methanol/camd_run_*.
 
 Parses a screening log and prints a funnel table showing how many candidates were eliminated at each step, useful for understanding bottlenecks and tuning thresholds.
 
+### Azeotrope Check (independent diagnostic)
+
+```bash
+python check_azeotrope.py config/IECR/screen_acetone_methanol.yaml -v
+```
+
+Standalone tool, separate from the design/screen pipelines. Reads only the `mixture:` section of any existing config file, solves for the binary A-B azeotrope via UNIFAC, and reports whether one was found (composition and temperature). Also plots xy and Txy diagrams with the azeotrope point marked, saved to `output.dir` if the config defines one. Uses a single initial guess (x=0.5, T=midpoint of Tb_A/Tb_B) — a root-finding problem, so it can miss an azeotrope far from that guess or fail to converge for a non-azeotropic pair. Pass `--no-plot` to skip plotting.
+
 ## Project Structure
 
 ```
 camd_iss/
 ├── camd_iss.py          # Design mode entry point
 ├── screen_iss.py        # Screen mode entry point
+├── check_azeotrope.py   # Standalone binary azeotrope check + xy/Txy plots
 ├── config/
 │   ├── camd_minimal.yaml         # Minimal working config template
 │   ├── IECR/                     # Acetone/methanol study configs

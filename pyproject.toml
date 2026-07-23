@@ -40,6 +40,14 @@ notebooks = [
     "ipykernel>=6.0.0",
     "notebook>=6.4.0",
 ]
+# SMILES resolution (experimental, resolve_smiles step) — degrades gracefully if absent
+smiles = [
+    "rdkit>=2022.9.1",
+]
+# Molecule generation (design mode only) — requires a Gurobi license
+design = [
+    "gurobipy>=10.0.0",
+]
 
 [project.urls]
 Repository = "https://github.com/arnaou/camd_iss"

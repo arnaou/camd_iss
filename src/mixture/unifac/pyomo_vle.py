@@ -30,7 +30,6 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     """
     # Generate initialization values using original mixture format
     init_values = _generate_initialization_values(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params)
-    #print(f"Initialization values generated: {init_values}")
     # Auto-convert formats for pyomo model
     mixture = _convert_mixture_format(mixture)
     antoine_array = _convert_antoine_format(antoine_params)
@@ -55,9 +54,9 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
     model.grp = pyo.Set(initialize=all_groups, name='all Groups')
     
     # define the constants/parameters
-    model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)}, 
-                       within=pyo.PositiveReals,name='Temperature in K') #bounds=(T.min()-10.0, T.max()+10.0)
-    #print(f"Temperature bounds: {T.min()-5} - {T.max()+5}") bounds=(T.min()-3, T.max()+5)
+    model.T = pyo.Var(model.dp, initialize={j: float(T[j]) for j in range(n_data)},
+                       within=pyo.PositiveReals, name='Temperature in K')
+
     # Flatten interaction parameters for Pyomo
     a_dict = {}
     for k1 in interaction_data:
