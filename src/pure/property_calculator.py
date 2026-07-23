@@ -21,22 +21,16 @@ Example Usage:
 from typing import Dict, List, Optional, Union, overload
 from pathlib import Path
 
-from .methods.base_method import PropertyMethod
 from .methods.constantinou_gani import ConstantinouGani
 
 
 class PropertyCalculator:
-    """Calculator for pure component properties using pluggable estimation methods."""
-    
-    def __init__(self, method: Optional[PropertyMethod] = None, 
-                 data_path: Optional[Union[str, Path]] = None,
-                 missing_group_action: str = "remove_compounds"):
-        """Initialize with optional method and data path."""
-        if method is None:
-            method = ConstantinouGani(data_path=data_path, 
-                                    missing_group_action=missing_group_action)
-        
-        self.method = method
+    """Calculator for pure component properties (Constantinou-Gani method)."""
+
+    def __init__(self, method: Optional[ConstantinouGani] = None,
+                 data_path: Optional[Union[str, Path]] = None):
+        """Initialize with optional method instance and data path."""
+        self.method = method if method is not None else ConstantinouGani(data_path=data_path)
     
     def calculate(self, input_data: Union[Dict[str, int], Dict[str, Dict[str, int]]], 
                  properties: Optional[List[str]] = None) -> Union[Optional[Dict[str, Optional[float]]], Dict[str, Optional[Dict[str, Optional[float]]]]]:

@@ -32,7 +32,7 @@ pip install -e .
 python screen_iss.py config/camd_minimal.yaml -v
 
 # 3. Or run the full design pipeline (requires Gurobi license)
-python camd_iss.py config/paper1/design_acetone_methanol.yaml -v
+python camd_iss.py config/IECR/design_acetone_methanol.yaml -v
 ```
 
 ## Installation
@@ -67,7 +67,7 @@ Both modes are driven by YAML configuration files and produce CSV/JSON output.
 ### Design Mode — generate and screen candidates
 
 ```bash
-python camd_iss.py config/paper1/design_acetone_methanol.yaml -v
+python camd_iss.py config/IECR/design_acetone_methanol.yaml -v
 ```
 
 ```yaml
@@ -92,7 +92,7 @@ design:
 ### Screen Mode — evaluate predefined entrainers
 
 ```bash
-python screen_iss.py config/paper2/screen_homo_acetone_methanol.yaml -v
+python screen_iss.py config/DA/screen_homo_acetone_methanol.yaml -v
 ```
 
 ```yaml
@@ -138,7 +138,7 @@ Results are written to the configured `output.dir` as `results.csv` and `results
 ### Post-run Analysis
 
 ```bash
-python analyze_screening_log.py results/paper1/design_acetone_methanol/camd_run_*.log
+python analyze_screening_log.py results/IECR/design_acetone_methanol/camd_run_*.log
 ```
 
 Parses a screening log and prints a funnel table showing how many candidates were eliminated at each step, useful for understanding bottlenecks and tuning thresholds.
@@ -151,8 +151,8 @@ camd_iss/
 ├── screen_iss.py        # Screen mode entry point
 ├── config/
 │   ├── camd_minimal.yaml         # Minimal working config template
-│   ├── paper1/                   # Acetone/methanol study configs
-│   └── paper2/                   # Multi-system study configs
+│   ├── IECR/                     # Acetone/methanol study configs
+│   └── DA/                       # Multi-system study configs
 ├── data/
 │   └── json/            # UNIFAC parameters (rk, qk, interactions, Tc, Tb, …)
 ├── src/
@@ -161,8 +161,9 @@ camd_iss/
 │   ├── pure/            # Property estimation and Antoine calculation
 │   ├── mixture/unifac/  # UNIFAC, VLE, ISS (Pyomo/IPOPT)
 │   └── data/            # Parameter loading and UNIFAC compatibility
-├── case_studies/        # Analysis notebooks (paper 1)
-├── tutorials/           # Step-by-step Jupyter notebooks (01–09)
+├── case_studies/        # Analysis notebooks and worked examples
+├── tutorials/           # Step-by-step Jupyter notebooks (01–09) plus
+│                        # standalone example scripts (VLE, ED comparisons)
 └── tests/               # Unit tests
 ```
 
@@ -200,17 +201,7 @@ If you use this software in your research, please cite the relevant paper(s):
 }
 ```
 
-**Paper 2 — Extended case studies (placeholder):**
-
-```bibtex
-@article{iss_camd2_placeholder,
-  author  = {},
-  title   = {},
-  journal = {},
-  year    = {},
-  doi     = {},
-}
-```
+**Paper 2 — Extended case studies:** citation to be added once published.
 
 ## Acknowledgements
 

@@ -31,6 +31,7 @@ import numpy as np
 import pyomo.environ as pyo
 from pathlib import Path
 from datetime import datetime
+from contextlib import contextmanager
 
 from .molecules import StructuralValidator
 from .pure import PropertyCalculator, AntoineCalculator
@@ -77,19 +78,22 @@ def setup_output_dir(config):
     return output_dir
 
 
-def print_step(step_num, title, verbose):
-    """Print step header and return start time."""
+@contextmanager
+def step(step_num, title, verbose):
+    """Print step header/footer (with elapsed time) around the wrapped block."""
     if verbose:
         print("\n" + "="*60)
         print(f"STEP {step_num}: {title}")
         print("="*60)
-    return time.time()
-
-
-def print_step_done(t0, verbose):
-    """Print step elapsed time."""
+    t0 = time.time()
+    yield
     if verbose:
         print(f"  [{time.time() - t0:.1f}s]")
+
+
+def _fmt_groups(groups):
+    """Format a UNIFAC groups dict as 'GROUP:count, ...'."""
+    return ", ".join(f"{k}:{v}" for k, v in groups.items())
 
 
 # ---------------------------------------------------------------------------
@@ -98,31 +102,29 @@ def print_step_done(t0, verbose):
 
 def validate_mixture(config, verbose=False):
     """Check defined mixture for structural validity."""
-    t0 = print_step(1, "Validate Binary Mixture", verbose)
+    with step(1, "Validate Binary Mixture", verbose):
+        mixture = {
+            'A': config['mixture']['component_a']['groups'],
+            'B': config['mixture']['component_b']['groups']
+        }
 
-    mixture = {
-        'A': config['mixture']['component_a']['groups'],
-        'B': config['mixture']['component_b']['groups']
-    }
+        validator = StructuralValidator()
 
-    validator = StructuralValidator()
+        is_valid_A = validator.is_valid(mixture['A'])
+        is_valid_B = validator.is_valid(mixture['B'])
 
-    is_valid_A = validator.is_valid(mixture['A'])
-    is_valid_B = validator.is_valid(mixture['B'])
+        if verbose:
+            groups_A = _fmt_groups(mixture['A'])
+            groups_B = _fmt_groups(mixture['B'])
+            print(f"Component A: {groups_A}")
+            print(f"  {'✓ Valid' if is_valid_A else '✗ Invalid'}")
+            print(f"Component B: {groups_B}")
+            print(f"  {'✓ Valid' if is_valid_B else '✗ Invalid'}")
+            print(f"\nSummary: {'Both components valid' if is_valid_A and is_valid_B else 'Validation failed'}")
 
-    if verbose:
-        groups_A = ", ".join([f"{k}:{v}" for k, v in mixture['A'].items()])
-        groups_B = ", ".join([f"{k}:{v}" for k, v in mixture['B'].items()])
-        print(f"Component A: {groups_A}")
-        print(f"  {'✓ Valid' if is_valid_A else '✗ Invalid'}")
-        print(f"Component B: {groups_B}")
-        print(f"  {'✓ Valid' if is_valid_B else '✗ Invalid'}")
-        print(f"\nSummary: {'Both components valid' if is_valid_A and is_valid_B else 'Validation failed'}")
+        if not (is_valid_A and is_valid_B):
+            raise ValueError("Binary mixture validation failed")
 
-    if not (is_valid_A and is_valid_B):
-        raise ValueError("Binary mixture validation failed")
-
-    print_step_done(t0, verbose)
     return mixture
 
 
@@ -132,18 +134,16 @@ def validate_mixture(config, verbose=False):
 
 def check_mixture_parameters(mixture, verbose=False):
     """Check UNIFAC parameters for binary mixture."""
-    t0 = print_step(2, "Check Binary Mixture Parameters", verbose)
+    with step(2, "Check Binary Mixture Parameters", verbose):
+        result = check_unifac_parameters(mixture=mixture)
 
-    result = check_unifac_parameters(mixture=mixture)
+        if verbose:
+            if result['compatible']:
+                print("✓ All UNIFAC parameters available")
+            else:
+                print("✗ Missing UNIFAC parameters")
+            print(f"\nSummary: {'Compatible' if result['compatible'] else 'Missing parameters'}")
 
-    if verbose:
-        if result['compatible']:
-            print("✓ All UNIFAC parameters available")
-        else:
-            print("✗ Missing UNIFAC parameters")
-        print(f"\nSummary: {'Compatible' if result['compatible'] else 'Missing parameters'}")
-
-    print_step_done(t0, verbose)
     return result['compatible']
 
 
@@ -153,25 +153,23 @@ def check_mixture_parameters(mixture, verbose=False):
 
 def calculate_mixture_properties(mixture, verbose=False):
     """Calculate pure component properties for binary mixture."""
-    t0 = print_step(3, "Calculate Pure Component Properties (Mixture)", verbose)
+    with step(3, "Calculate Pure Component Properties (Mixture)", verbose):
+        prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
+        pure_calc = PropertyCalculator()
+        pure_props = pure_calc.calculate(mixture, prop_list)
 
-    prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
-    pure_calc = PropertyCalculator()
-    pure_props = pure_calc.calculate(mixture, prop_list)
+        if verbose:
+            for comp, props in pure_props.items():
+                groups_str = _fmt_groups(mixture[comp])
+                print(f"\n{comp} ({groups_str}):")
+                print(f"  Tc: {props['tc']:.2f} K")
+                print(f"  Pc: {props['pc']:.2f} bar")
+                print(f"  Tb: {props['tb']:.2f} K")
+                print(f"  Tm: {props['tm']:.2f} K")
+                print(f"  Ac: {props['ac']:.4f}")
+                print(f"  Hv: {props['hv']:.2f} kJ/mol")
+            print(f"\nSummary: Calculated {len(prop_list)} properties for {len(pure_props)} components")
 
-    if verbose:
-        for comp, props in pure_props.items():
-            groups_str = ", ".join([f"{k}:{v}" for k, v in mixture[comp].items()])
-            print(f"\n{comp} ({groups_str}):")
-            print(f"  Tc: {props['tc']:.2f} K")
-            print(f"  Pc: {props['pc']:.2f} bar")
-            print(f"  Tb: {props['tb']:.2f} K")
-            print(f"  Tm: {props['tm']:.2f} K")
-            print(f"  Ac: {props['ac']:.4f}")
-            print(f"  Hv: {props['hv']:.2f} kJ/mol")
-        print(f"\nSummary: Calculated {len(prop_list)} properties for {len(pure_props)} components")
-
-    print_step_done(t0, verbose)
     return pure_props
 
 
@@ -181,29 +179,27 @@ def calculate_mixture_properties(mixture, verbose=False):
 
 def override_mixture_properties(pure_props, config, verbose=False):
     """Apply user-provided property overrides."""
-    t0 = print_step(4, "Override Mixture Properties (if provided)", verbose)
+    with step(4, "Override Mixture Properties (if provided)", verbose):
+        overrides_applied = 0
 
-    overrides_applied = 0
+        if 'pure_properties' in config:
+            for comp in ['component_a', 'component_b']:
+                if comp in config['pure_properties']:
+                    comp_key = 'A' if comp == 'component_a' else 'B'
+                    overrides = config['pure_properties'][comp]
+                    for prop, value in overrides.items():
+                        if value is not None:
+                            pure_props[comp_key][prop] = value
+                            overrides_applied += 1
+                            if verbose:
+                                print(f"Override {comp_key}.{prop} = {value}")
 
-    if 'pure_properties' in config:
-        for comp in ['component_a', 'component_b']:
-            if comp in config['pure_properties']:
-                comp_key = 'A' if comp == 'component_a' else 'B'
-                overrides = config['pure_properties'][comp]
-                for prop, value in overrides.items():
-                    if value is not None:
-                        pure_props[comp_key][prop] = value
-                        overrides_applied += 1
-                        if verbose:
-                            print(f"Override {comp_key}.{prop} = {value}")
+        if verbose:
+            if overrides_applied > 0:
+                print(f"\nSummary: {overrides_applied} property overrides applied")
+            else:
+                print("\nSummary: No overrides (using calculated values)")
 
-    if verbose:
-        if overrides_applied > 0:
-            print(f"\nSummary: {overrides_applied} property overrides applied")
-        else:
-            print("\nSummary: No overrides (using calculated values)")
-
-    print_step_done(t0, verbose)
     return pure_props
 
 
@@ -213,38 +209,36 @@ def override_mixture_properties(pure_props, config, verbose=False):
 
 def calculate_mixture_antoine(mixture, pure_props, verbose=False):
     """Calculate Antoine parameters for mixture components."""
-    t0 = print_step(5, "Calculate Antoine Parameters (Mixture)", verbose)
+    with step(5, "Calculate Antoine Parameters (Mixture)", verbose):
+        antoine_calc = AntoineCalculator()
+        antoine_params = {}
+        failed = []
 
-    antoine_calc = AntoineCalculator()
-    antoine_params = {}
-    failed = []
+        for compound, props in pure_props.items():
+            compound_dict = {compound: mixture[compound]}
+            results = antoine_calc.calculate_antoine_parameters(
+                compound_dict, critical_properties=props, method='enthalpy_vap'
+            )
 
-    for compound, props in pure_props.items():
-        compound_dict = {compound: mixture[compound]}
-        results = antoine_calc.calculate_antoine_parameters(
-            compound_dict, critical_properties=props, method='enthalpy_vap'
-        )
+            if results['termination_condition'] == 'optimal':
+                antoine_params[compound] = {
+                    'A': results['A'],
+                    'B': results['B'],
+                    'C': results['C']
+                }
+                if verbose:
+                    print(f"✓ {compound}: A={results['A']:.3f}, B={results['B']:.1f}, C={results['C']:.1f}")
+            else:
+                failed.append(compound)
+                if verbose:
+                    print(f"✗ {compound}: Failed")
 
-        if results['termination_condition'] == 'optimal':
-            antoine_params[compound] = {
-                'A': results['A'],
-                'B': results['B'],
-                'C': results['C']
-            }
-            if verbose:
-                print(f"✓ {compound}: A={results['A']:.3f}, B={results['B']:.1f}, C={results['C']:.1f}")
-        else:
-            failed.append(compound)
-            if verbose:
-                print(f"✗ {compound}: Failed")
+        if verbose:
+            print(f"\nSummary: {len(antoine_params)}/{len(pure_props)} successful")
 
-    if verbose:
-        print(f"\nSummary: {len(antoine_params)}/{len(pure_props)} successful")
+        if len(antoine_params) != len(pure_props):
+            raise ValueError("Antoine parameter calculation failed for mixture components")
 
-    if len(antoine_params) != len(pure_props):
-        raise ValueError("Antoine parameter calculation failed for mixture components")
-
-    print_step_done(t0, verbose)
     return antoine_params
 
 
@@ -262,41 +256,39 @@ def load_and_validate_candidates(config, config_key='screen', list_key='entraine
         list_key: Key within config_key for the candidate list
                   ('entrainers' or 'solvents').
     """
-    t0 = print_step(6, "Load and Validate Candidates", verbose)
+    with step(6, "Load and Validate Candidates", verbose):
+        screen_config = config[config_key]
+        candidates = []
+        candidate_names = []
+        validator = StructuralValidator()
 
-    screen_config = config[config_key]
-    candidates = []
-    candidate_names = []
-    validator = StructuralValidator()
+        valid_count = 0
+        invalid_count = 0
 
-    valid_count = 0
-    invalid_count = 0
+        if verbose:
+            print("Validating predefined candidates:")
 
-    if verbose:
-        print("Validating predefined candidates:")
+        for entry in screen_config[list_key]:
+            name = entry['name']
+            groups = entry['groups']
+            is_valid = validator.is_valid(groups)
 
-    for entry in screen_config[list_key]:
-        name = entry['name']
-        groups = entry['groups']
-        is_valid = validator.is_valid(groups)
+            if is_valid:
+                candidates.append(groups)
+                candidate_names.append(name)
+                valid_count += 1
+                if verbose:
+                    groups_str = _fmt_groups(groups)
+                    print(f"  ✓ {name}: {groups_str}")
+            else:
+                invalid_count += 1
+                if verbose:
+                    groups_str = _fmt_groups(groups)
+                    print(f"  ✗ {name}: {groups_str} - Invalid")
 
-        if is_valid:
-            candidates.append(groups)
-            candidate_names.append(name)
-            valid_count += 1
-            if verbose:
-                groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
-                print(f"  ✓ {name}: {groups_str}")
-        else:
-            invalid_count += 1
-            if verbose:
-                groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
-                print(f"  ✗ {name}: {groups_str} - Invalid")
+        if verbose:
+            print(f"\nSummary: {valid_count} valid, {invalid_count} invalid")
 
-    if verbose:
-        print(f"\nSummary: {valid_count} valid, {invalid_count} invalid")
-
-    print_step_done(t0, verbose)
     return candidates, candidate_names
 
 
@@ -306,20 +298,18 @@ def load_and_validate_candidates(config, config_key='screen', list_key='entraine
 
 def check_candidate_parameters(candidates, mixture, verbose=False):
     """Check UNIFAC parameters for candidates."""
-    t0 = print_step(7, "Check Candidate Parameters (UNIFAC)", verbose)
+    with step(7, "Check Candidate Parameters (UNIFAC)", verbose):
+        result = check_unifac_parameters(mixture=mixture, solvent_candidates=candidates)
 
-    result = check_unifac_parameters(mixture=mixture, solvent_candidates=candidates)
+        compatible_indices = result['compatible_solvents']
+        compatible = [candidates[i] for i in compatible_indices]
 
-    compatible_indices = result['compatible_solvents']
-    compatible = [candidates[i] for i in compatible_indices]
+        if verbose:
+            print(f"Checked: {len(candidates)}")
+            print(f"Compatible: {len(compatible)}")
+            print(f"Incompatible: {len(candidates) - len(compatible)}")
+            print(f"\nSummary: {len(compatible)}/{len(candidates)} have complete UNIFAC parameters")
 
-    if verbose:
-        print(f"Checked: {len(candidates)}")
-        print(f"Compatible: {len(compatible)}")
-        print(f"Incompatible: {len(candidates) - len(compatible)}")
-        print(f"\nSummary: {len(compatible)}/{len(candidates)} have complete UNIFAC parameters")
-
-    print_step_done(t0, verbose)
     return compatible, compatible_indices
 
 
@@ -336,24 +326,22 @@ def calculate_candidate_properties(candidates, config, prefix='candidate', verbo
         config: Parsed YAML config (unused currently, kept for interface consistency).
         prefix: Name prefix for internal labelling ('candidate', 'solvent', 'entrainer').
     """
-    t0 = print_step(8, "Calculate Pure Component Properties (Candidates)", verbose)
+    with step(8, "Calculate Pure Component Properties (Candidates)", verbose):
+        prop_calc = PropertyCalculator()
+        compounds = {f"{prefix}_{i+1}": sol for i, sol in enumerate(candidates)}
 
-    prop_calc = PropertyCalculator()
-    compounds = {f"{prefix}_{i+1}": sol for i, sol in enumerate(candidates)}
+        prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
+        props_raw = prop_calc.calculate(compounds, prop_list)
 
-    prop_list = ['tc', 'pc', 'tb', 'tm', 'ac', 'hv']
-    props_raw = prop_calc.calculate(compounds, prop_list)
+        # Filter None values (missing groups)
+        props = {name: p for name, p in props_raw.items() if p is not None}
 
-    # Filter None values (missing groups)
-    props = {name: p for name, p in props_raw.items() if p is not None}
+        if verbose:
+            dropped = len(props_raw) - len(props)
+            if dropped > 0:
+                print(f"Dropped: {dropped} (missing group contributions)")
+            print(f"\nSummary: {len(props)}/{len(candidates)} properties calculated")
 
-    if verbose:
-        dropped = len(props_raw) - len(props)
-        if dropped > 0:
-            print(f"Dropped: {dropped} (missing group contributions)")
-        print(f"\nSummary: {len(props)}/{len(candidates)} properties calculated")
-
-    print_step_done(t0, verbose)
     return props
 
 
@@ -363,64 +351,62 @@ def calculate_candidate_properties(candidates, config, prefix='candidate', verbo
 
 def screen_pure_properties(candidates, candidate_props, config, verbose=False):
     """Screen candidates based on pure property constraints."""
-    t0 = print_step(9, "Screen Pure Properties", verbose)
+    with step(9, "Screen Pure Properties", verbose):
+        constraints = config['screening'].get('pure') or {}
+        screened = {}
+        rejected = {}
 
-    constraints = config['screening'].get('pure') or {}
-    screened = {}
-    rejected = {}
+        for name, props in candidate_props.items():
+            idx = int(name.split('_')[1]) - 1
+            groups = candidates[idx]
+            groups_str = _fmt_groups(groups)
 
-    for name, props in candidate_props.items():
-        idx = int(name.split('_')[1]) - 1
-        groups = candidates[idx]
-        groups_str = ", ".join([f"{k}:{v}" for k, v in groups.items()])
+            # Sanity check: Tb < Tc
+            if props.get('tb') and props.get('tc') and props['tb'] >= props['tc']:
+                rejected[name] = {
+                    'groups': groups_str,
+                    'reason': f"Tb ({props['tb']:.1f}K) >= Tc ({props['tc']:.1f}K)"
+                }
+                continue
 
-        # Sanity check: Tb < Tc
-        if props.get('tb') and props.get('tc') and props['tb'] >= props['tc']:
-            rejected[name] = {
-                'groups': groups_str,
-                'reason': f"Tb ({props['tb']:.1f}K) >= Tc ({props['tc']:.1f}K)"
-            }
-            continue
+            # Check constraints
+            passes = True
+            rejection_reason = None
 
-        # Check constraints
-        passes = True
-        rejection_reason = None
-
-        for prop, (min_val, max_val) in constraints.items():
-            if prop in props and props[prop] is not None:
-                if not (min_val <= props[prop] <= max_val):
+            for prop, (min_val, max_val) in constraints.items():
+                if prop in props and props[prop] is not None:
+                    if not (min_val <= props[prop] <= max_val):
+                        passes = False
+                        rejection_reason = f"{prop}={props[prop]:.1f} outside [{min_val}, {max_val}]"
+                        break
+                else:
                     passes = False
-                    rejection_reason = f"{prop}={props[prop]:.1f} outside [{min_val}, {max_val}]"
+                    rejection_reason = f"Missing {prop}"
                     break
+
+            if passes:
+                screened[name] = {
+                    'groups': groups,
+                    'properties': props
+                }
             else:
-                passes = False
-                rejection_reason = f"Missing {prop}"
-                break
+                rejected[name] = {
+                    'groups': groups_str,
+                    'reason': rejection_reason
+                }
 
-        if passes:
-            screened[name] = {
-                'groups': groups,
-                'properties': props
-            }
-        else:
-            rejected[name] = {
-                'groups': groups_str,
-                'reason': rejection_reason
-            }
+        if verbose:
+            print(f"Initial: {len(candidate_props)}")
+            print(f"Passed: {len(screened)}")
+            print(f"Rejected: {len(rejected)}")
 
-    if verbose:
-        print(f"Initial: {len(candidate_props)}")
-        print(f"Passed: {len(screened)}")
-        print(f"Rejected: {len(rejected)}")
+            if rejected:
+                print(f"\nRejection reasons:")
+                for name, data in rejected.items():
+                    print(f"  {name} ({data['groups']}): {data['reason']}")
 
-        if rejected:
-            print(f"\nRejection reasons:")
-            for name, data in rejected.items():
-                print(f"  {name} ({data['groups']}): {data['reason']}")
+            print(f"\nSummary: {len(screened)}/{len(candidate_props)} passed pure property screening")
 
-        print(f"\nSummary: {len(screened)}/{len(candidate_props)} passed pure property screening")
-
-    print_step_done(t0, verbose)
     return screened
 
 
@@ -430,40 +416,38 @@ def screen_pure_properties(candidates, candidate_props, config, verbose=False):
 
 def calculate_candidate_antoine(screened_candidates, verbose=False):
     """Calculate Antoine parameters for screened candidates."""
-    t0 = print_step(10, "Calculate Antoine Parameters (Candidates)", verbose)
+    with step(10, "Calculate Antoine Parameters (Candidates)", verbose):
+        antoine_calc = AntoineCalculator()
+        antoine_params = {}
+        failed = 0
 
-    antoine_calc = AntoineCalculator()
-    antoine_params = {}
-    failed = 0
+        for name, data in screened_candidates.items():
+            props = data['properties']
+            groups = data['groups']
 
-    for name, data in screened_candidates.items():
-        props = data['properties']
-        groups = data['groups']
+            required = ['tc', 'pc', 'tb', 'ac', 'hv']
+            if all(prop in props and props[prop] is not None for prop in required):
+                compound_dict = {name: groups}
+                results = antoine_calc.calculate_antoine_parameters(
+                    compound_dict, critical_properties=props, method='enthalpy_vap'
+                )
 
-        required = ['tc', 'pc', 'tb', 'ac', 'hv']
-        if all(prop in props and props[prop] is not None for prop in required):
-            compound_dict = {name: groups}
-            results = antoine_calc.calculate_antoine_parameters(
-                compound_dict, critical_properties=props, method='enthalpy_vap'
-            )
-
-            if results['termination_condition'] == 'optimal':
-                antoine_params[name] = {
-                    'A': results['A'],
-                    'B': results['B'],
-                    'C': results['C']
-                }
+                if results['termination_condition'] == 'optimal':
+                    antoine_params[name] = {
+                        'A': results['A'],
+                        'B': results['B'],
+                        'C': results['C']
+                    }
+                else:
+                    failed += 1
             else:
                 failed += 1
-        else:
-            failed += 1
 
-    if verbose:
-        print(f"Successful: {len(antoine_params)}")
-        print(f"Failed: {failed}")
-        print(f"\nSummary: {len(antoine_params)}/{len(screened_candidates)} calculated")
+        if verbose:
+            print(f"Successful: {len(antoine_params)}")
+            print(f"Failed: {failed}")
+            print(f"\nSummary: {len(antoine_params)}/{len(screened_candidates)} calculated")
 
-    print_step_done(t0, verbose)
     return antoine_params
 
 
@@ -486,107 +470,105 @@ def screen_miscibility(screened_candidates, mixture, binary_props,
 
     Removes candidates that show phase splitting or instability at any temperature.
     """
-    t0 = print_step(11, "Screen Miscibility (Temperature Range)", verbose)
+    with step(11, "Screen Miscibility (Temperature Range)", verbose):
+        n_data = 100
+        T_step = 1.0
 
-    n_data = 100
-    T_step = 1.0
+        # Composition grid — fixed for all candidates and temperatures, built once
+        x1 = np.linspace(0.0, 1.0, n_data)
+        x_binary = np.column_stack([x1, 1 - x1])  # (n_data, 2)
 
-    # Composition grid — fixed for all candidates and temperatures, built once
-    x1 = np.linspace(0.0, 1.0, n_data)
-    x_binary = np.column_stack([x1, 1 - x1])  # (n_data, 2)
+        passed_miscibility = {}
+        failed_miscibility = {}
 
-    passed_miscibility = {}
-    failed_miscibility = {}
+        tb_A = binary_props['A']['tb']
+        tb_B = binary_props['B']['tb']
 
-    tb_A = binary_props['A']['tb']
-    tb_B = binary_props['B']['tb']
+        for cand_name, cand_data in screened_candidates.items():
+            groups_str = _fmt_groups(cand_data['groups'])
 
-    for cand_name, cand_data in screened_candidates.items():
-        groups_str = ", ".join([f"{k}:{v}" for k, v in cand_data['groups'].items()])
+            try:
+                tb_E = cand_data['properties']['tb']
 
-        try:
-            tb_E = cand_data['properties']['tb']
+                T_range_AE = np.arange(min(tb_A, tb_E), max(tb_A, tb_E) + T_step, T_step)
+                T_range_BE = np.arange(min(tb_B, tb_E), max(tb_B, tb_E) + T_step, T_step)
 
-            T_range_AE = np.arange(min(tb_A, tb_E), max(tb_A, tb_E) + T_step, T_step)
-            T_range_BE = np.arange(min(tb_B, tb_E), max(tb_B, tb_E) + T_step, T_step)
+                def _check_miscibility_batched(comp_key, comp_groups, T_range):
+                    """
+                    Batch all temperature steps into a single unifac() call.
+                    Returns (is_miscible, failing_temps).
+                    """
+                    N_T = len(T_range)
+                    # Stack composition and temperature arrays across all T steps
+                    x_batch = np.tile(x_binary, (N_T, 1))          # (N_T*n_data, 2)
+                    T_batch = np.repeat(T_range, n_data)            # (N_T*n_data,)
 
-            def _check_miscibility_batched(comp_key, comp_groups, T_range):
-                """
-                Batch all temperature steps into a single unifac() call.
-                Returns (is_miscible, failing_temps).
-                """
-                N_T = len(T_range)
-                # Stack composition and temperature arrays across all T steps
-                x_batch = np.tile(x_binary, (N_T, 1))          # (N_T*n_data, 2)
-                T_batch = np.repeat(T_range, n_data)            # (N_T*n_data,)
+                    res = unifac(
+                        {comp_key: comp_groups, 'E': cand_data['groups']},
+                        x_batch, T_batch, rk_data, qk_data, interaction_data
+                    )
+                    gamma_batch = res['gamma'].reshape(N_T, n_data, 2)   # (N_T, n_data, 2)
+                    x_3d = x_binary[np.newaxis, :, :]                    # (1, n_data, 2)
 
-                res = unifac(
-                    {comp_key: comp_groups, 'E': cand_data['groups']},
-                    x_batch, T_batch, rk_data, qk_data, interaction_data
+                    # G_mix for each T slice: shape (N_T, n_data)
+                    G_mix_all = (np.sum(x_3d * np.log(gamma_batch), axis=2) +
+                                 np.sum(np.ma.log(x_3d).filled(0) * x_3d, axis=2))
+
+                    failing_temps = []
+                    for t_idx, T_test in enumerate(T_range):
+                        G_mix = G_mix_all[t_idx]
+                        if len(G_mix) > 2:
+                            G2_mix = np.diff(np.diff(G_mix))
+                            if not (np.all(G_mix[1:-1] <= 0) and np.all(G2_mix >= 0)):
+                                failing_temps.append(T_test)
+
+                    return len(failing_temps) == 0, failing_temps
+
+                # Test A-E then B-E (B-E only if A-E passes)
+                miscible_AE, failing_AE = _check_miscibility_batched(
+                    'A', mixture['A'], T_range_AE
                 )
-                gamma_batch = res['gamma'].reshape(N_T, n_data, 2)   # (N_T, n_data, 2)
-                x_3d = x_binary[np.newaxis, :, :]                    # (1, n_data, 2)
 
-                # G_mix for each T slice: shape (N_T, n_data)
-                G_mix_all = (np.sum(x_3d * np.log(gamma_batch), axis=2) +
-                             np.sum(np.ma.log(x_3d).filled(0) * x_3d, axis=2))
-
-                failing_temps = []
-                for t_idx, T_test in enumerate(T_range):
-                    G_mix = G_mix_all[t_idx]
-                    if len(G_mix) > 2:
-                        G2_mix = np.diff(np.diff(G_mix))
-                        if not (np.all(G_mix[1:-1] <= 0) and np.all(G2_mix >= 0)):
-                            failing_temps.append(T_test)
-
-                return len(failing_temps) == 0, failing_temps
-
-            # Test A-E then B-E (B-E only if A-E passes)
-            miscible_AE, failing_AE = _check_miscibility_batched(
-                'A', mixture['A'], T_range_AE
-            )
-
-            if not miscible_AE:
-                failing_temps = failing_AE
-                failing_pair = "A-E"
-            else:
-                miscible_BE, failing_BE = _check_miscibility_batched(
-                    'B', mixture['B'], T_range_BE
-                )
-                failing_temps = failing_BE
-                failing_pair = "B-E" if failing_BE else None
-
-            if not failing_temps:
-                passed_miscibility[cand_name] = cand_data
-            else:
-                if len(failing_temps) > 1:
-                    temp_range_str = f"{failing_temps[0]:.1f}-{failing_temps[-1]:.1f}K"
+                if not miscible_AE:
+                    failing_temps = failing_AE
+                    failing_pair = "A-E"
                 else:
-                    temp_range_str = f"{failing_temps[0]:.1f}K"
+                    miscible_BE, failing_BE = _check_miscibility_batched(
+                        'B', mixture['B'], T_range_BE
+                    )
+                    failing_temps = failing_BE
+                    failing_pair = "B-E" if failing_BE else None
+
+                if not failing_temps:
+                    passed_miscibility[cand_name] = cand_data
+                else:
+                    if len(failing_temps) > 1:
+                        temp_range_str = f"{failing_temps[0]:.1f}-{failing_temps[-1]:.1f}K"
+                    else:
+                        temp_range_str = f"{failing_temps[0]:.1f}K"
+                    failed_miscibility[cand_name] = {
+                        'groups': groups_str,
+                        'reason': f"Phase instability {failing_pair} T={temp_range_str}"
+                    }
+
+            except Exception as e:
                 failed_miscibility[cand_name] = {
                     'groups': groups_str,
-                    'reason': f"Phase instability {failing_pair} T={temp_range_str}"
+                    'reason': f"Miscibility test error: {type(e).__name__}"
                 }
 
-        except Exception as e:
-            failed_miscibility[cand_name] = {
-                'groups': groups_str,
-                'reason': f"Miscibility test error: {type(e).__name__}"
-            }
+        if verbose:
+            print(f"Input: {len(screened_candidates)}")
+            print(f"Passed: {len(passed_miscibility)}")
+            print(f"Failed: {len(failed_miscibility)}")
 
-    if verbose:
-        print(f"Input: {len(screened_candidates)}")
-        print(f"Passed: {len(passed_miscibility)}")
-        print(f"Failed: {len(failed_miscibility)}")
+            if failed_miscibility:
+                print(f"\nFailed miscibility:")
+                for name, data in failed_miscibility.items():
+                    print(f"  {name} ({data['groups']}): {data['reason']}")
 
-        if failed_miscibility:
-            print(f"\nFailed miscibility:")
-            for name, data in failed_miscibility.items():
-                print(f"  {name} ({data['groups']}): {data['reason']}")
+            print(f"\nSummary: {len(passed_miscibility)}/{len(screened_candidates)} passed miscibility screening")
 
-        print(f"\nSummary: {len(passed_miscibility)}/{len(screened_candidates)} passed miscibility screening")
-
-    print_step_done(t0, verbose)
     return passed_miscibility
 
 
@@ -598,154 +580,152 @@ def perform_vle(screened_candidates, candidate_antoine, mixture,
                 binary_antoine, binary_props,
                 rk_data, qk_data, interaction_data, verbose=False):
     """Perform VLE calculations for candidates."""
-    t0 = print_step(12, "Perform VLE Calculations", verbose)
+    with step(12, "Perform VLE Calculations", verbose):
+        P = 1.01325  # bar
+        n_data = 50
 
-    P = 1.01325  # bar
-    n_data = 50
+        tb_A = binary_props['A']['tb']
+        tb_B = binary_props['B']['tb']
 
-    tb_A = binary_props['A']['tb']
-    tb_B = binary_props['B']['tb']
+        vle_results = {}
+        successful = []
+        failed = {}
 
-    vle_results = {}
-    successful = []
-    failed = {}
+        total = len([name for name in screened_candidates.keys() if name in candidate_antoine])
 
-    total = len([name for name in screened_candidates.keys() if name in candidate_antoine])
+        for cand_name, cand_data in screened_candidates.items():
+            groups_str = _fmt_groups(cand_data['groups'])
 
-    for cand_name, cand_data in screened_candidates.items():
-        groups_str = ", ".join([f"{k}:{v}" for k, v in cand_data['groups'].items()])
-
-        if cand_name not in candidate_antoine:
-            failed[cand_name] = {
-                'groups': groups_str,
-                'reason': "No Antoine parameters"
-            }
-            continue
-
-        try:
-            # Build ternary mixture
-            ternary_mixture = dict(mixture)
-            ternary_mixture[cand_name] = cand_data['groups']
-
-            # Antoine parameters
-            ternary_antoine = dict(binary_antoine)
-            ternary_antoine[cand_name] = candidate_antoine[cand_name]
-
-            tb_E = cand_data['properties']['tb']
-
-            # Composition grids
-            x1_ae = np.linspace(0.0, 1.0, n_data)
-            x2_ae = np.zeros(n_data)
-            x3_ae = 1 - x1_ae
-
-            x1_be = np.zeros(n_data)
-            x2_be = np.linspace(0.0, 1.0, n_data)
-            x3_be = 1 - x2_be
-
-            x_all = np.vstack([
-                np.column_stack([x1_ae, x2_ae, x3_ae]),
-                np.column_stack([x1_be, x2_be, x3_be])
-            ])
-
-            # Temperature guess
-            T0_ae = tb_E * (1 - x1_ae) + tb_A * x1_ae
-            T0_be = tb_E * (1 - x2_be) + tb_B * x2_be
-            T_guess = np.concatenate([T0_ae, T0_be])
-
-            # VLE calculation
-            vle_solution, vle_model = pyo_vle(
-                x_all, T_guess, ternary_mixture,
-                rk_data, qk_data, interaction_data, ternary_antoine, verbose=False
-            )
-
-            if vle_solution is None or vle_model is None:
+            if cand_name not in candidate_antoine:
                 failed[cand_name] = {
                     'groups': groups_str,
-                    'reason': "VLE solver returned None"
+                    'reason': "No Antoine parameters"
                 }
                 continue
 
-            status = str(vle_solution.solver.status)
-            cond = str(vle_solution.solver.termination_condition)
+            try:
+                # Build ternary mixture
+                ternary_mixture = dict(mixture)
+                ternary_mixture[cand_name] = cand_data['groups']
 
-            if status != 'ok' or cond != 'optimal':
+                # Antoine parameters
+                ternary_antoine = dict(binary_antoine)
+                ternary_antoine[cand_name] = candidate_antoine[cand_name]
+
+                tb_E = cand_data['properties']['tb']
+
+                # Composition grids
+                x1_ae = np.linspace(0.0, 1.0, n_data)
+                x2_ae = np.zeros(n_data)
+                x3_ae = 1 - x1_ae
+
+                x1_be = np.zeros(n_data)
+                x2_be = np.linspace(0.0, 1.0, n_data)
+                x3_be = 1 - x2_be
+
+                x_all = np.vstack([
+                    np.column_stack([x1_ae, x2_ae, x3_ae]),
+                    np.column_stack([x1_be, x2_be, x3_be])
+                ])
+
+                # Temperature guess
+                T0_ae = tb_E * (1 - x1_ae) + tb_A * x1_ae
+                T0_be = tb_E * (1 - x2_be) + tb_B * x2_be
+                T_guess = np.concatenate([T0_ae, T0_be])
+
+                # VLE calculation
+                vle_solution, vle_model = pyo_vle(
+                    x_all, T_guess, ternary_mixture,
+                    rk_data, qk_data, interaction_data, ternary_antoine, verbose=False
+                )
+
+                if vle_solution is None or vle_model is None:
+                    failed[cand_name] = {
+                        'groups': groups_str,
+                        'reason': "VLE solver returned None"
+                    }
+                    continue
+
+                status = str(vle_solution.solver.status)
+                cond = str(vle_solution.solver.termination_condition)
+
+                if status != 'ok' or cond != 'optimal':
+                    failed[cand_name] = {
+                        'groups': groups_str,
+                        'reason': f"VLE solver: {status}/{cond}"
+                    }
+                    continue
+
+                # Extract results
+                n_points = len(x_all)
+                T_bubble = np.zeros(n_points)
+                y_vapor = np.zeros((n_points, 3))
+                gamma = np.zeros((n_points, 3))
+                psat = np.zeros((n_points, 3))
+
+                for i in range(n_points):
+                    T_bubble[i] = vle_model.T[i].value if vle_model.T[i].value else T_guess[i]
+                    for j in range(3):
+                        y_vapor[i, j] = vle_model.y[i, j].value
+                        gamma[i, j] = vle_model.gamma[i, j].value
+                        psat[i, j] = vle_model.psat[i, j].value
+
+                # Calculate mixture properties
+                S = gamma[0, 0] / gamma[0, 1]
+                C = 1 / gamma[0, 1]
+                SxC = S * C
+                alpha = (gamma[0, 0] / psat[0, 0]) / (gamma[0, 1] / psat[0, 1])
+
+                # Azeotrope detection
+                az_AE = np.log(gamma[0, 0] * psat[0, 0] / P) * (-np.log(gamma[n_data-1, 2] * psat[n_data-1, 2] / P))
+                az_BE = np.log(gamma[n_data, 1] * psat[n_data, 1] / P) * (-np.log(gamma[-1, 2] * psat[-1, 2] / P))
+
+                # Gibbs mixing
+                G_mix = (np.sum(x_all * np.log(gamma), axis=1) +
+                        np.sum(np.ma.log(x_all).filled(0) * x_all, axis=1))
+                G_mix_AE = G_mix[:n_data]
+                G_mix_BE = G_mix[n_data:]
+                G2_mix_AE = np.diff(np.diff(G_mix_AE))
+                G2_mix_BE = np.diff(np.diff(G_mix_BE))
+
+                vle_results[cand_name] = {
+                    'x': x_all,
+                    'T': T_bubble,
+                    'y': y_vapor,
+                    'gamma': gamma,
+                    'psat': psat,
+                    'S': S,
+                    'C': C,
+                    'SxC': SxC,
+                    'alpha': alpha,
+                    'az_AE': az_AE,
+                    'az_BE': az_BE,
+                    'G_mix_AE': G_mix_AE,
+                    'G_mix_BE': G_mix_BE,
+                    'G2_mix_AE': G2_mix_AE,
+                    'G2_mix_BE': G2_mix_BE,
+                    'compound_names': list(ternary_mixture.keys())
+                }
+                successful.append(cand_name)
+
+            except Exception as e:
                 failed[cand_name] = {
                     'groups': groups_str,
-                    'reason': f"VLE solver: {status}/{cond}"
+                    'reason': f"VLE error: {type(e).__name__}"
                 }
-                continue
 
-            # Extract results
-            n_points = len(x_all)
-            T_bubble = np.zeros(n_points)
-            y_vapor = np.zeros((n_points, 3))
-            gamma = np.zeros((n_points, 3))
-            psat = np.zeros((n_points, 3))
+        if verbose:
+            print(f"Total: {total}")
+            print(f"Successful: {len(successful)}")
+            print(f"Failed: {len(failed)}")
 
-            for i in range(n_points):
-                T_bubble[i] = vle_model.T[i].value if vle_model.T[i].value else T_guess[i]
-                for j in range(3):
-                    y_vapor[i, j] = vle_model.y[i, j].value
-                    gamma[i, j] = vle_model.gamma[i, j].value
-                    psat[i, j] = vle_model.psat[i, j].value
+            if failed:
+                print(f"\nFailure reasons:")
+                for name, data in failed.items():
+                    print(f"  {name} ({data['groups']}): {data['reason']}")
 
-            # Calculate mixture properties
-            S = gamma[0, 0] / gamma[0, 1]
-            C = 1 / gamma[0, 1]
-            SxC = S * C
-            alpha = (gamma[0, 0] / psat[0, 0]) / (gamma[0, 1] / psat[0, 1])
+            print(f"\nSummary: {len(successful)}/{total} VLE calculations successful")
 
-            # Azeotrope detection
-            az_AE = np.log(gamma[0, 0] * psat[0, 0] / P) * (-np.log(gamma[n_data-1, 2] * psat[n_data-1, 2] / P))
-            az_BE = np.log(gamma[n_data, 1] * psat[n_data, 1] / P) * (-np.log(gamma[-1, 2] * psat[-1, 2] / P))
-
-            # Gibbs mixing
-            G_mix = (np.sum(x_all * np.log(gamma), axis=1) +
-                    np.sum(np.ma.log(x_all).filled(0) * x_all, axis=1))
-            G_mix_AE = G_mix[:n_data]
-            G_mix_BE = G_mix[n_data:]
-            G2_mix_AE = np.diff(np.diff(G_mix_AE))
-            G2_mix_BE = np.diff(np.diff(G_mix_BE))
-
-            vle_results[cand_name] = {
-                'x': x_all,
-                'T': T_bubble,
-                'y': y_vapor,
-                'gamma': gamma,
-                'psat': psat,
-                'S': S,
-                'C': C,
-                'SxC': SxC,
-                'alpha': alpha,
-                'az_AE': az_AE,
-                'az_BE': az_BE,
-                'G_mix_AE': G_mix_AE,
-                'G_mix_BE': G_mix_BE,
-                'G2_mix_AE': G2_mix_AE,
-                'G2_mix_BE': G2_mix_BE,
-                'compound_names': list(ternary_mixture.keys())
-            }
-            successful.append(cand_name)
-
-        except Exception as e:
-            failed[cand_name] = {
-                'groups': groups_str,
-                'reason': f"VLE error: {type(e).__name__}"
-            }
-
-    if verbose:
-        print(f"Total: {total}")
-        print(f"Successful: {len(successful)}")
-        print(f"Failed: {len(failed)}")
-
-        if failed:
-            print(f"\nFailure reasons:")
-            for name, data in failed.items():
-                print(f"  {name} ({data['groups']}): {data['reason']}")
-
-        print(f"\nSummary: {len(successful)}/{total} VLE calculations successful")
-
-    print_step_done(t0, verbose)
     return vle_results, successful
 
 
@@ -755,61 +735,59 @@ def perform_vle(screened_candidates, candidate_antoine, mixture,
 
 def screen_mixture_properties(vle_results, successful, screened_candidates, config, verbose=False):
     """Screen candidates based on mixture property constraints."""
-    t0 = print_step(13, "Screen Mixture Properties", verbose)
+    with step(13, "Screen Mixture Properties", verbose):
+        mixture_config = config['screening']['mixture']
+        passed = {}
+        rejected = {}
 
-    mixture_config = config['screening']['mixture']
-    passed = {}
-    rejected = {}
+        for name in successful:
+            results = vle_results[name]
+            groups_str = _fmt_groups(screened_candidates[name]['groups'])
 
-    for name in successful:
-        results = vle_results[name]
-        groups_str = ", ".join([f"{k}:{v}" for k, v in screened_candidates[name]['groups'].items()])
+            rejection_reasons = []
 
-        rejection_reasons = []
+            if mixture_config.get('no_azeotrope_AE', False):
+                if results['az_AE'] <= 0:
+                    rejection_reasons.append(f"Azeotrope A-E (az_AE={results['az_AE']:.3f})")
 
-        if mixture_config.get('no_azeotrope_AE', False):
-            if results['az_AE'] <= 0:
-                rejection_reasons.append(f"Azeotrope A-E (az_AE={results['az_AE']:.3f})")
+            if mixture_config.get('no_azeotrope_BE', False):
+                if results['az_BE'] <= 0:
+                    rejection_reasons.append(f"Azeotrope B-E (az_BE={results['az_BE']:.3f})")
 
-        if mixture_config.get('no_azeotrope_BE', False):
-            if results['az_BE'] <= 0:
-                rejection_reasons.append(f"Azeotrope B-E (az_BE={results['az_BE']:.3f})")
+            if mixture_config.get('miscibility', False):
+                if not np.all(results['G_mix_AE'][1:-1] <= 0):
+                    rejection_reasons.append("Phase split A-E (G_mix > 0)")
+                if not np.all(results['G_mix_BE'][1:-1] <= 0):
+                    rejection_reasons.append("Phase split B-E (G_mix > 0)")
+                if not np.all(results['G2_mix_AE'][1:-1] >= 0):
+                    rejection_reasons.append("Instability A-E (G2_mix < 0)")
+                if not np.all(results['G2_mix_BE'][1:-1] >= 0):
+                    rejection_reasons.append("Instability B-E (G2_mix < 0)")
 
-        if mixture_config.get('miscibility', False):
-            if not np.all(results['G_mix_AE'][1:-1] <= 0):
-                rejection_reasons.append("Phase split A-E (G_mix > 0)")
-            if not np.all(results['G_mix_BE'][1:-1] <= 0):
-                rejection_reasons.append("Phase split B-E (G_mix > 0)")
-            if not np.all(results['G2_mix_AE'][1:-1] >= 0):
-                rejection_reasons.append("Instability A-E (G2_mix < 0)")
-            if not np.all(results['G2_mix_BE'][1:-1] >= 0):
-                rejection_reasons.append("Instability B-E (G2_mix < 0)")
+            S_min = mixture_config.get('selectivity_min', 0)
+            if results['S'] < S_min:
+                rejection_reasons.append(f"Low selectivity (S={results['S']:.2f} < {S_min})")
 
-        S_min = mixture_config.get('selectivity_min', 0)
-        if results['S'] < S_min:
-            rejection_reasons.append(f"Low selectivity (S={results['S']:.2f} < {S_min})")
+            if not rejection_reasons:
+                passed[name] = results
+            else:
+                rejected[name] = {
+                    'groups': groups_str,
+                    'reason': "; ".join(rejection_reasons)
+                }
 
-        if not rejection_reasons:
-            passed[name] = results
-        else:
-            rejected[name] = {
-                'groups': groups_str,
-                'reason': "; ".join(rejection_reasons)
-            }
+        if verbose:
+            print(f"Input: {len(successful)}")
+            print(f"Passed: {len(passed)}")
+            print(f"Rejected: {len(rejected)}")
 
-    if verbose:
-        print(f"Input: {len(successful)}")
-        print(f"Passed: {len(passed)}")
-        print(f"Rejected: {len(rejected)}")
+            if rejected:
+                print(f"\nRejection reasons:")
+                for name, data in rejected.items():
+                    print(f"  {name} ({data['groups']}): {data['reason']}")
 
-        if rejected:
-            print(f"\nRejection reasons:")
-            for name, data in rejected.items():
-                print(f"  {name} ({data['groups']}): {data['reason']}")
+            print(f"\nSummary: {len(passed)}/{len(successful)} passed mixture screening")
 
-        print(f"\nSummary: {len(passed)}/{len(successful)} passed mixture screening")
-
-    print_step_done(t0, verbose)
     return passed
 
 
@@ -827,109 +805,107 @@ def perform_iss(screened_mixture, compatible_candidates, mixture, binary_antoine
         detailed: If True, extract full gamma/K/x/y arrays per operating point
                   (used by screen mode for detailed JSON output).
     """
-    t0 = print_step(14, "Perform ISS Calculations", verbose)
+    with step(14, "Perform ISS Calculations", verbose):
+        iss_config = config['iss']
+        x_iso = iss_config['x_iso']
+        xA = iss_config['x_min']
 
-    iss_config = config['iss']
-    x_iso = iss_config['x_iso']
-    xA = iss_config['x_min']
+        boiling_points = [binary_props['A']['tb'], binary_props['B']['tb']]
+        T_min = min(boiling_points)
+        T_max = max(boiling_points)
+        T0 = np.array([(T_max + T_min) / 2, (T_max + T_min) / 2])
+        x0 = np.array([[x_iso, 0.0, 1 - x_iso],
+                       [xA, 0.0, 1 - xA]])
 
-    boiling_points = [binary_props['A']['tb'], binary_props['B']['tb']]
-    T_min = min(boiling_points)
-    T_max = max(boiling_points)
-    T0 = np.array([(T_max + T_min) / 2, (T_max + T_min) / 2])
-    x0 = np.array([[x_iso, 0.0, 1 - x_iso],
-                   [xA, 0.0, 1 - xA]])
+        iss_results = {}
+        failed = {}
 
-    iss_results = {}
-    failed = {}
+        for cand_name in screened_mixture.keys():
+            groups_str = _fmt_groups(compatible_candidates[cand_name]['groups'])
 
-    for cand_name in screened_mixture.keys():
-        groups_str = ", ".join([f"{k}:{v}" for k, v in compatible_candidates[cand_name]['groups'].items()])
+            try:
+                # Build ternary
+                ternary_mixture = dict(mixture)
+                ternary_mixture[cand_name] = compatible_candidates[cand_name]['groups']
 
-        try:
-            # Build ternary
-            ternary_mixture = dict(mixture)
-            ternary_mixture[cand_name] = compatible_candidates[cand_name]['groups']
+                ternary_antoine = dict(binary_antoine)
+                ternary_antoine[cand_name] = candidate_antoine[cand_name]
 
-            ternary_antoine = dict(binary_antoine)
-            ternary_antoine[cand_name] = candidate_antoine[cand_name]
+                # ISS calculation
+                results, model = pyo_iss(x0, T0, ternary_mixture, rk_data, qk_data,
+                                        interaction_data, ternary_antoine, verbose=False)
 
-            # ISS calculation
-            results, model = pyo_iss(x0, T0, ternary_mixture, rk_data, qk_data,
-                                    interaction_data, ternary_antoine, verbose=False)
+                if results is None or model is None:
+                    failed[cand_name] = {
+                        'groups': groups_str,
+                        'reason': "ISS solver returned None"
+                    }
+                    continue
 
-            if results is None or model is None:
+                status = str(results.solver.status)
+                cond = str(results.solver.termination_condition)
+
+                if status != 'ok' or cond != 'optimal':
+                    failed[cand_name] = {
+                        'groups': groups_str,
+                        'reason': f"ISS solver: {status}/{cond}"
+                    }
+                    continue
+
+                ED = pyo.value(model.obj)
+                R_value = pyo.value(model.R)
+
+                entry = {
+                    'ED': ED,
+                    'R': R_value,
+                    'groups': compatible_candidates[cand_name]['groups']
+                }
+
+                if detailed:
+                    n_comp = len(model.i)
+                    n_data = len(model.dp)
+
+                    gamma_vals = np.zeros((n_data, n_comp))
+                    K_vals = np.zeros((n_data, n_comp))
+                    x_vals = np.zeros((n_data, n_comp))
+                    y_vals = np.zeros((n_data, n_comp))
+                    T_vals = np.zeros(n_data)
+
+                    for j in range(n_data):
+                        T_vals[j] = pyo.value(model.T[j])
+                        for i in range(n_comp):
+                            gamma_vals[j, i] = pyo.value(model.gamma[j, i])
+                            K_vals[j, i] = pyo.value(model.K[j, i])
+                            x_vals[j, i] = pyo.value(model.x[j, i])
+                            y_vals[j, i] = pyo.value(model.y[j, i])
+
+                    entry['gamma'] = gamma_vals
+                    entry['K'] = K_vals
+                    entry['x'] = x_vals
+                    entry['y'] = y_vals
+                    entry['T'] = T_vals
+                    entry['compound_names'] = list(ternary_mixture.keys())
+
+                iss_results[cand_name] = entry
+
+            except Exception as e:
                 failed[cand_name] = {
                     'groups': groups_str,
-                    'reason': "ISS solver returned None"
+                    'reason': f"ISS error: {type(e).__name__}"
                 }
-                continue
 
-            status = str(results.solver.status)
-            cond = str(results.solver.termination_condition)
+        if verbose:
+            print(f"Input: {len(screened_mixture)}")
+            print(f"Successful: {len(iss_results)}")
+            print(f"Failed: {len(failed)}")
 
-            if status != 'ok' or cond != 'optimal':
-                failed[cand_name] = {
-                    'groups': groups_str,
-                    'reason': f"ISS solver: {status}/{cond}"
-                }
-                continue
+            if failed:
+                print(f"\nFailure reasons:")
+                for name, data in failed.items():
+                    print(f"  {name} ({data['groups']}): {data['reason']}")
 
-            ED = pyo.value(model.obj)
-            R_value = pyo.value(model.R)
+            print(f"\nSummary: {len(iss_results)}/{len(screened_mixture)} ISS calculations successful")
 
-            entry = {
-                'ED': ED,
-                'R': R_value,
-                'groups': compatible_candidates[cand_name]['groups']
-            }
-
-            if detailed:
-                n_comp = len(model.i)
-                n_data = len(model.dp)
-
-                gamma_vals = np.zeros((n_data, n_comp))
-                K_vals = np.zeros((n_data, n_comp))
-                x_vals = np.zeros((n_data, n_comp))
-                y_vals = np.zeros((n_data, n_comp))
-                T_vals = np.zeros(n_data)
-
-                for j in range(n_data):
-                    T_vals[j] = pyo.value(model.T[j])
-                    for i in range(n_comp):
-                        gamma_vals[j, i] = pyo.value(model.gamma[j, i])
-                        K_vals[j, i] = pyo.value(model.K[j, i])
-                        x_vals[j, i] = pyo.value(model.x[j, i])
-                        y_vals[j, i] = pyo.value(model.y[j, i])
-
-                entry['gamma'] = gamma_vals
-                entry['K'] = K_vals
-                entry['x'] = x_vals
-                entry['y'] = y_vals
-                entry['T'] = T_vals
-                entry['compound_names'] = list(ternary_mixture.keys())
-
-            iss_results[cand_name] = entry
-
-        except Exception as e:
-            failed[cand_name] = {
-                'groups': groups_str,
-                'reason': f"ISS error: {type(e).__name__}"
-            }
-
-    if verbose:
-        print(f"Input: {len(screened_mixture)}")
-        print(f"Successful: {len(iss_results)}")
-        print(f"Failed: {len(failed)}")
-
-        if failed:
-            print(f"\nFailure reasons:")
-            for name, data in failed.items():
-                print(f"  {name} ({data['groups']}): {data['reason']}")
-
-        print(f"\nSummary: {len(iss_results)}/{len(screened_mixture)} ISS calculations successful")
-
-    print_step_done(t0, verbose)
     return iss_results
 
 
@@ -963,62 +939,60 @@ def resolve_smiles(iss_results, compatible_candidates, verbose=False):
     Returns:
         Dict mapping candidate name -> SMILES string (or None if failed).
     """
-    t0 = print_step(15, "Resolve SMILES [experimental]", verbose)
+    with step(15, "Resolve SMILES [experimental]", verbose):
+        smiles_map = {}
+        ok = 0
+        failed = 0
 
-    smiles_map = {}
-    ok = 0
-    failed = 0
+        try:
+            from .unifac_reverse import load_unifac_groups, reverse_engineer_by_name
+            data_path = Path(__file__).parent.parent / "data" / "json" / "unifac_ly.json"
+            db = load_unifac_groups(str(data_path))
+            assembler_available = True
+        except Exception as e:
+            if verbose:
+                print(f"Warning: could not load unifac_reverse ({e})")
+            assembler_available = False
+            db = None
 
-    try:
-        from .unifac_reverse import load_unifac_groups, reverse_engineer_by_name
-        data_path = Path(__file__).parent.parent / "data" / "json" / "unifac_ly.json"
-        db = load_unifac_groups(str(data_path))
-        assembler_available = True
-    except Exception as e:
-        if verbose:
-            print(f"Warning: could not load unifac_reverse ({e})")
-        assembler_available = False
-        db = None
+        for name in iss_results:
+            groups = compatible_candidates[name]['groups']
 
-    for name in iss_results:
-        groups = compatible_candidates[name]['groups']
-
-        # Single-group whole-molecule fallback
-        if len(groups) == 1:
-            group_name = next(iter(groups))
-            if group_name in _SINGLE_GROUP_SMILES:
-                smiles_map[name] = _SINGLE_GROUP_SMILES[group_name]
-                ok += 1
-                continue
-
-        # Multi-group: use assembler
-        if assembler_available:
-            try:
-                smiles_list = reverse_engineer_by_name(groups, db)
-                if smiles_list:
-                    smiles_map[name] = smiles_list[0]
+            # Single-group whole-molecule fallback
+            if len(groups) == 1:
+                group_name = next(iter(groups))
+                if group_name in _SINGLE_GROUP_SMILES:
+                    smiles_map[name] = _SINGLE_GROUP_SMILES[group_name]
                     ok += 1
-                else:
+                    continue
+
+            # Multi-group: use assembler
+            if assembler_available:
+                try:
+                    smiles_list = reverse_engineer_by_name(groups, db)
+                    if smiles_list:
+                        smiles_map[name] = smiles_list[0]
+                        ok += 1
+                    else:
+                        smiles_map[name] = None
+                        failed += 1
+                except Exception:
                     smiles_map[name] = None
                     failed += 1
-            except Exception:
+            else:
                 smiles_map[name] = None
                 failed += 1
-        else:
-            smiles_map[name] = None
-            failed += 1
 
-    if verbose:
-        print(f"Resolved: {ok}/{len(iss_results)}")
-        if failed:
-            unresolved = [n for n, s in smiles_map.items() if s is None]
-            print(f"Unresolved: {', '.join(unresolved)}")
-        for name, smi in smiles_map.items():
-            if smi:
-                groups_str = ", ".join(f"{k}:{v}" for k, v in compatible_candidates[name]['groups'].items())
-                print(f"  {groups_str} -> {smi}")
+        if verbose:
+            print(f"Resolved: {ok}/{len(iss_results)}")
+            if failed:
+                unresolved = [n for n, s in smiles_map.items() if s is None]
+                print(f"Unresolved: {', '.join(unresolved)}")
+            for name, smi in smiles_map.items():
+                if smi:
+                    groups_str = _fmt_groups(compatible_candidates[name]['groups'])
+                    print(f"  {groups_str} -> {smi}")
 
-    print_step_done(t0, verbose)
     return smiles_map
 
 
@@ -1032,7 +1006,7 @@ def _build_mixture_info(binary_mixture, binary_props, binary_antoine):
     for comp in ['A', 'B']:
         comp_entry = {}
         if binary_mixture and comp in binary_mixture:
-            comp_entry['groups'] = ", ".join([f"{k}:{v}" for k, v in binary_mixture[comp].items()])
+            comp_entry['groups'] = _fmt_groups(binary_mixture[comp])
         if binary_props and comp in binary_props:
             props = binary_props[comp]
             comp_entry['tc'] = props.get('tc')
@@ -1070,7 +1044,7 @@ def save_results(iss_results, screened_mixture, output_dir, config, verbose=Fals
     # Prepare results list
     results_list = []
     for name, iss_data in iss_results.items():
-        groups_str = ", ".join([f"{k}:{v}" for k, v in iss_data['groups'].items()])
+        groups_str = _fmt_groups(iss_data['groups'])
         mixture_data = screened_mixture[name]
 
         entry = {
@@ -1147,7 +1121,7 @@ def save_detailed_results(iss_results, screened_mixture, output_dir, mixture_inf
     """Save detailed JSON with full ISS operating point data (screen mode)."""
     detailed_results = []
     for name, iss_data in iss_results.items():
-        groups_str = ", ".join([f"{k}:{v}" for k, v in iss_data['groups'].items()])
+        groups_str = _fmt_groups(iss_data['groups'])
         mixture_data = screened_mixture[name]
 
         # Build operating points data with labeled components (A, B, E)

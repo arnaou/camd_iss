@@ -54,6 +54,6 @@ iss:
 
 # Output
 output:
-  dir: "results/IECR/screen_thf_water"
+  dir: "results/IECR/screen_isopropanol_water"
   formats: ["csv", "json"]
   verbose: true

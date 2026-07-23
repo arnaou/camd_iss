@@ -6,31 +6,34 @@ mode: "screen"
 
 # Binary mixture: Methyl acetate (A) / Methanol (B)
 mixture:
-  component_a:        # ter-butyl alcohol (C4H10O)
-    groups: {CH3: 3, C: 1, OH: 1}
+  component_a:        # Methyl acetate (CH3–COO–CH3)
+    groups: {CH3: 1, CH3COO: 1}
 
-  component_b:        # Water (H2O)
-    groups: {H2O: 1} 
+  component_b:        # Methanol (CH3–OH)
+    groups: {CH3OH: 1} 
 
 # Override with experimental data so we DON'T rely on UNIFAC here
 pure_properties:
   component_a:   
-    tc: 506.2    
-    pc: 39.7  
-    tb: 355.5  
+    tc: 506.6    
+    pc: 47.0     
+    tb: 330.0  
+
 
 # Predefined entrainers to evaluate
 screen:
   entrainers:
-    - name: "3-Octanone"
-      groups: {CH3: 2, CH2: 4, CH2CO: 1}
+    - name: "ethylene_glycol"
+      groups: {DOH: 1}
 
-    - name: "Hexyl acetate"
-      groups: {CH3COO: 1, CH2: 5, CH3: 1}
+    - name: "water"
+      groups: {H2O: 1}
 
-    - name: "2-Heptanone"
-      groups: {CH3CO: 1, CH2: 4, CH3: 1}
+    - name: "DMSO"
+      groups: {DMSO: 1}
 
+    - name: "2-Methoxyethanol"
+      groups: {CH3: 1, CH2O: 1, CH2: 1, OH: 1}
 
 
 
@@ -45,7 +48,7 @@ screening:
   mixture:
     no_azeotrope_AE: true
     no_azeotrope_BE: true
-    miscibility: false
+    miscibility: true
     selectivity_min: 0.5
 
 # ISS settings
@@ -55,6 +58,6 @@ iss:
 
 # Output
 output:
-  dir: "results/IECR/screen_thf_water"
+  dir: "results/extra/screen_methylacetate_methanol"
   formats: ["csv", "json"]
   verbose: true

@@ -1,0 +1,198 @@
+============================================================
+Screen-ISS: Entrainer Screening
+============================================================
+Timestamp: 2026-07-23 19:16:59
+Config: config/IECR/screen_acetone_methanol.yaml
+Log file: results/IECR/screen_acetone_methanol/screen_run_20260723_191659.log
+
+============================================================
+STEP 1: Validate Binary Mixture
+============================================================
+Component A: CH3:1, CH3CO:1
+  ✓ Valid
+Component B: CH3OH:1
+  ✓ Valid
+
+Summary: Both components valid
+  [0.0s]
+
+============================================================
+STEP 2: Check Binary Mixture Parameters
+============================================================
+✓ All UNIFAC parameters available
+
+Summary: Compatible
+  [0.0s]
+
+============================================================
+STEP 3: Calculate Pure Component Properties (Mixture)
+============================================================
+
+A (CH3:1, CH3CO:1):
+  Tc: 490.11 K
+  Pc: 48.80 bar
+  Tb: 305.37 K
+  Tm: 171.62 K
+  Ac: 0.3323
+  Hv: 29.94 kJ/mol
+
+B (CH3OH:1):
+  Tc: 513.00 K
+  Pc: 81.00 bar
+  Tb: 337.85 K
+  Tm: 176.00 K
+  Ac: 0.5640
+  Hv: 37.47 kJ/mol
+
+Summary: Calculated 6 properties for 2 components
+  [0.0s]
+
+============================================================
+STEP 4: Override Mixture Properties (if provided)
+============================================================
+Override A.tc = 508.1
+Override A.pc = 48.0
+Override A.tb = 329.3
+
+Summary: 3 property overrides applied
+  [0.0s]
+
+✓ Boiling point validation: Tb_A (329.30K) < Tb_B (337.85K)
+
+============================================================
+STEP 5: Calculate Antoine Parameters (Mixture)
+============================================================
+✓ A: A=4.784, B=1581.9, C=1.8
+✓ B: A=5.300, B=1653.1, C=-25.6
+
+Summary: 2/2 successful
+  [0.1s]
+
+============================================================
+STEP 6: Load and Validate Candidates
+============================================================
+Validating predefined candidates:
+  ✓ ethylene_glycol: DOH:1
+  ✓ DMSO: DMSO:1
+  ✓ water: H2O:1
+  ✓ ethanol: CH3:1, CH2:1, OH:1
+  ✓ 2-Proponal: CH3:2, CH:1, OH:1
+
+Summary: 5 valid, 0 invalid
+  [0.0s]
+
+============================================================
+STEP 7: Check Candidate Parameters (UNIFAC)
+============================================================
+Checked: 5
+Compatible: 5
+Incompatible: 0
+
+Summary: 5/5 have complete UNIFAC parameters
+  [0.0s]
+
+============================================================
+STEP 8: Calculate Pure Component Properties (Candidates)
+============================================================
+
+Summary: 5/5 properties calculated
+  [0.0s]
+
+============================================================
+STEP 9: Screen Pure Properties
+============================================================
+Initial: 5
+Passed: 3
+Rejected: 2
+
+Rejection reasons:
+  entrainer_4 (CH3:1, CH2:1, OH:1): tb=330.0 outside [368.0, 500.0]
+  entrainer_5 (CH3:2, CH:1, OH:1): tb=352.0 outside [368.0, 500.0]
+
+Summary: 3/5 passed pure property screening
+  [0.0s]
+
+============================================================
+STEP 10: Calculate Antoine Parameters (Candidates)
+============================================================
+Successful: 3
+Failed: 0
+
+Summary: 3/3 calculated
+  [0.0s]
+
+============================================================
+STEP 11: Screen Miscibility (Temperature Range)
+============================================================
+Input: 3
+Passed: 3
+Failed: 0
+
+Summary: 3/3 passed miscibility screening
+  [1.3s]
+
+============================================================
+STEP 12: Perform VLE Calculations
+============================================================
+Total: 3
+Successful: 3
+Failed: 0
+
+Summary: 3/3 VLE calculations successful
+  [2.2s]
+
+============================================================
+STEP 13: Screen Mixture Properties
+============================================================
+Input: 3
+Passed: 2
+Rejected: 1
+
+Rejection reasons:
+  entrainer_3 (H2O:1): Azeotrope A-E (az_AE=-0.574)
+
+Summary: 2/3 passed mixture screening
+  [0.0s]
+
+============================================================
+STEP 14: Perform ISS Calculations
+============================================================
+Input: 2
+Successful: 2
+Failed: 0
+
+Summary: 2/2 ISS calculations successful
+  [0.4s]
+
+============================================================
+STEP 15: Resolve SMILES [experimental]
+============================================================
+Resolved: 2/2
+  DOH:1 -> OCCO
+  DMSO:1 -> CS(C)=O
+  [0.2s]
+
+============================================================
+SAVING RESULTS
+============================================================
+✓ Saved: results/IECR/screen_acetone_methanol/results.csv
+✓ Saved: results/IECR/screen_acetone_methanol/results.json
+
+Summary: Saved 2 results in 2 format(s)
+✓ Saved: results/IECR/screen_acetone_methanol/results_detailed.json
+
+============================================================================================================================================
+                                                       TOP ENTRAINERS (sorted by ED)                                                        
+============================================================================================================================================
+  #  Groups                          SMILES                                ED       R       S       C     SxC   alpha   Tb(K)   Tc(K)  Pc(b)   Tm(K)      ac  Hv(kJ)    Ant-A     Ant-B    Ant-C
+--------------------------------------------------------------------------------------------------------------------------------------------
+  1  DMSO:1                          CS(C)=O                           0.6108   1.353   1.459   0.937   1.368   2.017   463.1   729.0  56.50   291.7  0.2806   52.47   4.2348  1598.695  -85.074
+  2  DOH:1                           OCCO                              1.0080   1.370   2.971   0.801   2.379   4.198   470.4   719.7  85.38   260.2  0.4868   66.26   4.7471  1728.052  -105.988
+============================================================================================================================================
+Total: 2 entrainer(s) evaluated
+============================================================================================================================================
+
+============================================================
+Screen-ISS COMPLETE
+Output: results/IECR/screen_acetone_methanol
+============================================================

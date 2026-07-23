@@ -48,8 +48,8 @@ coverage.xml
 
 # Log files (except paper results)
 *.log
-!results/paper1/**/*.log
-!results/paper2/**/*.log
+!results/DA/**/*.log
+!results/IECR/**/*.log
 
 # Sphinx documentation
 docs/_build/
@@ -104,8 +104,8 @@ data/unifac_groups.pkl
 
 # Results: ignore generated runs, but track paper results
 results/*
-!results/paper1
-!results/paper2
+!results/DA
+!results/IECR
 # But ignore root-level results artifacts
 results/*.log
 results/*.png

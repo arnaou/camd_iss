@@ -23,7 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.molecules import generate_molecules
 from src.pipeline import (
-    TeeLogger, load_config, setup_output_dir, print_step,
+    TeeLogger, load_config, setup_output_dir, step,
     validate_mixture, check_mixture_parameters,
     calculate_mixture_properties, override_mixture_properties,
     calculate_mixture_antoine, load_and_validate_candidates,
@@ -33,30 +33,29 @@ from src.pipeline import (
 
 def generate_solvent_candidates(config, mixture, verbose=False):
     """Generate solvent candidates using MILP."""
-    print_step(6, "Generate Solvent Candidates", verbose)
+    with step(6, "Generate Solvent Candidates", verbose):
+        design_config = config['design']
+        binary_components = list(mixture.values())
 
-    design_config = config['design']
-    binary_components = list(mixture.values())
+        if verbose:
+            print(f"Design groups: {', '.join(design_config['groups'])}")
+            print(f"Constraints: {design_config['constraints']['min_groups']}-{design_config['constraints']['max_groups']} total groups, "
+                  f"{design_config['constraints']['min_func_groups']}-{design_config['constraints']['max_func_groups']} functional groups")
 
-    if verbose:
-        print(f"Design groups: {', '.join(design_config['groups'])}")
-        print(f"Constraints: {design_config['constraints']['min_groups']}-{design_config['constraints']['max_groups']} total groups, "
-              f"{design_config['constraints']['min_func_groups']}-{design_config['constraints']['max_func_groups']} functional groups")
+        candidates = generate_molecules(
+            design_groups=design_config['groups'],
+            min_groups=design_config['constraints']['min_groups'],
+            max_groups=design_config['constraints']['max_groups'],
+            min_func_groups=design_config['constraints']['min_func_groups'],
+            max_func_groups=design_config['constraints']['max_func_groups'],
+            molecular_type=design_config['constraints']['molecular_type'],
+            max_solutions=design_config['max_candidates'],
+            exclude_compounds=binary_components,
+            verbose=False
+        )
 
-    candidates = generate_molecules(
-        design_groups=design_config['groups'],
-        min_groups=design_config['constraints']['min_groups'],
-        max_groups=design_config['constraints']['max_groups'],
-        min_func_groups=design_config['constraints']['min_func_groups'],
-        max_func_groups=design_config['constraints']['max_func_groups'],
-        molecular_type=design_config['constraints']['molecular_type'],
-        max_solutions=design_config['max_candidates'],
-        exclude_compounds=binary_components,
-        verbose=False
-    )
-
-    if verbose:
-        print(f"\nSummary: Generated {len(candidates)} candidates")
+        if verbose:
+            print(f"\nSummary: Generated {len(candidates)} candidates")
 
     return candidates
 

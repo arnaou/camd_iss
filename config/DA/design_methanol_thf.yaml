@@ -46,6 +46,6 @@ iss:
   x_min: 0.60
 
 output:
-  dir: "results/paper2/design_methanol_thf"
+  dir: "results/DA/design_methanol_thf"
   formats: ["csv", "json"]
   verbose: true

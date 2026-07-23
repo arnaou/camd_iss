@@ -89,6 +89,6 @@ iss:
   x_min: 0.40
 
 output:
-  dir: "results/paper2/screen_homo_ethylacetate_ethanol"
+  dir: "results/DA/screen_homo_ethylacetate_ethanol"
   formats: ["csv", "json"]
   verbose: true

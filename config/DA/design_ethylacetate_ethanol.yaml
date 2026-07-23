@@ -50,6 +50,6 @@ iss:
   x_min: 0.40
 
 output:
-  dir: "results/paper2/design_ethylacetate_ethanol"
+  dir: "results/DA/design_ethylacetate_ethanol"
   formats: ["csv", "json"]
   verbose: true

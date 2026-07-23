@@ -46,6 +46,6 @@ iss:
   x_min: 0.60
 
 output:
-  dir: "results/paper2/design_ethanol_water"
+  dir: "results/DA/design_ethanol_water"
   formats: ["csv", "json"]
   verbose: true

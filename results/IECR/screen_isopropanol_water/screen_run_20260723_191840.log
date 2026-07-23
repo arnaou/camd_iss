@@ -1,0 +1,195 @@
+============================================================
+Screen-ISS: Entrainer Screening
+============================================================
+Timestamp: 2026-07-23 19:18:40
+Config: config/IECR/screen_isopropanol_water.yaml
+Log file: results/IECR/screen_isopropanol_water/screen_run_20260723_191840.log
+
+============================================================
+STEP 1: Validate Binary Mixture
+============================================================
+Component A: CH3:2, CH:1, OH:1
+  ✓ Valid
+Component B: H2O:1
+  ✓ Valid
+
+Summary: Both components valid
+  [0.0s]
+
+============================================================
+STEP 2: Check Binary Mixture Parameters
+============================================================
+✓ All UNIFAC parameters available
+
+Summary: Compatible
+  [0.0s]
+
+============================================================
+STEP 3: Calculate Pure Component Properties (Mixture)
+============================================================
+
+A (CH3:2, CH:1, OH:1):
+  Tc: 514.43 K
+  Pc: 47.97 bar
+  Tb: 351.96 K
+  Tm: 162.39 K
+  Ac: 0.5498
+  Hv: 42.36 kJ/mol
+
+B (H2O:1):
+  Tc: 647.00 K
+  Pc: 220.64 bar
+  Tb: 373.15 K
+  Tm: 273.15 K
+  Ac: 0.3449
+  Hv: 43.99 kJ/mol
+
+Summary: Calculated 6 properties for 2 components
+  [0.0s]
+
+============================================================
+STEP 4: Override Mixture Properties (if provided)
+============================================================
+Override A.tc = 509.2
+Override A.pc = 49.0
+Override A.tb = 355.5
+
+Summary: 3 property overrides applied
+  [0.0s]
+
+✓ Boiling point validation: Tb_A (355.50K) < Tb_B (373.15K)
+
+============================================================
+STEP 5: Calculate Antoine Parameters (Mixture)
+============================================================
+✓ A: A=4.875, B=1415.1, C=-64.9
+✓ B: A=5.083, B=1628.9, C=-52.3
+
+Summary: 2/2 successful
+  [0.1s]
+
+============================================================
+STEP 6: Load and Validate Candidates
+============================================================
+Validating predefined candidates:
+  ✓ ethylene_glycol: DOH:1
+  ✓ DMSO: DMSO:1
+  ✓ propylene_glycol: CH3:1, CH:1, CH2:1, OH:2
+
+Summary: 3 valid, 0 invalid
+  [0.0s]
+
+============================================================
+STEP 7: Check Candidate Parameters (UNIFAC)
+============================================================
+Checked: 3
+Compatible: 3
+Incompatible: 0
+
+Summary: 3/3 have complete UNIFAC parameters
+  [0.0s]
+
+============================================================
+STEP 8: Calculate Pure Component Properties (Candidates)
+============================================================
+
+Summary: 3/3 properties calculated
+  [0.0s]
+
+============================================================
+STEP 9: Screen Pure Properties
+============================================================
+Initial: 3
+Passed: 3
+Rejected: 0
+
+Summary: 3/3 passed pure property screening
+  [0.0s]
+
+============================================================
+STEP 10: Calculate Antoine Parameters (Candidates)
+============================================================
+Successful: 3
+Failed: 0
+
+Summary: 3/3 calculated
+  [0.1s]
+
+============================================================
+STEP 11: Screen Miscibility (Temperature Range)
+============================================================
+Input: 3
+Passed: 3
+Failed: 0
+
+Summary: 3/3 passed miscibility screening
+  [1.2s]
+
+============================================================
+STEP 12: Perform VLE Calculations
+============================================================
+Total: 3
+Successful: 3
+Failed: 0
+
+Summary: 3/3 VLE calculations successful
+  [1.4s]
+
+============================================================
+STEP 13: Screen Mixture Properties
+============================================================
+Input: 3
+Passed: 3
+Rejected: 0
+
+Summary: 3/3 passed mixture screening
+  [0.0s]
+
+============================================================
+STEP 14: Perform ISS Calculations
+============================================================
+Input: 3
+Successful: 3
+Failed: 0
+
+Summary: 3/3 ISS calculations successful
+  [0.2s]
+
+============================================================
+STEP 15: Resolve SMILES [experimental]
+============================================================
+Groups: CH3(1), CH2(2), CH(3), OH(1), OH(1)
+Bonds: 4 | Topology: acyclic | Min ring: 5
+Topologies: 3
+Unique SMILES: 2
+Resolved: 3/3
+  DOH:1 -> OCCO
+  DMSO:1 -> CS(C)=O
+  CH3:1, CH:1, CH2:1, OH:2 -> CC(O)CO
+  [0.2s]
+
+============================================================
+SAVING RESULTS
+============================================================
+✓ Saved: results/IECR/screen_isopropanol_water/results.csv
+✓ Saved: results/IECR/screen_isopropanol_water/results.json
+
+Summary: Saved 3 results in 2 format(s)
+✓ Saved: results/IECR/screen_isopropanol_water/results_detailed.json
+
+============================================================================================================================================
+                                                       TOP ENTRAINERS (sorted by ED)                                                        
+============================================================================================================================================
+  #  Groups                          SMILES                                ED       R       S       C     SxC   alpha   Tb(K)   Tc(K)  Pc(b)   Tm(K)      ac  Hv(kJ)    Ant-A     Ant-B    Ant-C
+--------------------------------------------------------------------------------------------------------------------------------------------
+  1  DOH:1                           OCCO                              0.6421   1.617   2.263   1.000   2.264   1.432   470.4   719.7  85.38   260.2  0.4868   66.26   4.7471  1728.052  -105.988
+  2  DMSO:1                          CS(C)=O                           0.6500   2.141   1.570   2.145   3.367   0.981   463.1   729.0  56.50   291.7  0.2806   52.47   4.2348  1598.695  -85.074
+  3  CH3:1, CH:1, CH2:1, OH:2        CC(O)CO                          18.9101   7.595   0.764   0.646   0.494   0.463   445.5   607.8  50.76   224.4  0.9355   67.42   5.3658  1873.289  -95.998
+============================================================================================================================================
+Total: 3 entrainer(s) evaluated
+============================================================================================================================================
+
+============================================================
+Screen-ISS COMPLETE
+Output: results/IECR/screen_isopropanol_water
+============================================================

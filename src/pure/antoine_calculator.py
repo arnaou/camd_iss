@@ -6,42 +6,24 @@ using pure component critical properties.
 This module integrates with the CAMD workflow but can also be used as standalone functio.
 
 Example Usage:
-    # Standalone usage
-    calculator = AntoineCalculator(missing_group_action="remove_compounds")
+    calculator = AntoineCalculator()
     compound = {'CH3': 2, 'OH': 1}  # Ethanol
-    properties = {'tc': 513.9, 'pc': 6.137, 'ac': 0.645, 'tb': 351.4}  # Critical props from PropertyCalculator
+    properties = {'tc': 513.9, 'pc': 6.137, 'hv': 38.6, 'tb': 351.4}  # Critical props from PropertyCalculator
     antoine_params = calculator.calculate_antoine_parameters(compound, properties)
     print(f"Antoine A: {antoine_params['A']:.3f}")
-    
-    # Individual parameter calculation
-    params = calculator.solve_antoine(tb=351.4, tc=513.9, pc=6.137, p0=0.101325, w=0.645)
-    print(f"A: {params['A']:.3f}, B: {params['B']:.3f}, C: {params['C']:.3f}")
 """
 
+import re
 import numpy as np
 import pyomo.environ as pyo
-from pathlib import Path
 from typing import Dict, Optional, Union
-import os
 
 
-def _parse_pyomo_log(file_path: str) -> int:
+def _parse_pyomo_log(file_path: str) -> Optional[int]:
     """Parse Pyomo/IPOPT log file and return the number of iterations."""
-    iters = 0
     with open(file_path, 'r') as f:
-        for line in f:
-            if line.startswith('Number of Iterations....'):
-                tokens = line.split()
-                iters = int(tokens[3])
-    return iters
-
-
-def _ensure_file_exists_in_cwd(filename: str, content: str = ''):
-    """Ensure a file exists in the current working directory, creating it if needed."""
-    file_path = os.path.join(os.getcwd(), filename)
-    if not os.path.exists(file_path):
-        with open(file_path, 'w') as f:
-            f.write(content)
+        match = re.search(r'Number of Iterations\.+:\s*(\d+)', f.read())
+    return int(match.group(1)) if match else None
 
 
 class AntoineCalculator:
@@ -75,32 +57,30 @@ class AntoineCalculator:
     
     def calculate_antoine_parameters(self, compound: Dict[str, int],
                                    critical_properties: Dict[str, float],
-                                   method: str) -> Optional[Dict[str, float]]:
+                                   method: str = "enthalpy_vap") -> Optional[Dict[str, float]]:
         """
         Calculate Antoine parameters for a compound using its critical properties.
 
         Args:
             compound: Dict with group names as keys and counts as values
             critical_properties: Dict with critical properties from PropertyCalculator
-            method: Specific solving method to use (required)
+            method: Solver method - "enthalpy_vap" (default, requires tc/pc/hv/tb),
+                    "acentric_factor" (requires tc/pc/ac/tb), or
+                    "minimal" (requires only tc/pc/tb)
 
         Returns:
             Dict with Antoine parameters {'A', 'B', 'C'} or None if calculation failed
         """
+        solvers = {
+            "enthalpy_vap": self._solve_enthalpy_vap,
+            "acentric_factor": self._solve_acentric_factor,
+            "minimal": self._solve_minimal_data,
+        }
+        if method not in solvers:
+            raise ValueError(f"Unknown solver method: {method}")
+
         try:
-            if self.verbose:
-                print(f"Using solver method: {method}")
-
-            # Dispatch to appropriate solver (each method validates its own requirements)
-            if method == "acentric_factor":
-                return self._solve_acentric_factor(compound, critical_properties)
-            elif method == "enthalpy_vap":
-                return self._solve_enthalpy_vap(compound, critical_properties)
-            elif method == "minimal":
-                return self._solve_minimal_data(compound, critical_properties)
-            else:
-                raise ValueError(f"Unknown solver method: {method}")
-
+            return solvers[method](compound, critical_properties)
         except Exception as e:
             self._handle_calculation_error(e, compound, "Antoine parameter calculation")
             return None
@@ -118,45 +98,31 @@ class AntoineCalculator:
         Returns:
             Dict with Antoine parameters or None if calculation failed
         """
-        # Validate required properties
         required = ['tc', 'pc', 'ac', 'tb']
         missing = [prop for prop in required if prop not in critical_properties]
         if missing:
             raise ValueError(f"Missing required properties for acentric factor method: {missing}")
 
-        # Extract properties
         Tc = critical_properties['tc']  # Critical temperature [K]
         Pc = critical_properties['pc']  # Critical pressure [bar]
         w = critical_properties['ac']   # Acentric factor [-]
         Tb = critical_properties['tb']  # Boiling point [K]
         P0 = 1.01325  # Standard atmospheric pressure in bar
 
-        # Step 1: Calculate saturated pressure at Tr = 0.7 (acentric factor definition)
+        # Saturated pressure at Tr = 0.7 (acentric factor definition)
         Pw = np.power(10, -(w + 1)) * Pc
 
-        # Step 2: set three characteristic temperatures (t) and three characteristic pressures (y)
-        t1 = Tb
-        t2 = 0.7 * Tc
-        t3 = Tc
-        p1 = P0
-        p2 = Pw
-        p3 = Pc
-        #print(f"Characteristic points (T [K], P [bar]): ({t1}, {p1}), ({t2}, {p2}), ({t3}, {p3})")
-        y1 = np.log10(p1)
-        y2 = np.log10(p2)
-        y3 = np.log10(p3)
+        t1, t2, t3 = Tb, 0.7 * Tc, Tc
+        p1, p2, p3 = P0, Pw, Pc
+        y1, y2, y3 = np.log10(p1), np.log10(p2), np.log10(p3)
 
-        # Initial parameter estimates
         X = (y3 - y2) / (y2 - y1) * (t2 - t1) / (t3 - t2)
         Y = t1 - t3
         C0 = Y / (X - 1) - t3
         B0 = (y3 - y1) / (t3 - t1) * (t1 + C0) * (t3 - C0)
         A0 = y2 + B0 / (t2 + C0)
 
-        # Step 3: Pyomo optimization model
         model = pyo.ConcreteModel('Antoine parameter optimization')
-
-        # Parameters
         model.tb = pyo.Param(initialize=Tb, mutable=False, domain=pyo.PositiveReals)
         model.tc = pyo.Param(initialize=Tc, mutable=False, domain=pyo.PositiveReals)
         model.tw = pyo.Param(initialize=0.7*Tc, mutable=False, domain=pyo.PositiveReals)
@@ -165,37 +131,29 @@ class AntoineCalculator:
         model.p0 = pyo.Param(initialize=P0, mutable=False, domain=pyo.PositiveReals)
         model.pw = pyo.Param(initialize=Pw, mutable=False, domain=pyo.PositiveReals)
 
-        # Variables
         model.A = pyo.Var(within=pyo.Reals, initialize=A0, name='Antoine parameter A')
         model.B = pyo.Var(within=pyo.Reals, initialize=B0, name='Antoine parameter B')
         model.C = pyo.Var(within=pyo.Reals, initialize=C0, name='Antoine parameter C')
 
-        # Constraints
         def eq_p0(m):
-            """Constraint for atmospheric pressure at boiling point"""
             return pyo.log10(m.p0) == m.A - m.B / (m.C + m.tb)
         model.eq_p0 = pyo.Constraint(rule=eq_p0)
 
         def eq_pc(m):
-            """Constraint for critical pressure at critical temperature"""
             return pyo.log10(m.pc) == m.A - m.B / (m.C + m.tc)
         model.eq_pc = pyo.Constraint(rule=eq_pc)
 
         def eq_pw(m):
-            """Constraint for pressure at Tr = 0.7 (acentric factor definition)"""
             return pyo.log10(m.pw) == m.A - m.B / (m.C + m.tw)
         model.eq_pw = pyo.Constraint(rule=eq_pw)
 
-        # Solver configuration
         opt = pyo.SolverFactory('ipopt')
         opt.options["halt_on_ampl_error"] = "yes"
         opt.options["max_iter"] = 10000
 
-        # Solve
         logfile = "pyomo_antoine_log"
         solution = opt.solve(model, tee=self.verbose, symbolic_solver_labels=True, logfile=logfile)
 
-        # Extract results
         solv_stat = str(solution.solver.status)
         term_cond = str(solution.solver.termination_condition)
 
@@ -204,19 +162,14 @@ class AntoineCalculator:
             print(f"         Solver status: {solv_stat}, Termination: {term_cond}")
             return None
 
-        # Parse iterations from log file
         try:
             num_iter = _parse_pyomo_log(logfile)
-        except:
+        except Exception:
             num_iter = None
 
         return {
-            'A0': float(A0),  # Initial guess
-            'B0': float(B0),  # Initial guess
-            'C0': float(C0),  # Initial guess
-            'A': pyo.value(model.A),  # Optimized value
-            'B': pyo.value(model.B),  # Optimized value
-            'C': pyo.value(model.C),  # Optimized value
+            'A0': float(A0), 'B0': float(B0), 'C0': float(C0),
+            'A': pyo.value(model.A), 'B': pyo.value(model.B), 'C': pyo.value(model.C),
             'solver_status': solv_stat,
             'termination_condition': term_cond,
             'num_iter': num_iter

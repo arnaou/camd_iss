@@ -60,8 +60,7 @@ class TestPropertyCalculator:
         for key in ['tm', 'tb', 'tc', 'pc', 'ac', 'hv']:
             assert key in result
 
-    def test_missing_group_returns_none(self):
-        calc = PropertyCalculator(missing_group_action="remove_compounds")
+    def test_missing_group_returns_none(self, calc):
         result = calc.calculate({'UNKNOWN_GROUP_XYZ': 1})
         assert result is None
 

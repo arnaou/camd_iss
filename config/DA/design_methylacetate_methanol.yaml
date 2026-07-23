@@ -46,6 +46,6 @@ iss:
   x_min: 0.60
 
 output:
-  dir: "results/paper2/design_methylacetate_methanol"
+  dir: "results/DA/design_methylacetate_methanol"
   formats: ["csv", "json"]
   verbose: true

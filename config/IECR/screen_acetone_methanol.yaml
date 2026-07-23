@@ -57,6 +57,6 @@ iss:
 
 # Output
 output:
-  dir: "results/paper1/screen_acetone_methanol"
+  dir: "results/IECR/screen_acetone_methanol"
   formats: ["csv", "json"]
   verbose: true
