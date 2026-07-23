@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """
-CAMD-ISS: Computer-Aided Molecular Design for Extractive Distillation
+ISS: Computer-Aided Molecular Design / Screening for Extractive Distillation
 
-Config-driven script for solvent design and screening with early miscibility screening.
+Config-driven entry point for both solvent design (MILP-based molecule
+generation) and screening of predefined entrainers, dispatched by
+config['mode']. Both modes share the same 14-step pipeline; only candidate
+sourcing (step 6) and the detailed ISS output differ.
 
 Workflow Steps:
 1. Validate binary mixture
@@ -10,8 +13,10 @@ Workflow Steps:
 3. Calculate pure component properties (mixture)
 4. Override properties if provided by user
 5. Calculate Antoine parameters (mixture)
-6. Generate solvent candidates (MILP) or load predefined solvents
-7-14. Screening pipeline (UNIFAC params, pure props, Antoine, miscibility, VLE, ISS)
+6. Generate solvent candidates (MILP, design mode) or load predefined
+   entrainers (screen mode)
+7-14. Screening pipeline (UNIFAC params, pure props, Antoine, miscibility,
+      VLE, ISS)
 """
 
 import sys
@@ -27,12 +32,13 @@ from src.pipeline import (
     validate_mixture, check_mixture_parameters,
     calculate_mixture_properties, override_mixture_properties,
     calculate_mixture_antoine, load_and_validate_candidates,
-    run_screening_pipeline, save_results, print_results_table,
+    run_screening_pipeline, save_results, save_detailed_results,
+    print_results_table,
 )
 
 
 def generate_solvent_candidates(config, mixture, verbose=False):
-    """Generate solvent candidates using MILP."""
+    """Generate solvent candidates using MILP (design mode)."""
     with step(6, "Generate Solvent Candidates", verbose):
         design_config = config['design']
         binary_components = list(mixture.values())
@@ -62,28 +68,32 @@ def generate_solvent_candidates(config, mixture, verbose=False):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='CAMD-ISS: Config-driven solvent design/screening with early miscibility screening'
+        description='ISS: Config-driven solvent design/screening for extractive distillation'
     )
     parser.add_argument('config', help='Path to YAML configuration file')
     parser.add_argument('-v', '--verbose', action='store_true', help='Verbose output')
     args = parser.parse_args()
 
     config = load_config(args.config)
+    mode = config['mode']
+    if mode not in ('design', 'screen'):
+        raise ValueError(f"Invalid mode: {mode}. Must be 'design' or 'screen'")
+
     verbose = args.verbose or config['output'].get('verbose', False)
 
     output_dir = setup_output_dir(config)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_file = output_dir / f"camd_run_{timestamp}.log"
+    log_file = output_dir / f"iss_run_{timestamp}.log"
     logger = TeeLogger(log_file)
     sys.stdout = logger
 
     try:
         print("="*60)
-        print("CAMD-ISS: Computer-Aided Molecular Design")
+        print(f"ISS: {'Solvent Design' if mode == 'design' else 'Entrainer Screening'}")
         print("="*60)
         print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print(f"Mode: {config['mode'].upper()}")
+        print(f"Mode: {mode.upper()}")
         print(f"Config: {args.config}")
         print(f"Log file: {log_file}")
 
@@ -103,47 +113,56 @@ def main():
         binary_antoine = calculate_mixture_antoine(mixture, binary_props, verbose)
 
         # Step 6: Get candidates (mode-dependent)
-        if config['mode'] == 'screen':
-            candidates, _ = load_and_validate_candidates(
-                config, config_key='screen', list_key='solvents', verbose=verbose
-            )
-        elif config['mode'] == 'design':
+        if mode == 'design':
             candidates = generate_solvent_candidates(config, mixture, verbose)
+            prefix, label, detailed_iss = 'solvent', 'solvent', False
         else:
-            raise ValueError(f"Invalid mode: {config['mode']}. Must be 'design' or 'screen'")
+            candidates, _ = load_and_validate_candidates(
+                config, config_key='screen', list_key='entrainers', verbose=verbose
+            )
+            prefix, label, detailed_iss = 'entrainer', 'entrainer', True
 
         if not candidates:
-            print("\n⚠ No candidates to process")
+            print(f"\n⚠ No {label}s to process")
             return
 
         # Steps 7-14: Screening pipeline
         pipeline_result = run_screening_pipeline(
             candidates, mixture, binary_props, binary_antoine,
-            config, verbose, prefix='solvent'
+            config, verbose, prefix=prefix, detailed_iss=detailed_iss
         )
 
         if pipeline_result is None or not pipeline_result['iss_results']:
-            print("\n⚠ No solvents completed the screening pipeline")
+            print(f"\n⚠ No {label}s completed the screening pipeline")
             return
 
         iss_results = pipeline_result['iss_results']
         screened_mixture = pipeline_result['screened_mixture']
 
-        # Save results
-        results_list, _ = save_results(
+        # Save summary results (CSV + JSON)
+        results_list, mixture_info = save_results(
             iss_results, screened_mixture, output_dir, config, verbose,
             binary_props=binary_props, binary_antoine=binary_antoine,
             binary_mixture=mixture,
             candidate_props_map=pipeline_result['screened_miscibility'],
             candidate_antoine=pipeline_result['antoine_filtered'],
             smiles_map=pipeline_result.get('smiles_map'),
-            label='solvent'
+            label=label
         )
 
-        print_results_table(results_list, label='solvent')
+        # Screen mode also saves detailed per-operating-point JSON
+        if detailed_iss:
+            save_detailed_results(
+                iss_results, screened_mixture, output_dir, mixture_info,
+                candidate_props_map=pipeline_result['screened_miscibility'],
+                candidate_antoine=pipeline_result['antoine_filtered'],
+                verbose=verbose
+            )
+
+        print_results_table(results_list, label=label)
 
         print("\n" + "="*60)
-        print("CAMD-ISS COMPLETE")
+        print("ISS COMPLETE")
         print(f"Output: {output_dir}")
         print("="*60)
 

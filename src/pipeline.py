@@ -1,9 +1,8 @@
 """
 Shared screening pipeline for CAMD-ISS.
 
-Contains all step functions used by both camd_iss.py (design mode)
-and screen_iss.py (screen mode). Each step is a standalone function
-that can be called from either entry point.
+Contains all step functions used by iss.py for both design and screen
+modes. Each step is a standalone function called from the entry point.
 
 Steps:
     1. validate_mixture           - Check mixture structural validity

@@ -4,7 +4,7 @@ Check-Azeotrope: Independent test for whether a binary mixture forms an azeotrop
 
 Standalone diagnostic, separate from the design/screen pipelines. Solves for
 the binary azeotropic composition and temperature via UNIFAC (using the same
-mixture/pure-property/Antoine setup as camd_iss.py and screen_iss.py), reports
+mixture/pure-property/Antoine setup as iss.py), reports
 whether a physically valid azeotrope was found, and plots the xy and Txy
 diagrams for the binary pair with the azeotrope point marked.
 

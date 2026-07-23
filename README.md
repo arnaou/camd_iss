@@ -28,11 +28,11 @@ CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp S
 conda install -c conda-forge ipopt
 pip install -e .
 
-# 2. Run screening on the minimal example
-python screen_iss.py config/camd_minimal.yaml -v
+# 2. Run screening on a real system (no Gurobi required)
+python iss.py config/IECR/screen_acetone_methanol.yaml -v
 
 # 3. Or run the full design pipeline (requires Gurobi license)
-python camd_iss.py config/IECR/design_acetone_methanol.yaml -v
+python iss.py config/camd_minimal.yaml -v
 ```
 
 ## Installation
@@ -44,8 +44,8 @@ python camd_iss.py config/IECR/design_acetone_methanol.yaml -v
 | [IPOPT](https://coin-or.github.io/Ipopt/) | VLE, ISS, Antoine (all modes) | Open source |
 | [Gurobi](https://www.gurobi.com/) | Molecule generation (design mode only) | Commercial — free academic license available |
 
-**Screen mode** (`screen_iss.py`) only requires IPOPT.  
-**Design mode** (`camd_iss.py`) additionally requires a Gurobi license for MILP-based candidate generation.  
+**Screen mode** only requires IPOPT.  
+**Design mode** additionally requires a Gurobi license for MILP-based candidate generation.  
 A free academic license is available at [gurobi.com/academia](https://www.gurobi.com/academia/academic-program-and-licenses/).
 
 ```bash
@@ -68,12 +68,12 @@ grbgetkey <your-license-key>
 
 ## Usage
 
-Both modes are driven by YAML configuration files and produce CSV/JSON output.
+Both modes are driven by the same `iss.py` entry point — the mode is read from the config file's `mode` field — and produce CSV/JSON output.
 
 ### Design Mode — generate and screen candidates
 
 ```bash
-python camd_iss.py config/IECR/design_acetone_methanol.yaml -v
+python iss.py config/IECR/design_acetone_methanol.yaml -v
 ```
 
 ```yaml
@@ -98,7 +98,7 @@ design:
 ### Screen Mode — evaluate predefined entrainers
 
 ```bash
-python screen_iss.py config/DA/screen_homo_acetone_methanol.yaml -v
+python iss.py config/DA/screen_homo_acetone_methanol.yaml -v
 ```
 
 ```yaml
@@ -144,7 +144,7 @@ Results are written to the configured `output.dir` as `results.csv` and `results
 ### Post-run Analysis
 
 ```bash
-python analyze_screening_log.py results/IECR/design_acetone_methanol/camd_run_*.log
+python analyze_screening_log.py results/IECR/design_acetone_methanol/iss_run_*.log
 ```
 
 Parses a screening log and prints a funnel table showing how many candidates were eliminated at each step, useful for understanding bottlenecks and tuning thresholds.
@@ -161,13 +161,12 @@ Standalone tool, separate from the design/screen pipelines. Reads only the `mixt
 
 ```
 camd_iss/
-├── camd_iss.py          # Design mode entry point
-├── screen_iss.py        # Screen mode entry point
+├── iss.py               # Entry point (design/screen mode via config['mode'])
 ├── check_azeotrope.py   # Standalone binary azeotrope check + xy/Txy plots
 ├── config/
 │   ├── camd_minimal.yaml         # Minimal working config template
-│   ├── IECR/                     # Acetone/methanol study configs
-│   └── DA/                       # Multi-system study configs
+│   ├── IECR/                     # Original CAMD-ISS framework case studies
+│   └── DA/                       # Extended case studies (upcoming conference paper)
 ├── data/
 │   └── json/            # UNIFAC parameters (rk, qk, interactions, Tc, Tb, …)
 ├── src/
@@ -177,8 +176,7 @@ camd_iss/
 │   ├── mixture/unifac/  # UNIFAC, VLE, ISS (Pyomo/IPOPT)
 │   └── data/            # Parameter loading and UNIFAC compatibility
 ├── case_studies/        # Analysis notebooks and worked examples
-├── tutorials/           # Step-by-step Jupyter notebooks (01–09) plus
-│                        # standalone example scripts (VLE, ED comparisons)
+├── tutorials/           # Step-by-step Jupyter notebooks (01–09)
 └── tests/               # Unit tests
 ```
 
@@ -202,7 +200,7 @@ The `tutorials/` folder contains nine notebooks covering the full workflow:
 
 If you use this software in your research, please cite the relevant paper(s):
 
-**Paper 1 — CAMD-ISS framework (acetone/methanol case study):**
+**CAMD-ISS framework (IECR):**
 
 ```bibtex
 @article{iss_camd2026,
@@ -216,17 +214,12 @@ If you use this software in your research, please cite the relevant paper(s):
 }
 ```
 
-**Paper 2 — Extended case studies:** citation to be added once published.
+**Extended case studies (DA conference paper):** citation to be added once published.
 
 ## Acknowledgements
 
 This work originated as an M.Sc. thesis by Adem R.N. Aouichaoui under the supervision of Assoc. Prof. Jens Abildskov at the [Process Systems Engineering Center (PROSYS)](https://www.kt.dtu.dk/english/research/prosys), Technical University of Denmark (DTU).
 
-Collaborators:
-
-- Ivonne Rodriguez-Donis — [Laboratoire de Chimie Agro-industrielle (LCA)](https://lca.inp-toulouse.fr/), Université de Toulouse, INRA
-- Nataliya Shcherbakova — [Laboratoire de Génie Chimique (LGC)](https://www.lgc.cnrs.fr/), Université de Toulouse, CNRS, INP, UPS
-- Vincent Gerbaud — [Laboratoire de Génie Chimique (LGC)](https://www.lgc.cnrs.fr/), Université de Toulouse, CNRS, INP, UPS
 
 ## Contributing
 

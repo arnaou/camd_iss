@@ -33,9 +33,9 @@ design:
   # Maximum candidates to generate
   max_candidates: 1000
 
-# SCREEN MODE: Predefined solvents (only used if mode="screen")
+# SCREEN MODE: Predefined entrainers (only used if mode="screen")
 screen:
-  solvents:
+  entrainers:
     - name: "ethanol"
       groups: {CH3: 1, CH2: 1, OH: 1}
     - name: "butanol"
