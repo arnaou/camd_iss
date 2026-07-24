@@ -1,0 +1,130 @@
+{
+  "metadata": {
+    "description": "SMILES fragments (with [*] dummy attachment atoms) and aromatic ring group definitions used by src/unifac_reverse.py to assemble a molecule from a UNIFAC group composition. Hand-maintained (not auto-exported from data_unifac.xlsx like the other files in this directory) — edit directly to add support for a new UNIFAC group."
+  },
+  "fragments": {
+    "CH3": "[*]C", "CH2": "[*]C[*]", "CH": "[*]C([*])[*]",
+    "C": "[*]C([*])([*])[*]",
+
+    "CH2=CH": "[*]/C=C", "CH=CH": "[*]/C=C\\[*]",
+    "CH2=C": "[*]/C(=C)[*]", "CH=C": "[*]/C=C(\\[*])[*]",
+    "C=C": "[*]/C([*])=C(\\[*])[*]",
+
+    "OH": "[*]O",
+
+    "CH3OH": "CO",
+
+    "H2O": "O",
+
+    "CH3CO": "[*]C(=O)C", "CH2CO": "[*]C(=O)C[*]",
+
+    "HCO": "[*]C=O",
+
+    "CH3COO": "[*]OC(=O)C", "CH2COO": "[*]OC(=O)C[*]",
+
+    "HCOO": "[*]OC=O",
+
+    "CH3O": "[*]OC", "CH2O": "[*]OC[*]", "CHO": "[*]OC([*])[*]",
+    "THF": "C1CCOC1",
+
+    "CH3NH2": "CN", "CH2NH2": "[*]CN", "CHNH2": "[*]C([*])N",
+
+    "CH3NH": "[*]NC", "CH2NH": "[*]NC[*]", "CHNH": "[*]NC([*])[*]",
+
+    "CH3N": "[*]N([*])C", "CH2N": "[*]N([*])C[*]",
+
+    "C5H5N": "c1ccncc1", "C5H4N": "[*]c1ccncc1",
+    "C5H3N": "[*]c1cc([*])ncc1",
+
+    "CH3CN": "CC#N", "CH2CN": "[*]CC#N",
+
+    "COOH": "[*]C(=O)O", "HCOOH": "OC=O",
+
+    "CH2Cl": "[*]CCl", "CHCl": "[*]C([*])Cl",
+    "CCl": "[*]C([*])([*])Cl",
+
+    "CH2Cl2": "ClCCl", "CHCl2": "[*]C(Cl)Cl", "CCl2": "[*]C([*])(Cl)Cl",
+
+    "CHCl3": "ClC(Cl)Cl", "CCl3": "[*]C(Cl)(Cl)Cl",
+
+    "CCl4": "ClC(Cl)(Cl)Cl",
+
+    "CH3NO2": "C[N+](=O)[O-]", "CH2NO2": "[*]C[N+](=O)[O-]",
+    "CHNO2": "[*]C([*])[N+](=O)[O-]",
+
+    "CS2": "C(=S)=S",
+
+    "CH3SH": "CS", "CH2SH": "[*]CS",
+
+    "furfural": "O=Cc1ccco1",
+
+    "DOH": "OCCO",
+
+    "I": "[*]I", "Br": "[*]Br",
+
+    "CH{triple}C": "[*]C#C", "C{triple}C": "[*]C#C[*]",
+
+    "DMSO": "CS(=O)C",
+
+    "acrylnitrile": "C=CC#N",
+
+    "Cl-C=C": "[*]C(=C)Cl",
+
+    "DMF": "O=CN(C)C", "HCON(CH2)2": "[*]CN(C=O)[*]",
+
+    "CF3": "[*]C(F)(F)F", "CF2": "[*]C([*])(F)F", "CF": "[*]C([*])([*])F",
+
+    "COO": "[*]C(=O)O[*]",
+
+    "SiH3": "[*][SiH3]", "SiH2": "[*][SiH2][*]",
+    "SiH": "[*][SiH]([*])[*]", "Si": "[*][Si]([*])([*])[*]",
+
+    "SiH2O": "[*][SiH2]O[*]", "SiHO": "[*][SiH](O[*])[*]",
+    "SiO": "[*][Si](O[*])([*])[*]",
+
+    "NMP": "CN1CCCC1=O",
+
+    "CCl3F": "FC(Cl)(Cl)Cl", "CCl2F": "[*]C(Cl)(Cl)F",
+    "HCCl2F": "FC(Cl)Cl", "HCClF": "[*]C(Cl)F",
+    "CClF2": "[*]C(Cl)(F)F", "HCClF2": "FC(F)Cl",
+    "CClF3": "FC(F)(F)Cl", "CCl2F2": "FC(F)(Cl)Cl",
+
+    "CONH2": "[*]C(=O)N", "CONHCH3": "[*]C(=O)NC",
+    "CONHCH2": "[*]C(=O)NC[*]", "CON(CH3)2": "[*]C(=O)N(C)C",
+    "CONCH3CH2": "[*]C(=O)N(C)C[*]",
+    "CON(CH2)2": "[*]C(=O)N(C[*])C[*]",
+
+    "C2H5O2": "[*]OCCO", "C2H4O2": "[*]OCC([*])O",
+
+    "CH3S": "[*]SC", "CH2S": "[*]SC[*]", "CHS": "[*]SC([*])[*]",
+
+    "morpholine": "C1COCCN1",
+
+    "C4H4S": "c1ccsc1", "C4H3S": "[*]c1ccsc1",
+    "C4H2S": "[*]c1cc([*])sc1",
+
+    "CH2OCH2": "C1CO1", "CH2OCH": "[*]C1CO1",
+    "CH2OC": "[*]C1([*])CO1", "CHOCH": "[*]C1C([*])O1",
+    "CHOC": "[*]C1C([*])([*])O1",
+    "COC": "[*]C1([*])C([*])([*])O1",
+
+    "O=COC=O": "[*]C(=O)OC([*])=O",
+
+    "CH2SuCH2": "[*]CS(=O)(=O)C[*]",
+    "CH2SuCH": "[*]CS(=O)(=O)C([*])[*]"
+  },
+  "aromatic_groups": {
+    "ACH":   {"substituent": null,          "ext_conn": 0},
+    "AC":    {"substituent": null,          "ext_conn": 1},
+    "ACCH3": {"substituent": "C",           "ext_conn": 0},
+    "ACCH2": {"substituent": "C[*]",        "ext_conn": 1},
+    "ACCH":  {"substituent": "C([*])[*]",   "ext_conn": 2},
+    "ACOH":  {"substituent": "O",           "ext_conn": 0},
+    "ACNH2": {"substituent": "N",           "ext_conn": 0},
+    "ACCl":  {"substituent": "Cl",          "ext_conn": 0},
+    "ACNO2": {"substituent": "[N+](=O)[O-]","ext_conn": 0},
+    "ACF":   {"substituent": "F",           "ext_conn": 0},
+    "AC-CN": {"substituent": "C#N",         "ext_conn": 0},
+    "AC-Br": {"substituent": "Br",          "ext_conn": 0}
+  }
+}

@@ -32,7 +32,7 @@ from pathlib import Path
 from datetime import datetime
 from contextlib import contextmanager
 
-from .molecules import StructuralValidator
+from .molecules import StructuralValidator, generate_molecules
 from .pure import PropertyCalculator, AntoineCalculator
 from .data import load_unifac_data, check_unifac_parameters
 from .mixture.unifac import pyo_vle
@@ -291,6 +291,35 @@ def load_and_validate_candidates(config, config_key='screen', list_key='entraine
     return candidates, candidate_names
 
 
+def generate_solvent_candidates(config, mixture, verbose=False):
+    """Generate solvent candidates using MILP (design mode's step 6)."""
+    with step(6, "Generate Solvent Candidates", verbose):
+        design_config = config['design']
+        binary_components = list(mixture.values())
+
+        if verbose:
+            print(f"Design groups: {', '.join(design_config['groups'])}")
+            print(f"Constraints: {design_config['constraints']['min_groups']}-{design_config['constraints']['max_groups']} total groups, "
+                  f"{design_config['constraints']['min_func_groups']}-{design_config['constraints']['max_func_groups']} functional groups")
+
+        candidates = generate_molecules(
+            design_groups=design_config['groups'],
+            min_groups=design_config['constraints']['min_groups'],
+            max_groups=design_config['constraints']['max_groups'],
+            min_func_groups=design_config['constraints']['min_func_groups'],
+            max_func_groups=design_config['constraints']['max_func_groups'],
+            molecular_type=design_config['constraints']['molecular_type'],
+            max_solutions=design_config['max_candidates'],
+            exclude_compounds=binary_components,
+            verbose=False
+        )
+
+        if verbose:
+            print(f"\nSummary: Generated {len(candidates)} candidates")
+
+    return candidates
+
+
 # ---------------------------------------------------------------------------
 # Step 7: Check UNIFAC parameters for candidates
 # ---------------------------------------------------------------------------
@@ -304,9 +333,9 @@ def check_candidate_parameters(candidates, mixture, verbose=False):
         compatible = [candidates[i] for i in compatible_indices]
 
         if verbose:
-            print(f"Checked: {len(candidates)}")
-            print(f"Compatible: {len(compatible)}")
-            print(f"Incompatible: {len(candidates) - len(compatible)}")
+            print(f"Input: {len(candidates)}")
+            print(f"Passed: {len(compatible)}")
+            print(f"Rejected: {len(candidates) - len(compatible)}")
             print(f"\nSummary: {len(compatible)}/{len(candidates)} have complete UNIFAC parameters")
 
     return compatible, compatible_indices
@@ -337,6 +366,7 @@ def calculate_candidate_properties(candidates, config, prefix='candidate', verbo
 
         if verbose:
             dropped = len(props_raw) - len(props)
+            print(f"Input: {len(candidates)}")
             if dropped > 0:
                 print(f"Dropped: {dropped} (missing group contributions)")
             print(f"\nSummary: {len(props)}/{len(candidates)} properties calculated")
@@ -395,7 +425,7 @@ def screen_pure_properties(candidates, candidate_props, config, verbose=False):
                 }
 
         if verbose:
-            print(f"Initial: {len(candidate_props)}")
+            print(f"Input: {len(candidate_props)}")
             print(f"Passed: {len(screened)}")
             print(f"Rejected: {len(rejected)}")
 
@@ -443,6 +473,7 @@ def calculate_candidate_antoine(screened_candidates, verbose=False):
                 failed += 1
 
         if verbose:
+            print(f"Input: {len(screened_candidates)}")
             print(f"Successful: {len(antoine_params)}")
             print(f"Failed: {failed}")
             print(f"\nSummary: {len(antoine_params)}/{len(screened_candidates)} calculated")
@@ -559,10 +590,10 @@ def screen_miscibility(screened_candidates, mixture, binary_props,
         if verbose:
             print(f"Input: {len(screened_candidates)}")
             print(f"Passed: {len(passed_miscibility)}")
-            print(f"Failed: {len(failed_miscibility)}")
+            print(f"Rejected: {len(failed_miscibility)}")
 
             if failed_miscibility:
-                print(f"\nFailed miscibility:")
+                print(f"\nRejection reasons:")
                 for name, data in failed_miscibility.items():
                     print(f"  {name} ({data['groups']}): {data['reason']}")
 
@@ -714,7 +745,7 @@ def perform_vle(screened_candidates, candidate_antoine, mixture,
                 }
 
         if verbose:
-            print(f"Total: {total}")
+            print(f"Input: {total}")
             print(f"Successful: {len(successful)}")
             print(f"Failed: {len(failed)}")
 
@@ -931,12 +962,21 @@ def resolve_smiles(iss_results, compatible_candidates, verbose=False):
     fallback table for single-group whole-molecule groups (DOH, DMSO,
     CH3OH, H2O, THF).
 
+    A UNIFAC group composition is a multiset of groups, not a unique
+    connectivity — different constitutional isomers can share the exact
+    same group counts (e.g. {CH3:1, CH2:1, CH:1, HCO:2} matches both
+    2-methylbutanedial and ethylmalonaldehyde) and get identical estimated
+    properties/ISS results, since UNIFAC is blind to connectivity. All
+    isomers found are returned, joined by " | ", rather than picking one
+    arbitrarily — the property estimates apply to all of them equally.
+
     Args:
         iss_results: Dict of ISS results (keys = candidate names).
         compatible_candidates: Dict with 'groups' per candidate.
 
     Returns:
-        Dict mapping candidate name -> SMILES string (or None if failed).
+        Dict mapping candidate name -> SMILES string, possibly containing
+        multiple isomers joined by " | " (or None if resolution failed).
     """
     with step(15, "Resolve SMILES [experimental]", verbose):
         smiles_map = {}
@@ -950,7 +990,7 @@ def resolve_smiles(iss_results, compatible_candidates, verbose=False):
             assembler_available = True
         except Exception as e:
             if verbose:
-                print(f"Warning: could not load unifac_reverse ({e})")
+                print(f"Warning: SMILES resolver unavailable ({e})")
             assembler_available = False
             db = None
 
@@ -970,7 +1010,7 @@ def resolve_smiles(iss_results, compatible_candidates, verbose=False):
                 try:
                     smiles_list = reverse_engineer_by_name(groups, db)
                     if smiles_list:
-                        smiles_map[name] = smiles_list[0]
+                        smiles_map[name] = " | ".join(smiles_list)
                         ok += 1
                     else:
                         smiles_map[name] = None

@@ -120,7 +120,7 @@ screen:
 
 ### Screening Pipeline
 
-Both modes run the same 14-step pipeline:
+Both modes run the same 15-step pipeline:
 
 | Step | Description |
 |------|-------------|
@@ -138,16 +138,17 @@ Both modes run the same 14-step pipeline:
 | 12 | Bubble-point VLE calculations (ternary) |
 | 13 | Screen by mixture property constraints (selectivity, azeotropes) |
 | 14 | ISS calculation — minimize entrainer-to-distillate ratio *E/D* |
+| 15 | *[Experimental]* Resolve UNIFAC group composition to a candidate SMILES structure |
 
 Results are written to the configured `output.dir` as `results.csv` and `results.json`.
 
 ### Post-run Analysis
 
 ```bash
-python analyze_screening_log.py results/IECR/design_acetone_methanol/iss_run_*.log
+python analyze_screening_log.py results/IECR/design_acetone_methanol/iss_run_*.log -o rejection_reasons
 ```
 
-Parses a screening log and prints a funnel table showing how many candidates were eliminated at each step, useful for understanding bottlenecks and tuning thresholds.
+Parses a screening log from either mode and breaks down *why* candidates were rejected — by pure-property constraint (Tb, Tm, Tc, Pc, Hv) at step 9 and by mixture constraint (azeotrope, miscibility, selectivity) at step 13 — printing counts and saving a bar chart (`-o` sets the base output name; both `.pdf` and `.png` are written). Useful for understanding which screening threshold is doing the rejecting, to help tune configs.
 
 ### Azeotrope Check (independent diagnostic)
 
@@ -161,8 +162,9 @@ Standalone tool, separate from the design/screen pipelines. Reads only the `mixt
 
 ```
 camd_iss/
-├── iss.py               # Entry point (design/screen mode via config['mode'])
-├── check_azeotrope.py   # Standalone binary azeotrope check + xy/Txy plots
+├── iss.py                     # Entry point (design/screen mode via config['mode'])
+├── check_azeotrope.py         # Standalone binary azeotrope check + xy/Txy plots
+├── analyze_screening_log.py   # Post-run rejection-reason breakdown + bar chart
 ├── config/
 │   ├── camd_minimal.yaml         # Minimal working config template
 │   ├── IECR/                     # Original CAMD-ISS framework case studies
@@ -170,19 +172,20 @@ camd_iss/
 ├── data/
 │   └── json/            # UNIFAC parameters (rk, qk, interactions, Tc, Tb, …)
 ├── src/
-│   ├── pipeline.py      # Shared 14-step pipeline
-│   ├── molecules/       # Structure validation and MILP generation
-│   ├── pure/            # Property estimation and Antoine calculation
-│   ├── mixture/unifac/  # UNIFAC, VLE, ISS (Pyomo/IPOPT)
-│   └── data/            # Parameter loading and UNIFAC compatibility
+│   ├── pipeline.py        # Shared 15-step pipeline
+│   ├── unifac_reverse.py  # [Experimental] Group composition -> SMILES
+│   ├── molecules/         # Structure validation and MILP generation
+│   ├── pure/              # Property estimation and Antoine calculation
+│   ├── mixture/unifac/    # UNIFAC, VLE, ISS (Pyomo/IPOPT)
+│   └── data/              # Parameter loading and UNIFAC compatibility
 ├── case_studies/        # Analysis notebooks and worked examples
-├── tutorials/           # Step-by-step Jupyter notebooks (01–09)
+├── tutorials/           # Step-by-step Jupyter notebooks (01–10)
 └── tests/               # Unit tests
 ```
 
 ## Tutorials
 
-The `tutorials/` folder contains nine notebooks covering the full workflow:
+The `tutorials/` folder contains notebooks covering the full workflow:
 
 | Notebook | Topic |
 |----------|-------|
@@ -195,6 +198,7 @@ The `tutorials/` folder contains nine notebooks covering the full workflow:
 | `07_azeotrope.ipynb` | Azeotrope detection |
 | `08_iss.ipynb` | ISS optimization |
 | `09_analyze_screening.ipynb` | Screening results analysis |
+| `10_assemble_mol.ipynb` | *[Experimental]* UNIFAC group composition -> candidate SMILES (`src/unifac_reverse.py`) |
 
 ## Citation
 

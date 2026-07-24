@@ -26,198 +26,33 @@ Usage:
 """
 
 import json
-from itertools import combinations
+from pathlib import Path
 from typing import Optional
 from rdkit import Chem
 from rdkit.Chem import RWMol
 
 
 # ═══════════════════════════════════════════════════════════════════════════
-# FRAGMENT SMILES LIBRARY (non-aromatic groups)
+# FRAGMENT SMILES LIBRARY (non-aromatic groups) + AROMATIC GROUP DEFINITIONS
 # ═══════════════════════════════════════════════════════════════════════════
-# [*] = dummy atom marking an open attachment point.
+# Loaded from data/json/fragment_smiles.json — edit that file to add support
+# for a new UNIFAC group rather than hardcoding it here.
+#
+# FRAGMENT_SMILES: group name -> SMILES with [*] dummy attachment atoms.
+# AROMATIC_GROUPS: group name -> {'substituent': SMILES fragment on the ring
+#   carbon (or None), 'ext_conn': number of extra connections to non-aromatic
+#   groups}. Each aromatic group occupies one position on a benzene ring.
 
-FRAGMENT_SMILES = {
-    # ── Main group 1: Alkane ──
-    "CH3": "[*]C", "CH2": "[*]C[*]", "CH": "[*]C([*])[*]",
-    "C": "[*]C([*])([*])[*]",
-
-    # ── Main group 2: Alkene ──
-    "CH2=CH": "[*]/C=C", "CH=CH": "[*]/C=C\\[*]",
-    "CH2=C": "[*]/C(=C)[*]", "CH=C": "[*]/C=C(\\[*])[*]",
-    "C=C": "[*]/C([*])=C(\\[*])[*]",
-
-    # ── Main group 5: Hydroxyl ──
-    "OH": "[*]O",
-
-    # ── Main group 6: Methanol ──
-    "CH3OH": "CO",
-
-    # ── Main group 7: Water ──
-    "H2O": "O",
-
-    # ── Main group 9: Ketone ──
-    "CH3CO": "[*]C(=O)C", "CH2CO": "[*]C(=O)C[*]",
-
-    # ── Main group 10: Aldehyde ──
-    "HCO": "[*]C=O",
-
-    # ── Main group 11: Ester (acetate-type) ──
-    "CH3COO": "[*]OC(=O)C", "CH2COO": "[*]OC(=O)C[*]",
-
-    # ── Main group 12: Formate ──
-    "HCOO": "[*]OC=O",
-
-    # ── Main group 13: Ether ──
-    "CH3O": "[*]OC", "CH2O": "[*]OC[*]", "CHO": "[*]OC([*])[*]",
-    "THF": "C1CCOC1",
-
-    # ── Main group 14: Primary amine ──
-    "CH3NH2": "CN", "CH2NH2": "[*]CN", "CHNH2": "[*]C([*])N",
-
-    # ── Main group 15: Secondary amine ──
-    "CH3NH": "[*]NC", "CH2NH": "[*]NC[*]", "CHNH": "[*]NC([*])[*]",
-
-    # ── Main group 16: Tertiary amine ──
-    "CH3N": "[*]N([*])C", "CH2N": "[*]N([*])C[*]",
-
-    # ── Main group 18: Pyridine ──
-    "C5H5N": "c1ccncc1", "C5H4N": "[*]c1ccncc1",
-    "C5H3N": "[*]c1cc([*])ncc1",
-
-    # ── Main group 19: Nitrile ──
-    "CH3CN": "CC#N", "CH2CN": "[*]CC#N",
-
-    # ── Main group 20: Carboxylic acid ──
-    "COOH": "[*]C(=O)O", "HCOOH": "OC=O",
-
-    # ── Main group 21: Chloro ──
-    "CH2Cl": "[*]CCl", "CHCl": "[*]C([*])Cl",
-    "CCl": "[*]C([*])([*])Cl",
-
-    # ── Main group 22: Dichloro ──
-    "CH2Cl2": "ClCCl", "CHCl2": "[*]C(Cl)Cl", "CCl2": "[*]C([*])(Cl)Cl",
-
-    # ── Main group 23: Trichloro ──
-    "CHCl3": "ClC(Cl)Cl", "CCl3": "[*]C(Cl)(Cl)Cl",
-
-    # ── Main group 24: Carbon tetrachloride ──
-    "CCl4": "ClC(Cl)(Cl)Cl",
-
-    # ── Main group 26: Nitro ──
-    "CH3NO2": "C[N+](=O)[O-]", "CH2NO2": "[*]C[N+](=O)[O-]",
-    "CHNO2": "[*]C([*])[N+](=O)[O-]",
-
-    # ── Main group 28: CS2 ──
-    "CS2": "C(=S)=S",
-
-    # ── Main group 29: Thiol ──
-    "CH3SH": "CS", "CH2SH": "[*]CS",
-
-    # ── Main group 30: Furfural ──
-    "furfural": "O=Cc1ccco1",
-
-    # ── Main group 31: Ethylene glycol ──
-    "DOH": "OCCO",
-
-    # ── Main group 32-33: Halogens ──
-    "I": "[*]I", "Br": "[*]Br",
-
-    # ── Main group 34: Alkyne ──
-    "CH{triple}C": "[*]C#C", "C{triple}C": "[*]C#C[*]",
-
-    # ── Main group 35: DMSO ──
-    "DMSO": "CS(=O)C",
-
-    # ── Main group 36: Acrylonitrile ──
-    "acrylnitrile": "C=CC#N",
-
-    # ── Main group 37: Vinyl chloride ──
-    "Cl-C=C": "[*]C(=C)Cl",
-
-    # ── Main group 39: DMF ──
-    "DMF": "O=CN(C)C", "HCON(CH2)2": "[*]CN(C=O)[*]",
-
-    # ── Main group 40: Fluorocarbon ──
-    "CF3": "[*]C(F)(F)F", "CF2": "[*]C([*])(F)F", "CF": "[*]C([*])([*])F",
-
-    # ── Main group 41: Generic ester ──
-    "COO": "[*]C(=O)O[*]",
-
-    # ── Main group 42: Silane ──
-    "SiH3": "[*][SiH3]", "SiH2": "[*][SiH2][*]",
-    "SiH": "[*][SiH]([*])[*]", "Si": "[*][Si]([*])([*])[*]",
-
-    # ── Main group 43: Siloxane ──
-    "SiH2O": "[*][SiH2]O[*]", "SiHO": "[*][SiH](O[*])[*]",
-    "SiO": "[*][Si](O[*])([*])[*]",
-
-    # ── Main group 44: NMP ──
-    "NMP": "CN1CCCC1=O",
-
-    # ── Main group 45: CFCs ──
-    "CCl3F": "FC(Cl)(Cl)Cl", "CCl2F": "[*]C(Cl)(Cl)F",
-    "HCCl2F": "FC(Cl)Cl", "HCClF": "[*]C(Cl)F",
-    "CClF2": "[*]C(Cl)(F)F", "HCClF2": "FC(F)Cl",
-    "CClF3": "FC(F)(F)Cl", "CCl2F2": "FC(F)(Cl)Cl",
-
-    # ── Main group 46: Amide ──
-    "CONH2": "[*]C(=O)N", "CONHCH3": "[*]C(=O)NC",
-    "CONHCH2": "[*]C(=O)NC[*]", "CON(CH3)2": "[*]C(=O)N(C)C",
-    "CONCH3CH2": "[*]C(=O)N(C)C[*]",
-    "CON(CH2)2": "[*]C(=O)N(C[*])C[*]",
-
-    # ── Main group 47: Oxyethylene ──
-    "C2H5O2": "[*]OCCO", "C2H4O2": "[*]OCC([*])O",
-
-    # ── Main group 48: Thioether ──
-    "CH3S": "[*]SC", "CH2S": "[*]SC[*]", "CHS": "[*]SC([*])[*]",
-
-    # ── Main group 49: Morpholine ──
-    "morpholine": "C1COCCN1",
-
-    # ── Main group 50: Thiophene ──
-    "C4H4S": "c1ccsc1", "C4H3S": "[*]c1ccsc1",
-    "C4H2S": "[*]c1cc([*])sc1",
-
-    # ── Main group 51: Epoxide ──
-    "CH2OCH2": "C1CO1", "CH2OCH": "[*]C1CO1",
-    "CH2OC": "[*]C1([*])CO1", "CHOCH": "[*]C1C([*])O1",
-    "CHOC": "[*]C1C([*])([*])O1",
-    "COC": "[*]C1([*])C([*])([*])O1",
-
-    # ── Main group 52: Anhydride ──
-    "O=COC=O": "[*]C(=O)OC([*])=O",
-
-    # ── Main group 55: Sulfone ──
-    "CH2SuCH2": "[*]CS(=O)(=O)C[*]",
-    "CH2SuCH": "[*]CS(=O)(=O)C([*])[*]",
-}
+def _load_fragment_data(path: Optional[str] = None) -> tuple[dict, dict]:
+    """Load fragment SMILES + aromatic group definitions from JSON."""
+    if path is None:
+        path = Path(__file__).parent.parent / "data" / "json" / "fragment_smiles.json"
+    with open(path) as f:
+        data = json.load(f)
+    return data["fragments"], data["aromatic_groups"]
 
 
-# ═══════════════════════════════════════════════════════════════════════════
-# AROMATIC GROUP DEFINITIONS
-# ═══════════════════════════════════════════════════════════════════════════
-
-# Each aromatic group occupies one position on a benzene ring.
-# 'substituent' is the SMILES fragment attached to the ring carbon.
-# 'ext_conn' is the number of additional connections to non-aromatic groups.
-
-AROMATIC_GROUPS = {
-    "ACH":   {"substituent": None,               "ext_conn": 0},
-    "AC":    {"substituent": None,               "ext_conn": 1},  # bare C with 1 external
-    "ACCH3": {"substituent": "C",                "ext_conn": 0},
-    "ACCH2": {"substituent": "C[*]",             "ext_conn": 1},
-    "ACCH":  {"substituent": "C([*])[*]",        "ext_conn": 2},
-    "ACOH":  {"substituent": "O",                "ext_conn": 0},
-    "ACNH2": {"substituent": "N",                "ext_conn": 0},
-    "ACCl":  {"substituent": "Cl",               "ext_conn": 0},
-    "ACNO2": {"substituent": "[N+](=O)[O-]",     "ext_conn": 0},
-    "ACF":   {"substituent": "F",                "ext_conn": 0},
-    "AC-CN": {"substituent": "C#N",              "ext_conn": 0},
-    "AC-Br": {"substituent": "Br",              "ext_conn": 0},
-}
-
+FRAGMENT_SMILES, AROMATIC_GROUPS = _load_fragment_data()
 AROMATIC_GROUP_NAMES = set(AROMATIC_GROUPS.keys())
 
 
@@ -448,41 +283,8 @@ def _naphthalene_to_smiles(peripheral: tuple) -> Optional[str]:
     return Chem.MolToSmiles(mol)
 
 
-def enumerate_biphenyl_isomers(
-    ring1_counts: dict[str, int],
-    ring2_counts: dict[str, int]
-) -> list[str]:
-    """
-    Enumerate biphenyl isomers (two benzene rings connected by a single bond).
-    Each ring has 5 aromatic groups + 1 AC at the linking position.
-    """
-    # Each ring: 5 regular aromatic + 1 linking position
-    # The linking position is AC (using its external connection for the inter-ring bond)
-    ring1_isomers = enumerate_ring_isomers_single(ring1_counts)
-    ring2_isomers = enumerate_ring_isomers_single(ring2_counts)
-
-    smiles_set = set()
-    for arr1 in ring1_isomers:
-        smi1 = ring_arrangement_to_smiles(arr1, with_dummies=True)
-        if smi1 is None:
-            continue
-        for arr2 in ring2_isomers:
-            smi2 = ring_arrangement_to_smiles(arr2, with_dummies=True)
-            if smi2 is None:
-                continue
-            # Connect: replace [*] in ring1 with ring2 structure
-            # This is handled by the main assembler — we return each ring
-            # as a fragment with its external [*] connections
-            pass
-
-    # Actually, biphenyl is better handled by the main assembler:
-    # ring1 and ring2 are super-fragments, each with 1 [*] at the AC position.
-    # They get connected like any other pair of fragments.
-    # So we just need to return the ring fragments.
-    return []  # Handled by main assembler
-
-
-def assemble_aromatic_fragments(aromatic_groups: dict[str, int]) -> list[tuple[str, int]]:
+def assemble_aromatic_fragments(aromatic_groups: dict[str, int],
+                                max_results: int = 500) -> list[tuple[str, int]]:
     """
     Given aromatic group counts, determine the ring system(s) and return
     all valid aromatic super-fragment SMILES with their external connection counts.
@@ -512,7 +314,7 @@ def assemble_aromatic_fragments(aromatic_groups: dict[str, int]) -> list[tuple[s
     for n_benz, n_naph in partitions:
         # Distribute aromatic group types among ring slots
         distributions = _distribute_groups_to_ring_system(
-            aromatic_groups, n_benz, n_naph
+            aromatic_groups, n_benz, n_naph, max_results
         )
 
         for dist in distributions:
@@ -559,7 +361,8 @@ def _aromatic_ring_partitions(total_atoms: int, n_ac: int) -> list[tuple[int, in
 def _distribute_groups_to_ring_system(
     aromatic_groups: dict[str, int],
     n_benzene: int,
-    n_naphthalene: int
+    n_naphthalene: int,
+    max_results: int = 500,
 ) -> list[tuple]:
     """
     Distribute aromatic group types among benzene and naphthalene rings.
@@ -570,6 +373,11 @@ def _distribute_groups_to_ring_system(
     Returns list of distributions. Each distribution is a tuple of dicts:
     (ring1_counts, ring2_counts, ...) where benzene rings come first,
     then naphthalene peripheral counts.
+
+    max_results caps the number of distributions found — this recursion has
+    no other bound, and grows combinatorially with the number of rings and
+    aromatic group types, so molecules needing several multi-substituted
+    rings could otherwise take a long time before returning.
     """
     # Reserve AC for naphthalene fusion
     available = dict(aromatic_groups)
@@ -604,6 +412,8 @@ def _distribute_groups_to_ring_system(
     results_set = set()
 
     def _distribute(g_idx, rings):
+        if len(results_set) >= max_results:
+            return
         if g_idx == n_group_types:
             # Check all rings are exactly the right size
             if all(sum(r.values()) == ring_sizes[i] for i, r in enumerate(rings)):
@@ -626,6 +436,8 @@ def _distribute_groups_to_ring_system(
 
     def _split_recursive(remaining, n_parts, part_idx, current_split,
                          name, g_idx, rings):
+        if len(results_set) >= max_results:
+            return
         if part_idx == n_parts - 1:
             current_split.append(remaining)
             # Check feasibility
@@ -1125,7 +937,7 @@ def reverse_engineer(
             na_names = {group_db[gid]['name']: c for gid, c in nonaromatic_ids.items()}
             print(f"Non-aromatic groups: {na_names}")
 
-    aromatic_fragments = assemble_aromatic_fragments(aromatic_comp)
+    aromatic_fragments = assemble_aromatic_fragments(aromatic_comp, max_results)
 
     if not aromatic_fragments:
         if verbose:

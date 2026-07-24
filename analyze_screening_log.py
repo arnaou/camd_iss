@@ -35,22 +35,27 @@ def parse_rejection_reasons(log_path):
     if pure_section:
         rejection_text = pure_section.group(1)
 
-        # Count rejections by property
+        # Count rejections by property. Every non-empty line here is a
+        # rejection line by construction (the regex above already scoped
+        # rejection_text to the block between "Rejection reasons:" and the
+        # next "Summary:"/"STEP" marker) — no need to match the candidate
+        # name prefix, which varies by mode ('solvent_' vs 'entrainer_').
         for line in rejection_text.strip().split('\n'):
             line = line.strip()
-            if not line or line.startswith('solvent_'):
-                if 'tb=' in line.lower() and 'outside' in line.lower():
-                    pure_rejections['Tb'] += 1
-                elif 'tm=' in line.lower() and 'outside' in line.lower():
-                    pure_rejections['Tm'] += 1
-                elif 'tc=' in line.lower() and 'outside' in line.lower():
-                    pure_rejections['Tc'] += 1
-                elif 'pc=' in line.lower() and 'outside' in line.lower():
-                    pure_rejections['Pc'] += 1
-                elif 'hv=' in line.lower() and 'outside' in line.lower():
-                    pure_rejections['Hv'] += 1
-                elif 'tb (' in line.lower() and '>= tc' in line.lower():
-                    pure_rejections['Tb≥Tc'] += 1
+            if not line:
+                continue
+            if 'tb=' in line.lower() and 'outside' in line.lower():
+                pure_rejections['Tb'] += 1
+            elif 'tm=' in line.lower() and 'outside' in line.lower():
+                pure_rejections['Tm'] += 1
+            elif 'tc=' in line.lower() and 'outside' in line.lower():
+                pure_rejections['Tc'] += 1
+            elif 'pc=' in line.lower() and 'outside' in line.lower():
+                pure_rejections['Pc'] += 1
+            elif 'hv=' in line.lower() and 'outside' in line.lower():
+                pure_rejections['Hv'] += 1
+            elif 'tb (' in line.lower() and '>= tc' in line.lower():
+                pure_rejections['Tb≥Tc'] += 1
 
     # Parse Step 13: Mixture Property Rejections
     mixture_section = re.search(
@@ -61,16 +66,17 @@ def parse_rejection_reasons(log_path):
     if mixture_section:
         rejection_text = mixture_section.group(1)
 
-        # Count rejections by property
+        # Count rejections by property (see note above on why no prefix check)
         for line in rejection_text.strip().split('\n'):
             line = line.strip()
-            if not line or line.startswith('solvent_'):
-                if 'azeotrope' in line.lower():
-                    mixture_rejections['Azeotrope'] += 1
-                elif 'phase split' in line.lower() or 'instability' in line.lower():
-                    mixture_rejections['Miscibility'] += 1
-                elif 'low selectivity' in line.lower() or 'selectivity' in line.lower():
-                    mixture_rejections['Selectivity'] += 1
+            if not line:
+                continue
+            if 'azeotrope' in line.lower():
+                mixture_rejections['Azeotrope'] += 1
+            elif 'phase split' in line.lower() or 'instability' in line.lower():
+                mixture_rejections['Miscibility'] += 1
+            elif 'low selectivity' in line.lower() or 'selectivity' in line.lower():
+                mixture_rejections['Selectivity'] += 1
 
     return pure_rejections, mixture_rejections
 
@@ -138,15 +144,18 @@ def create_rejection_bar_plot(pure_rejections, mixture_rejections, output_path=N
 
     plt.tight_layout()
 
-    # Save figure
+    # Save figure (always writes both a PDF and a PNG, regardless of the
+    # extension passed in output_path)
     if output_path:
-        plt.savefig(output_path, dpi=300, bbox_inches='tight',
+        pdf_path = Path(output_path).with_suffix('.pdf')
+        png_path = Path(output_path).with_suffix('.png')
+        plt.savefig(pdf_path, dpi=300, bbox_inches='tight',
                    facecolor='white', edgecolor='none', format='pdf')
-        plt.savefig(output_path.replace('.pdf', '.png'), dpi=300,
+        plt.savefig(png_path, dpi=300,
                    bbox_inches='tight', facecolor='white', edgecolor='none')
         print(f"\nFigure saved as:")
-        print(f"  - {output_path}")
-        print(f"  - {output_path.replace('.pdf', '.png')}")
+        print(f"  - {pdf_path}")
+        print(f"  - {png_path}")
 
     plt.show()
 
