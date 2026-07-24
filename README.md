@@ -142,6 +142,8 @@ Both modes run the same 15-step pipeline:
 
 Results are written to the configured `output.dir` as `results.csv` and `results.json`.
 
+A UNIFAC group composition doesn't uniquely determine one molecule — different constitutional isomers can share identical group counts (and get identical estimated properties, since UNIFAC is blind to connectivity). When step 15 finds more than one isomer for a candidate, the `smiles` column lists all of them joined by `" | "` rather than picking one arbitrarily.
+
 ### Post-run Analysis
 
 ```bash
@@ -224,6 +226,13 @@ If you use this software in your research, please cite the relevant paper(s):
 
 This work originated as an M.Sc. thesis by Adem R.N. Aouichaoui under the supervision of Assoc. Prof. Jens Abildskov at the [Process Systems Engineering Center (PROSYS)](https://www.kt.dtu.dk/english/research/prosys), Technical University of Denmark (DTU).
 
+
+## Development
+
+```bash
+pip install -e ".[dev]"
+pytest tests/ -q
+```
 
 ## Contributing
 
