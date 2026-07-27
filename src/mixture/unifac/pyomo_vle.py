@@ -275,9 +275,9 @@ def pyo_vle(x, T, mixture, rk_data, qk_data, interaction_data, antoine_params, v
         Residual activity coefficient:
         log_gamma_r = q * (1 - Σ(theta * beta / omega - e * ln(beta / omega)))
         """
-        return m.log_gamma_r[dp, i] == m.q[i] * (1 - sum(m.theta[dp, k] * m.beta[dp, i, k] / m.omega[dp, k] - 
-                                                         m.e[i, k] * (pyo.log(m.beta[dp, i, k]) - pyo.log(m.omega[dp, k])) 
-                                                         for k in m.k)) # the log here is an issue check it
+        return m.log_gamma_r[dp, i] == m.q[i] * (1 - sum(m.theta[dp, k] * m.beta[dp, i, k] / m.omega[dp, k] -
+                                                         m.e[i, k] * pyo.log(m.beta[dp, i, k] / m.omega[dp, k])
+                                                         for k in m.k))
     
     model.eq_log_gamma_r = pyo.Constraint(model.dp, model.i, rule=eq_log_gamma_r,
                                          name='Constraint for calculating log_gamma_r of unifac')
