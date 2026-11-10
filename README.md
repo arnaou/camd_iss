@@ -3,7 +3,7 @@
 **Computer-Aided Molecular Design for Extractive Distillation using the Infinitely Sharp Split (ISS) Method**
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.26434%2Fchemrxiv.15002406%2Fv1-blue)](https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002406/v1)
+[![DOI](https://img.shields.io/badge/DOI-10.1021%2Facs.iecr.6c02057-blue)](https://doi.org/10.1021/acs.iecr.6c02057)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 
 <p align="center">
@@ -28,10 +28,11 @@ CAMD-ISS addresses this by coupling molecular design with the Infinitely Sharp S
 conda install -c conda-forge ipopt
 pip install -e .
 
-# 2. Run screening on a real system (no Gurobi required)
+# 2. Run screening on a real system (no MILP solver required)
 python iss.py config/IECR/screen_acetone_methanol.yaml -v
 
-# 3. Or run the full design pipeline (requires Gurobi license)
+# 3. Or run the full design pipeline (needs Gurobi or CPLEX, see below)
+pip install -e ".[gurobi]"
 python iss.py config/camd_minimal.yaml -v
 ```
 
@@ -42,11 +43,17 @@ python iss.py config/camd_minimal.yaml -v
 | Solver | Required for | License |
 |--------|-------------|---------|
 | [IPOPT](https://coin-or.github.io/Ipopt/) | VLE, ISS, Antoine (all modes) | Open source |
-| [Gurobi](https://www.gurobi.com/) | Molecule generation (design mode only) | Commercial — free academic license available |
+| [Gurobi](https://www.gurobi.com/) **or** [CPLEX](https://www.ibm.com/products/ilog-cplex-optimization-studio) | Molecule generation (design mode only) | Commercial — see below |
 
 **Screen mode** only requires IPOPT.  
-**Design mode** additionally requires a Gurobi license for MILP-based candidate generation.  
-A free academic license is available at [gurobi.com/academia](https://www.gurobi.com/academia/academic-program-and-licenses/).
+**Design mode** additionally needs one MILP solver, selected with `design.solver` in the config (`gurobi` by default, or `cplex`). Both return the same candidate set.
+
+The design MILP is small (one integer variable per design group, a few dozen constraints), so the size-limited editions that ship with the pip packages are enough for the provided configs — no license file needed:
+
+- `pip install gurobipy` includes a restricted license (up to 2000 variables/constraints, non-production use). It expires with the package version; upgrade `gurobipy` to renew it.
+- `pip install cplex` installs the CPLEX Community Edition (up to 1000 variables/constraints).
+
+For larger problems, both offer free academic licenses: [Gurobi](https://www.gurobi.com/academia/academic-program-and-licenses/), [IBM Academic Initiative](https://www.ibm.com/academic/) (CPLEX).
 
 ```bash
 # Install IPOPT via conda (recommended)
@@ -61,9 +68,8 @@ pip install -e ".[smiles]"
 # Optional: Jupyter notebooks (tutorials/, case_studies/)
 pip install -e ".[notebooks]"
 
-# Design mode only: Gurobi (requires a license)
-pip install -e ".[design]"
-grbgetkey <your-license-key>
+# Design mode only: one MILP solver
+pip install -e ".[gurobi]"   # or: pip install -e ".[cplex]"
 ```
 
 ## Usage
@@ -93,6 +99,7 @@ design:
     min_func_groups: 1
     max_func_groups: 2
     molecular_type: 1   # 1 = acyclic
+  solver: "gurobi"      # or "cplex"
 ```
 
 ### Screen Mode — evaluate predefined entrainers
@@ -209,14 +216,19 @@ If you use this software in your research, please cite the relevant paper(s):
 **CAMD-ISS framework (IECR):**
 
 ```bibtex
-@article{iss_camd2026,
-  author  = {Adem R. N. Aouichaoui and Ivonne Rodriguez-Donis and Nataliya Shcherbakova
-             and Edoardo Parascandolo and Vincent Gerbaud and Jens Abildskov},
+@article{10.1021/acs.iecr.6c02057,
+  author  = {Aouichaoui, Adem R. N. and Rodriguez-Donis, Ivonne and Shcherbakova, Nataliya
+             and Parascandolo, Edoardo and Gerbaud, Vincent and Abildskov, Jens},
   title   = {Computer-Aided Entrainer Design for Extractive Distillation Using Infinitely Sharp Splits},
-  journal = {ChemRxiv},
+  journal = {Industrial \& Engineering Chemistry Research},
+  volume  = {65},
+  number  = {38},
+  pages   = {20546--20560},
   year    = {2026},
-  doi     = {10.26434/chemrxiv.15002406/v1},
-  url     = {https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002406/v1},
+  month   = {09},
+  issn    = {0888-5885},
+  doi     = {10.1021/acs.iecr.6c02057},
+  url     = {https://doi.org/10.1021/acs.iecr.6c02057},
 }
 ```
 

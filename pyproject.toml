@@ -43,9 +43,12 @@ notebooks = [
 smiles = [
     "rdkit>=2022.9.1",
 ]
-# Molecule generation (design mode only) — requires a Gurobi license
-design = [
+# Molecule generation (design mode only) — install one, select via design.solver
+gurobi = [
     "gurobipy>=10.0.0",
+]
+cplex = [
+    "cplex>=22.1.0",
 ]
 
 [project.urls]

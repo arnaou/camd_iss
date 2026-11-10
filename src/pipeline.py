@@ -311,7 +311,8 @@ def generate_solvent_candidates(config, mixture, verbose=False):
             molecular_type=design_config['constraints']['molecular_type'],
             max_solutions=design_config['max_candidates'],
             exclude_compounds=binary_components,
-            verbose=False
+            verbose=False,
+            solver=design_config.get('solver', 'gurobi'),
         )
 
         if verbose:

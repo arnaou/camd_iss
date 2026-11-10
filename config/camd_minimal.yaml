@@ -33,6 +33,9 @@ design:
   # Maximum candidates to generate
   max_candidates: 1000
 
+  # MILP solver: "gurobi" (default) or "cplex"
+  solver: "gurobi"
+
 # SCREEN MODE: Predefined entrainers (only used if mode="screen")
 screen:
   entrainers:
