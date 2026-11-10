@@ -3,7 +3,7 @@
 **Computer-Aided Molecular Design for Extractive Distillation using the Infinitely Sharp Split (ISS) Method**
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![DOI](https://img.shields.io/badge/DOI-10.26434%2Fchemrxiv.15002406%2Fv1-blue)](https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002406/v1)
+[![DOI](https://img.shields.io/badge/DOI-10.1021%2Facs.iecr.6c02057-blue)](https://doi.org/10.1021/acs.iecr.6c02057)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
 
 <p align="center">
@@ -209,14 +209,19 @@ If you use this software in your research, please cite the relevant paper(s):
 **CAMD-ISS framework (IECR):**
 
 ```bibtex
-@article{iss_camd2026,
-  author  = {Adem R. N. Aouichaoui and Ivonne Rodriguez-Donis and Nataliya Shcherbakova
-             and Edoardo Parascandolo and Vincent Gerbaud and Jens Abildskov},
+@article{10.1021/acs.iecr.6c02057,
+  author  = {Aouichaoui, Adem R. N. and Rodriguez-Donis, Ivonne and Shcherbakova, Nataliya
+             and Parascandolo, Edoardo and Gerbaud, Vincent and Abildskov, Jens},
   title   = {Computer-Aided Entrainer Design for Extractive Distillation Using Infinitely Sharp Splits},
-  journal = {ChemRxiv},
+  journal = {Industrial \& Engineering Chemistry Research},
+  volume  = {65},
+  number  = {38},
+  pages   = {20546--20560},
   year    = {2026},
-  doi     = {10.26434/chemrxiv.15002406/v1},
-  url     = {https://chemrxiv.org/doi/abs/10.26434/chemrxiv.15002406/v1},
+  month   = {09},
+  issn    = {0888-5885},
+  doi     = {10.1021/acs.iecr.6c02057},
+  url     = {https://doi.org/10.1021/acs.iecr.6c02057},
 }
 ```
 
